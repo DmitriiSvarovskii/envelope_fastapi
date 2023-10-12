@@ -13,7 +13,7 @@ class CartCreate(CartBase):
     shop_id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class CartItem(BaseModel):

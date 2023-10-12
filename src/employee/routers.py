@@ -5,8 +5,8 @@ from .models import Employee
 from .schemas import EmployeeBase, EmployeeCreate, EmployeeUpdate
 from sqlalchemy.ext.asyncio import AsyncSession
 from ..database import get_async_session
-from typing import List, Dict
-
+from typing import List, Annotated
+from src.secure import apikey_scheme
 
 router = APIRouter(
     prefix="/employee",
@@ -15,14 +15,14 @@ router = APIRouter(
 
 # Получение списка всех категорий
 @router.get("/")
-async def get_all_employee(session: AsyncSession = Depends(get_async_session)) -> List[EmployeeBase]:
+async def get_all_employee(access_token: Annotated[str, Depends(apikey_scheme)], session: AsyncSession = Depends(get_async_session)) -> List[EmployeeBase]:
     query = select(Employee).order_by(Employee.id.desc())
     result = await session.execute(query)
     return result.scalars().all()
 
 
 @router.post("/add_empl/")
-async def create_new_employee(new_employee: EmployeeCreate, session: AsyncSession = Depends(get_async_session)):
+async def create_new_employee(access_token: Annotated[str, Depends(apikey_scheme)], new_employee: EmployeeCreate, session: AsyncSession = Depends(get_async_session)):
     stmt = insert(Employee).values(**new_employee.dict())
     await session.execute(stmt)
     await session.commit()
@@ -30,7 +30,7 @@ async def create_new_employee(new_employee: EmployeeCreate, session: AsyncSessio
 
 
 @router.put("/upd_empl/")
-async def update_employee(employee_id: int, new_date: EmployeeUpdate, session: AsyncSession = Depends(get_async_session)):
+async def update_employee(access_token: Annotated[str, Depends(apikey_scheme)], employee_id: int, new_date: EmployeeUpdate, session: AsyncSession = Depends(get_async_session)):
     stmt = update(Employee).where(
         Employee.id == employee_id).values(**new_date.dict())
     await session.execute(stmt)
@@ -39,7 +39,7 @@ async def update_employee(employee_id: int, new_date: EmployeeUpdate, session: A
 
 
 @router.delete("/del_empl/")
-async def delete_employee(employee_id: int, session: AsyncSession = Depends(get_async_session)):
+async def delete_employee(access_token: Annotated[str, Depends(apikey_scheme)], employee_id: int, session: AsyncSession = Depends(get_async_session)):
     stmt = delete(Employee).where(
         Employee.id == employee_id)
     await session.execute(stmt)

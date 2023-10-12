@@ -1,15 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-from sqlalchemy import insert, select, join, label
+from sqlalchemy import select
 from .models import Order, OrderDetail
 from src.cart.models import Cart
 from src.product.models import Product
 from .schemas import OrderBase, OrderDetailBase
 from sqlalchemy.ext.asyncio import AsyncSession
 from ..database import get_async_session
-from typing import List, Dict
 from typing import Optional
-
+from typing import List, Annotated
+from src.secure import apikey_scheme
 
 router = APIRouter(
     prefix="/order",
@@ -17,14 +16,14 @@ router = APIRouter(
 
 
 @router.get("/")
-async def get_all_orders(session: AsyncSession = Depends(get_async_session)) -> List[OrderBase]:
+async def get_all_orders(access_token: Annotated[str, Depends(apikey_scheme)], session: AsyncSession = Depends(get_async_session)) -> List[OrderBase]:
     query = select(Order).order_by(Order.id.desc())
     result = await session.execute(query)
     return result.scalars().all()
 
 
 @router.get("/detail")
-async def get_all_order_details(session: AsyncSession = Depends(get_async_session)) -> List[OrderDetailBase]:
+async def get_all_order_details(access_token: Annotated[str, Depends(apikey_scheme)], session: AsyncSession = Depends(get_async_session)) -> List[OrderDetailBase]:
     query = select(OrderDetail).order_by(OrderDetail.id.desc())
     result = await session.execute(query)
     return result.scalars().all()

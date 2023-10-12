@@ -1,8 +1,8 @@
 """1 migrations
 
-Revision ID: f12d507c5c6d
+Revision ID: 587118969d63
 Revises: 
-Create Date: 2023-10-06 15:26:38.353994
+Create Date: 2023-10-12 15:23:22.849047
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'f12d507c5c6d'
+revision: str = '587118969d63'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -43,17 +43,18 @@ def upgrade() -> None:
     op.create_index(op.f('ix_units_id'), 'units', ['id'], unique=False)
     op.create_table('users',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('username', sa.String(), nullable=True),
+    sa.Column('username', sa.String(), nullable=False),
     sa.Column('hashed_password', sa.String(length=1024), nullable=False),
-    sa.Column('name', sa.String(), nullable=False),
-    sa.Column('availability', sa.Boolean(), nullable=True),
+    sa.Column('name', sa.String(), nullable=True),
+    sa.Column('is_active', sa.Boolean(), nullable=False),
     sa.Column('token_bot', sa.String(), nullable=True),
     sa.Column('tg_group_id', sa.Integer(), nullable=True),
     sa.Column('role_id', sa.Integer(), nullable=True),
     sa.Column('employee_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['employee_id'], ['employees.id'], ),
     sa.ForeignKeyConstraint(['role_id'], ['roles.id'], ),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('username')
     )
     op.create_index(op.f('ix_users_id'), 'users', ['id'], unique=False)
     op.create_table('categories',
@@ -81,6 +82,15 @@ def upgrade() -> None:
     sa.UniqueConstraint('tg_user_id')
     )
     op.create_index(op.f('ix_customers_id'), 'customers', ['id'], unique=False)
+    op.create_table('tokens',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('access_token', sa.String(), nullable=True),
+    sa.Column('user_id', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['user_id'], ['users.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_tokens_access_token'), 'tokens', ['access_token'], unique=True)
+    op.create_index(op.f('ix_tokens_id'), 'tokens', ['id'], unique=False)
     op.create_table('orders',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('shop_id', sa.Integer(), nullable=True),
@@ -162,6 +172,9 @@ def downgrade() -> None:
     op.drop_table('products')
     op.drop_index(op.f('ix_orders_id'), table_name='orders')
     op.drop_table('orders')
+    op.drop_index(op.f('ix_tokens_id'), table_name='tokens')
+    op.drop_index(op.f('ix_tokens_access_token'), table_name='tokens')
+    op.drop_table('tokens')
     op.drop_index(op.f('ix_customers_id'), table_name='customers')
     op.drop_table('customers')
     op.drop_index(op.f('ix_categories_id'), table_name='categories')

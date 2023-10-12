@@ -10,7 +10,7 @@ class CategoryBase(BaseModel):
 
 class CategoryCreate(CategoryBase):
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class CategoryUpdate(CategoryBase):
@@ -21,4 +21,4 @@ class CategoryModel(CategoryBase):
     id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True

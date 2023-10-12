@@ -1,6 +1,7 @@
 from datetime import datetime
 from sqlalchemy import create_engine, Column, Integer, TIMESTAMP, String, Boolean, Float, ForeignKey
 from sqlalchemy.orm import relationship
+from src.user.models import User
 
 from src.database import Base
 
@@ -12,3 +13,4 @@ class Token(Base):
     access_token = Column(String, unique=True, index=True)
 
     user_id = Column(Integer, ForeignKey("users.id"))
+    user = relationship('User', back_populates='tokens')

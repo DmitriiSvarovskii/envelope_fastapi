@@ -34,7 +34,8 @@ app.include_router(router_employee)
 
 
 origins = [
-    "http://localhost:3000",
+    "http://localhost:8000",
+    "https://swarovskidmitrii.ru"
 ]
 
 app.add_middleware(

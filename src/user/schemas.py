@@ -1,6 +1,6 @@
 from datetime import datetime
 from pydantic import BaseModel
-from typing import List
+from typing import Optional
 
 
 class RoleBase(BaseModel):
@@ -15,22 +15,24 @@ class Role(RoleBase):
     id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class UserBase(BaseModel):
     username: str
-    # hashed_password: str
     name: str
-    availability: bool = True
-    token_bot: str = None
-    tg_group_id: int = None
-    role_id: int = 2
-    employee_id: int = None
+    availability: Optional[bool] = True
+    token_bot: Optional[str] = None
+    tg_group_id: Optional[int] = None
+    role_id: Optional[int] = 2
+    employee_id: Optional[int] = None
+
+    class Config:
+        from_attributes = True
 
 
 class UserCreate(BaseModel):
-    name: str
+    # name: str
     username: str
     hashed_password: str
 

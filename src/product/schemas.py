@@ -55,7 +55,7 @@ class ProductModel(ProductOne):
     # created_at: datetime
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class UnitBase(BaseModel):
@@ -74,7 +74,4 @@ class UnitModel(UnitBase):
     id: int
 
     class Config:
-        orm_mode = True
-
-    class Config:
-        orm_mode = True
+        from_attributes = True

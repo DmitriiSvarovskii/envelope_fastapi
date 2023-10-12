@@ -23,7 +23,7 @@ class Order(OrderBase):
     # customer: "Customer"
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 
 class OrderDetailBase(BaseModel):
@@ -44,4 +44,4 @@ class OrderDetail(OrderDetailBase):
     shop_id: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
