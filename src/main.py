@@ -40,7 +40,8 @@ async def home():
 
 origins = [
     "http://localhost:8000",
-    "https://swarovskidmitrii.ru"
+    "https://swarovskidmitrii.ru",
+    "https://www.swarovskidmitrii.ru",
 ]
 
 app.add_middleware(
