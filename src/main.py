@@ -33,6 +33,11 @@ app.include_router(router_user)
 app.include_router(router_employee)
 
 
+@app.get("/")
+async def home():
+    return {"message": "Hello World"}
+
+
 origins = [
     "http://localhost:8000",
     "https://swarovskidmitrii.ru"
