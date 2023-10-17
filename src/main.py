@@ -34,9 +34,9 @@ app.include_router(router_category)
 # app.include_router(router_employee)
 
 
-@app.get("/")
-async def home():
-    return {"message": "Hello World"}
+# @app.get("/")
+# async def home():
+#     return {"message": "Hello World"}
 
 
 origins = [
