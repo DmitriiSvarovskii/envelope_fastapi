@@ -13,11 +13,11 @@ from src.category.routers import router as router_category
 
 
 app = FastAPI(
-    title="Garage cafe",
+    title="Envelope app (api-admin) ",
     version="1.0.0a",
     openapi_url="/api/v1/openapi.json",
     docs_url="/api/v1/docs",
-    redoc_url=None,  # Если не хотите использовать ReDoc
+    redoc_url=None,
 )
 
 app.openapi_schema = None
@@ -29,7 +29,7 @@ app.openapi_schema = None
 app.include_router(router_category)
 # app.include_router(router_product)
 # app.include_router(router_cart)
-# app.include_router(router_order)
+# app.include_router(router_order)x
 # app.include_router(router_customer)
 # app.include_router(router_user)
 # app.include_router(router_employee)
