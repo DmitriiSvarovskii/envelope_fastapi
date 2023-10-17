@@ -3,9 +3,9 @@ from pydantic import BaseModel
 
 class CategoryBase(BaseModel):
     name_rus: str = None
-    name_en: str = None
-    availability: bool = True
-    shop_id: int
+    # name_en: str = None
+    # availability: bool = True
+    # shop_id: int
 
 
 class CategoryCreate(CategoryBase):
