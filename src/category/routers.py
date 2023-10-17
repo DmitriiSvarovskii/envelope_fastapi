@@ -10,7 +10,7 @@ from src.secure import apikey_scheme
 
 
 router = APIRouter(
-    prefix="/category",
+    prefix="/api/v1/category",
     tags=["Menu. Category"])
 
 

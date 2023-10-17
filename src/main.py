@@ -13,16 +13,16 @@ from src.category.routers import router as router_category
 
 
 app = FastAPI(
-    prefix="/api/v1/",
     title="Garage cafe",
     version="1.0.0a",
+    # root_path="/api/v1",
+    # root_path_in_servers=False,
 )
 
 app.openapi_schema = None
 
 
 # app.mount("/media", StaticFiles(directory="media"), name="media")
-
 
 # app.include_router(router_auth)
 app.include_router(router_category)
