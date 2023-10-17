@@ -1,0 +1,2 @@
+TELEGRAM_BOT_TOKEN = '5684593983:AAEZUn_fKhmTQV-SLr3p7EDcikT6dLQyCPg'
+NGROK_TUNNEL_URL = 'https://swarovskidmitrii.ru'

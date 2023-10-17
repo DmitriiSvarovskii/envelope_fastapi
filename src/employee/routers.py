@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from ..database import get_async_session
 from typing import List, Annotated
 from src.secure import apikey_scheme
+from ..user.models import User
 
 router = APIRouter(
     prefix="/employee",
@@ -19,6 +20,14 @@ async def get_all_employee(access_token: Annotated[str, Depends(apikey_scheme)],
     query = select(Employee).order_by(Employee.id.desc())
     result = await session.execute(query)
     return result.scalars().all()
+
+
+@router.get("/token_all")
+async def get_all_token_bots(session: AsyncSession = Depends(get_async_session)) -> List[str]:
+    query = select(User.token_bot)
+    result = await session.execute(query)
+    token_bots = [row for row in result.scalars().all()]
+    return token_bots
 
 
 @router.post("/add_empl/")
