@@ -15,8 +15,9 @@ from src.category.routers import router as router_category
 app = FastAPI(
     title="Garage cafe",
     version="1.0.0a",
-    # root_path="/api/v1",
-    # root_path_in_servers=False,
+    openapi_url="/api/v1/openapi.json",
+    docs_url="/api/v1/docs",
+    redoc_url=None,  # Если не хотите использовать ReDoc
 )
 
 app.openapi_schema = None
