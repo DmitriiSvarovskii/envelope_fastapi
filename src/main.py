@@ -41,6 +41,7 @@ app.include_router(router_category)
 
 
 origins = [
+    "http://127.0.0.1:5173",
     "https://swarovskidmitrii.ru",
     "https://www.swarovskidmitrii.ru",
 ]
