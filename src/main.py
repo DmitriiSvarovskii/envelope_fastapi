@@ -41,7 +41,8 @@ app.include_router(router_category)
 
 
 origins = [
-    "http://127.0.0.1:5173",
+    "http://localhost",
+    "http://localhost:5173",
     "https://swarovskidmitrii.ru",
     "https://www.swarovskidmitrii.ru",
 ]
@@ -53,4 +54,5 @@ app.add_middleware(
     allow_methods=["GET", "POST", "OPTIONS", "DELETE", "PATCH", "PUT"],
     allow_headers=["Content-Type", "Set-Cookie", "Access-Control-Allow-Headers", "Access-Control-Allow-Origin",
                    "Authorization"],
+
 )
