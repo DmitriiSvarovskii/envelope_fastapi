@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from aiogram import types, Dispatcher, Bot
-from bot import dp, bot
-from config import TELEGRAM_BOT_TOKEN, NGROK_TUNNEL_URL
+from tg_bot.bot import dp, bot
+from tg_bot.config import TELEGRAM_BOT_TOKEN, NGROK_TUNNEL_URL
 
 
 app = FastAPI()
