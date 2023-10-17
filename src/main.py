@@ -41,14 +41,12 @@ app.include_router(router_category)
 
 
 origins = [
-    "http://localhost:8000",
     "https://swarovskidmitrii.ru",
     "https://www.swarovskidmitrii.ru",
 ]
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
     allow_credentials=True,
     allow_origins=origins,
     allow_methods=["GET", "POST", "OPTIONS", "DELETE", "PATCH", "PUT"],
