@@ -46,18 +46,22 @@ router = APIRouter(
 #         raise HTTPException(status_code=403, detail="Access denied")
 
 
-@router.get("/")
+@router.get("/", response_model=List[ProductList])
 async def get_all_product(session: AsyncSession = Depends(get_async_session)):
     query = select(Product).order_by(Product.id)
     result = await session.execute(query)
-    return result.scalars().all()
+    products = result.scalars().all()
+    product_dicts = [product.__dict__ for product in products]
+    return product_dicts
 
 
-@router.get("/{product_id}")
+@router.get("/{product_id}", response_model=List[ProductOne])
 async def get_one_product(product_id: int, session: AsyncSession = Depends(get_async_session)):
     query = select(Product).where(Product.id == product_id)
     result = await session.execute(query)
-    return result.scalars().all()
+    products = result.scalars().all()
+    product_dicts = [product.__dict__ for product in products]
+    return product_dicts
 
 
 @router.post("/")

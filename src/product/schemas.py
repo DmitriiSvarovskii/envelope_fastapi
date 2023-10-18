@@ -50,6 +50,7 @@ class ProductCreate(BaseModel):
     # description_en: str = None
     price: float = None
     # image: str = None
+    unit: int
     availability: bool = True
     popular: bool = False
     type_delivery: bool = True
