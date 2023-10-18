@@ -5,7 +5,7 @@ from typing import List
 
 class ProductList(BaseModel):
     id: int
-    shop_id: int
+    # shop_id: int
     category_id: int
     name_rus: str = None
     # name_en: str = None
@@ -17,16 +17,16 @@ class ProductList(BaseModel):
     popular: bool = False
     type_delivery: bool = True
     type_takeaway: bool = True
-    type_inside: bool = True
+    type_dinein: bool = True
 
 
 class ProductOne(ProductList):
-    shop_id: int
+    # shop_id: int
     category_id: int
     name_rus: str = None
-    name_en: str = None
+    # name_en: str = None
     description_rus: str = None
-    description_en: str = None
+    # description_en: str = None
     price: float = None
     image: str
     wt: int = None
@@ -39,15 +39,37 @@ class ProductOne(ProductList):
     popular: bool = False
     type_delivery: bool = True
     type_takeaway: bool = True
-    type_inside: bool = True
+    type_dinein: bool = True
 
 
-class ProductCreate(ProductOne):
-    pass
+class ProductCreate(BaseModel):
+    category_id: int
+    name_rus: str = None
+    # name_en: str = None
+    description_rus: str = None
+    # description_en: str = None
+    price: float = None
+    # image: str = None
+    availability: bool = True
+    popular: bool = False
+    type_delivery: bool = True
+    type_takeaway: bool = True
+    type_dinein: bool = True
 
 
-class ProductUpdate(ProductOne):
-    pass
+class ProductUpdate(BaseModel):
+    category_id: int
+    name_rus: str = None
+    # name_en: str = None
+    description_rus: str = None
+    # description_en: str = None
+    price: float = None
+    # image: str = None
+    availability: bool = True
+    popular: bool = False
+    type_delivery: bool = True
+    type_takeaway: bool = True
+    type_dinein: bool = True
 
 
 class ProductModel(ProductOne):

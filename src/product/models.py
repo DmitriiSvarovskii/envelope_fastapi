@@ -13,15 +13,15 @@ class Product(Base):
     __tablename__ = 'products'
 
     id = Column(Integer, primary_key=True, index=True)
-    shop_id = Column(Integer, ForeignKey("users.id"))
+    # shop_id = Column(Integer, ForeignKey("users.id"))
     category_id = Column(Integer, ForeignKey("categories.id"))
     name_rus = Column(String, nullable=True)
-    name_en = Column(String, default=None)
+    # name_en = Column(String, default=None)
     description_rus = Column(String, nullable=True)
-    description_en = Column(String, default=None)
+    # description_en = Column(String, default=None)
     price = Column(Float, nullable=True)
     image = Column(
-        String, default="/Users/dmitriyswarovski/Desktop/Python/Project/api/gar_cafe_fastapi/media/caprese-salad.webp")
+        String, nullable=False, default="/var/www/envelope_fastapi/media/caprese-salad.webp")
     wt = Column(Integer, default=None)
     unit = Column(Integer, ForeignKey("units.id"))
     kilocalories = Column(Integer, default=None)
@@ -32,27 +32,27 @@ class Product(Base):
     popular = Column(Boolean, default=False)
     type_delivery = Column(Boolean, default=True)
     type_takeaway = Column(Boolean, default=True)
-    type_inside = Column(Boolean, default=True)
+    type_dinein = Column(Boolean, default=True)
 
-    def save_image(self, image_path):
-        """
-        Обработка и сохранение изображения в формате webp.
-        """
-        media_directory = f"src/media/{self.shop_id}/"
+    # def save_image(self, image_path):
+    #     """
+    #     Обработка и сохранение изображения в формате webp.
+    #     """
+    #     media_directory = f"src/media/{self.shop_id}/"
 
-        os.makedirs(media_directory, exist_ok=True)
+    #     os.makedirs(media_directory, exist_ok=True)
 
-        image = PILImage.open(image_path)
+    #     image = PILImage.open(image_path)
 
-        max_size = (800, 800)
-        image.thumbnail(max_size, PILImage.LANCZOS)
+    #     max_size = (800, 800)
+    #     image.thumbnail(max_size, PILImage.LANCZOS)
 
-        webp_path = os.path.splitext(image_path)[0] + ".webp"
-        webp_full_path = os.path.join(media_directory, webp_path)
-        image.save(webp_full_path, "WEBP")
+    #     webp_path = os.path.splitext(image_path)[0] + ".webp"
+    #     webp_full_path = os.path.join(media_directory, webp_path)
+    #     image.save(webp_full_path, "WEBP")
 
-        webp_relative_path = os.path.join('', webp_path)
-        self.image = webp_relative_path
+    #     webp_relative_path = os.path.join('', webp_path)
+    #     self.image = webp_relative_path
 
 
 class Unit(Base):

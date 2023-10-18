@@ -11,7 +11,7 @@ from src.secure import apikey_scheme
 
 router = APIRouter(
     prefix="/api/v1/category",
-    tags=["Menu. Category"])
+    tags=["Category"])
 
 
 # @router.post("/your_endpoint")

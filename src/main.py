@@ -3,7 +3,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.category.routers import router as router_category
-# from src.product.routers import router as router_product
+from src.product.routers import router as router_product
 # from src.cart.routers import router as router_cart
 # from src.order.routers import router as router_order
 # from src.customer.routers import router as router_customer
@@ -27,9 +27,9 @@ app.openapi_schema = None
 
 # app.include_router(router_auth)
 app.include_router(router_category)
-# app.include_router(router_product)
+app.include_router(router_product)
 # app.include_router(router_cart)
-# app.include_router(router_order)x
+# app.include_router(router_order)
 # app.include_router(router_customer)
 # app.include_router(router_user)
 # app.include_router(router_employee)
