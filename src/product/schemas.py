@@ -57,6 +57,10 @@ class ProductCreate(BaseModel):
     type_dinein: bool = True
 
 
+class UnitCreate(BaseModel):
+    name: str
+
+
 class ProductUpdate(BaseModel):
     category_id: int
     name_rus: str = None

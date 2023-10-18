@@ -8,8 +8,8 @@ import base64
 from fastapi import APIRouter, Depends, HTTPException, Header
 from sqlalchemy.orm import Session
 from sqlalchemy import insert, select, update, delete
-from .models import Product
-from .schemas import ProductModel, ProductCreate, ProductUpdate, ProductList, ProductOne
+from .models import Product, Unit
+from .schemas import ProductModel, ProductCreate, ProductUpdate, ProductList, ProductOne, UnitCreate
 from sqlalchemy.ext.asyncio import AsyncSession
 from ..database import get_async_session
 from typing import List, Annotated
@@ -90,6 +90,20 @@ async def delete_product(product_id: int, session: Session = Depends(get_async_s
             status_code=500, detail=f"An error occurred: {str(e)}")
 
 
+@router.get("/")
+async def get_all_unit(session: AsyncSession = Depends(get_async_session)):
+    query = select(Unit).order_by(Unit.id)
+    result = await session.execute(query)
+    return result.scalars().all()
+
+
+@router.post("/unit/")
+async def create_new_unit(new_unit: UnitCreate, session: AsyncSession = Depends(get_async_session)):
+    stmt = insert(Unit).values(**new_unit.dict())
+    await session.execute(stmt)
+    await session.commit()
+    return {"status": "success"}
+
 # BOT_TOKEN = '6141111072:AAH8CBhf7iQUVNFCjR_STaBf9h_mYHSggvo'
 
 
@@ -103,6 +117,13 @@ async def delete_product(product_id: int, session: Session = Depends(get_async_s
 #                         if chunk[:len("hash=")] != "hash="],
 #                        key=lambda x: x[0])
 #     init_data = "\n".join([f"{rec[0]}={rec[1]}" for rec in init_data])
+@router.put("/{product_id}")
+async def update_product(product_id: int, new_date: ProductUpdate, session: AsyncSession = Depends(get_async_session)):
+    stmt = update(Product).where(
+        Product.id == product_id).values(**new_date.dict())
+    await session.execute(stmt)
+    await session.commit()
+    return {"status": "success"}
 #     print(unquote(init_data))
 #     print(init_data)
 
