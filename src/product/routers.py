@@ -81,54 +81,26 @@ async def update_product(product_id: int, new_date: ProductUpdate, session: Asyn
     return {"status": "success"}
 
 
-@router.put("/{product_id}/availability")
-async def update_product(product_id: int, session: AsyncSession = Depends(get_async_session)):
+@router.put("/{product_id}/checkbox")
+async def update_product_field(product_id: int, checkbox: str, session: AsyncSession = Depends(get_async_session)):
     product = await session.get(Product, product_id)
     if product is None:
         raise HTTPException(status_code=404, detail="Продукт не найден")
-    product.availability = not product.availability
+    if not hasattr(product, checkbox):
+        raise HTTPException(status_code=400, detail="Поле не существует")
+    setattr(product, checkbox, not getattr(product, checkbox))
     await session.commit()
     return {"status": "success"}
 
 
-@router.put("/{product_id}/popular")
-async def update_product(product_id: int, session: AsyncSession = Depends(get_async_session)):
-    product = await session.get(Product, product_id)
-    if product is None:
-        raise HTTPException(status_code=404, detail="Продукт не найден")
-    product.popular = not product.popular
-    await session.commit()
-    return {"status": "success"}
-
-
-@router.put("/{product_id}/delivery")
-async def update_product(product_id: int, session: AsyncSession = Depends(get_async_session)):
-    product = await session.get(Product, product_id)
-    if product is None:
-        raise HTTPException(status_code=404, detail="Продукт не найден")
-    product.type_delivery = not product.type_delivery
-    await session.commit()
-    return {"status": "success"}
-
-
-@router.put("/{product_id}/takeaway")
-async def update_product(product_id: int, session: AsyncSession = Depends(get_async_session)):
-    product = await session.get(Product, product_id)
-    if product is None:
-        raise HTTPException(status_code=404, detail="Продукт не найден")
-    product.type_takeaway = not product.type_takeaway
-    await session.commit()
-    return {"status": "success"}
-
-
-@router.put("/{product_id}/dinein")
-async def update_product(product_id: int, session: AsyncSession = Depends(get_async_session)):
-    product = await session.get(Product, product_id)
-    if product is None:
-        raise HTTPException(status_code=404, detail="Продукт не найден")
-    product.type_dinein = not product.type_dinein
-    await session.commit()
-    return {"status": "success"}
+# @router.put("/{product_id}/popular")
+# async def update_product(product_id: int, session: AsyncSession = Depends(get_async_session)):
+#     product = await session.get(Product, product_id)
+#     if product is None:
+#         raise HTTPException(status_code=404, detail="Продукт не найден")
+#     product.popular = not product.popular
+#     await session.commit()
+#     return {"status": "success"}
 
 
 @router.delete("/")

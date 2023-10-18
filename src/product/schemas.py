@@ -9,53 +9,54 @@ class ProductList(BaseModel):
     category_id: int
     name_rus: str = None
     # name_en: str = None
-    description_rus: str = None
+    # description_rus: str = None
     # description_en: str = None
     price: float = None
-    image: str
-    availability: bool = True
-    popular: bool = False
-    type_delivery: bool = True
-    type_takeaway: bool = True
-    type_dinein: bool = True
+    # image: str
+    availability: bool
+    popular: bool
+    delivery: bool
+    takeaway: bool
+    dinein: bool
 
 
 class ProductOne(ProductList):
     # shop_id: int
     category_id: int
-    name_rus: str = None
+    name_rus: str
     # name_en: str = None
     description_rus: str = None
     # description_en: str = None
-    price: float = None
-    image: str
+    price: float
+    image: str = None
     wt: int = None
-    unit: int
+    unit: int = None
     kilocalories: int = None
     proteins: int = None
     fats: int = None
     carbohydrates: int = None
-    availability: bool = True
-    popular: bool = False
-    type_delivery: bool = True
-    type_takeaway: bool = True
-    type_dinein: bool = True
+    availability: bool
+    popular: bool
+    delivery: bool
+    takeaway: bool
+    dinein: bool
 
 
 class ProductCreate(BaseModel):
     category_id: int
-    name_rus: str = None
+    name_rus: str
     # name_en: str = None
     description_rus: str = None
     # description_en: str = None
-    price: float = None
+    price: float
+    wt: int
     # image: str = None
     unit: int
-    availability: bool = True
-    popular: bool = False
-    type_delivery: bool = True
-    type_takeaway: bool = True
-    type_dinein: bool = True
+    availability: bool
+    popular: bool
+    delivery: bool
+    takeaway: bool
+    dinein: bool
 
 
 class UnitCreate(BaseModel):
@@ -72,9 +73,9 @@ class ProductUpdate(BaseModel):
     # image: str = None
     availability: bool = True
     popular: bool = False
-    type_delivery: bool = True
-    type_takeaway: bool = True
-    type_dinein: bool = True
+    delivery: bool = True
+    takeaway: bool = True
+    dinein: bool = True
 
 
 class ProductModel(ProductOne):

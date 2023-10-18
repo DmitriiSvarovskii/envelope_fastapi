@@ -30,9 +30,9 @@ class Product(Base):
     carbohydrates = Column(Integer, default=None)
     availability = Column(Boolean, nullable=True, default=True)
     popular = Column(Boolean, default=False)
-    type_delivery = Column(Boolean, default=True)
-    type_takeaway = Column(Boolean, default=True)
-    type_dinein = Column(Boolean, default=True)
+    delivery = Column(Boolean, default=True)
+    takeaway = Column(Boolean, default=True)
+    dinein = Column(Boolean, default=True)
 
     # def save_image(self, image_path):
     #     """
