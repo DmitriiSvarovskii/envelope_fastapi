@@ -1,3 +1,4 @@
+from sqlalchemy.orm import selectinload
 import jwt
 from datetime import datetime, timedelta
 from urllib.parse import urlparse, parse_qs
@@ -46,12 +47,43 @@ router = APIRouter(
 #         raise HTTPException(status_code=403, detail="Access denied")
 
 
+# @router.get("/", response_model=List[ProductList])
+# async def get_all_product(session: AsyncSession = Depends(get_async_session)):
+#     # query = select(Product).order_by(Product.id)
+#     # result = await session.execute(query)
+#     # products = result.scalars().all()
+#     # Выберите все поля из таблицы Product и связанное поле category
+#     stmt = select(Product).options(selectinload(
+#         Product.category)).order_by(Product.id)
+
+#     result = await session.execute(stmt)
+#     products = result.scalars().all()
+#     product_dicts = [product.__dict__ for product in products]
+#     return product_dicts
 @router.get("/", response_model=List[ProductList])
 async def get_all_product(session: AsyncSession = Depends(get_async_session)):
-    query = select(Product).order_by(Product.id)
-    result = await session.execute(query)
+    stmt = select(Product).options(selectinload(
+        Product.category)).order_by(Product.id)
+    result = await session.execute(stmt)
     products = result.scalars().all()
-    product_dicts = [product.__dict__ for product in products]
+
+    # Создаем список словарей с данными о продуктах
+    product_dicts = [
+        {
+            "id": product.id,
+            # "category_id": product.category_id,
+            "category_id": product.category.name_rus,  # Добавляем название категории
+            "name_rus": product.name_rus,
+            "price": product.price,
+            "availability": product.availability,
+            "popular": product.popular,
+            "delivery": product.delivery,
+            "takeaway": product.takeaway,
+            "dinein": product.dinein
+        }
+        for product in products
+    ]
+
     return product_dicts
 
 

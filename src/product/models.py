@@ -34,6 +34,8 @@ class Product(Base):
     takeaway = Column(Boolean, default=True)
     dinein = Column(Boolean, default=True)
 
+    category = relationship("Category")
+
     # def save_image(self, image_path):
     #     """
     #     Обработка и сохранение изображения в формате webp.

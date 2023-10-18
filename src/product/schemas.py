@@ -5,19 +5,20 @@ from typing import List
 
 class ProductList(BaseModel):
     id: int
-    # shop_id: int
-    category_id: int
-    name_rus: str = None
-    # name_en: str = None
-    # description_rus: str = None
-    # description_en: str = None
-    price: float = None
-    # image: str
+    # category_id: int
+    category_id: str  # Добавляем поле для отображения названия категории
+    name_rus: str
+    price: float
     availability: bool
     popular: bool
     delivery: bool
     takeaway: bool
     dinein: bool
+    # shop_id: int
+    # image: str
+    # name_en: str = None
+    # description_rus: str = None
+    # description_en: str = None
 
 
 class ProductOne(ProductList):
