@@ -111,7 +111,7 @@ async def update_product(product_id: int, session: AsyncSession = Depends(get_as
     return {"status": "success"}
 
 
-@router.put("/{product_id}/akeaway")
+@router.put("/{product_id}/takeaway")
 async def update_product(product_id: int, session: AsyncSession = Depends(get_async_session)):
     product = await session.get(Product, product_id)
     if product is None:
