@@ -86,6 +86,7 @@ class ProductModel(ProductOne):
 
 
 class UnitBase(BaseModel):
+    id: int
     name: str
 
 
