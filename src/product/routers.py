@@ -90,7 +90,7 @@ async def delete_product(product_id: int, session: Session = Depends(get_async_s
             status_code=500, detail=f"An error occurred: {str(e)}")
 
 
-@router.get("/")
+@router.get("/unit/")
 async def get_all_unit(session: AsyncSession = Depends(get_async_session)):
     query = select(Unit).order_by(Unit.id)
     result = await session.execute(query)
