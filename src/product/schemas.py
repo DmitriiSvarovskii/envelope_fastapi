@@ -50,7 +50,7 @@ class ProductCreate(BaseModel):
     description_rus: str
     # # description_en: str = None
     price: float
-    wt: int
+    # wt: int
     # kilocalories: int
     # proteins: int
     # fats: int
