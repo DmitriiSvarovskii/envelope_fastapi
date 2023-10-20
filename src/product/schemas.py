@@ -29,7 +29,7 @@ class ProductOne(ProductList):
     description_rus: str
     # description_en: str = None
     price: float
-    image: str
+    # image: str
     wt: int
     # unit: int = None
     kilocalories: int

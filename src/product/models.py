@@ -17,8 +17,8 @@ class Product(Base):
     name_rus = Column(String, nullable=True)
     description_rus = Column(String, nullable=True)
     price = Column(Float, nullable=True)
-    image = Column(
-        String, nullable=False, default="/var/www/envelope_fastapi/media/caprese-salad.webp")
+    # image = Column(
+    #     String, nullable=False, default="/var/www/envelope_fastapi/media/caprese-salad.webp")
     wt = Column(Integer, default=None)
     unit = Column(Integer, ForeignKey("units.id"))
     kilocalories = Column(Integer, default=None)
