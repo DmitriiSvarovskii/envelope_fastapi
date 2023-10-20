@@ -20,4 +20,15 @@ async def get_all_categories(session: AsyncSession) -> list[Category]:
     query = select(Category).order_by(Category.id)
     result: Result = await session.execute(query)
     categories = result.scalars().all()
-    return list(categories)
+    category_dicts = [
+        {
+            "id": category.id,
+            "name_rus": category.name_rus,
+            # "availability": category.availability
+        }
+
+        for category in categories
+    ]
+    return category_dicts
+    # name_rus: str
+    # # availability: bool}
