@@ -14,6 +14,6 @@ class Category(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True, index=True)
     name_rus: Mapped[str]
-    availability: Mapped[bool] = mapped_column(default=True)
+    # availability: Mapped[bool] = mapped_column(default=True)
     # name_en = Column(String, default=None)
     # shop_id = Column(Integer, ForeignKey("users.id"))

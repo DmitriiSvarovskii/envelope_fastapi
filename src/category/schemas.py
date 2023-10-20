@@ -4,7 +4,7 @@ from typing import List, Optional
 
 class CategoryBase1(BaseModel):
     name_rus: str
-    availability: bool
+    # availability: bool
 
     class Config:
         from_attributes = True
@@ -14,7 +14,7 @@ class CategoryBase(BaseModel):
     # model_config = ConfigDict(from_attributes=True)
     id: int
     name_rus: str
-    availability: bool
+    # availability: bool
 
     class Config:
         from_attributes = True
@@ -36,7 +36,7 @@ class CategoryBase(BaseModel):
 
 class CategoryCreate(BaseModel):
     name_rus: str
-    availability: bool = True
+    # availability: bool = True
 
     class Config:
         from_attributes = True
