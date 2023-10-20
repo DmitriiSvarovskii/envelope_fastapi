@@ -1,14 +1,40 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
+from typing import List, Optional
+
+
+class CategoryBase1(BaseModel):
+    name_rus: str
+    availability: bool
+
+    class Config:
+        from_attributes = True
 
 
 class CategoryBase(BaseModel):
-    name_rus: str = None
+    # model_config = ConfigDict(from_attributes=True)
+    id: int
+    name_rus: str
+    availability: bool
+
+    class Config:
+        from_attributes = True
+
+
+# class CategoryBase(CategoryTest):
+
+#     items: List[CategoryTest] = []
+
+#     class Config:
+#         from_attributes = True
+
+
+# class CategoryBase(CategoryTest):
+
     # name_en: str = None
-    # availability: bool = True
     # shop_id: int
 
 
-class CategoryCreate(CategoryBase):
+class CategoryCreate(CategoryBase1):
     class Config:
         from_attributes = True
 

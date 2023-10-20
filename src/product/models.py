@@ -13,12 +13,9 @@ class Product(Base):
     __tablename__ = 'products'
 
     id = Column(Integer, primary_key=True, index=True)
-    # shop_id = Column(Integer, ForeignKey("users.id"))
     category_id = Column(Integer, ForeignKey("categories.id"))
     name_rus = Column(String, nullable=True)
-    # name_en = Column(String, default=None)
     description_rus = Column(String, nullable=True)
-    # description_en = Column(String, default=None)
     price = Column(Float, nullable=True)
     image = Column(
         String, nullable=False, default="/var/www/envelope_fastapi/media/caprese-salad.webp")
@@ -35,6 +32,9 @@ class Product(Base):
     dinein = Column(Boolean, default=True)
 
     category = relationship("Category")
+    # shop_id = Column(Integer, ForeignKey("users.id"))
+    # name_en = Column(String, default=None)
+    # description_en = Column(String, default=None)
 
     # def save_image(self, image_path):
     #     """

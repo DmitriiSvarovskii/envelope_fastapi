@@ -1,3 +1,4 @@
+from .crud import get_all_categories
 from fastapi import APIRouter, Depends, HTTPException, Form
 from sqlalchemy.orm import Session
 from sqlalchemy import insert, select, delete, update
@@ -7,6 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from ..database import get_async_session
 from typing import List, Annotated
 from src.secure import apikey_scheme
+from typing import List
 
 
 router = APIRouter(
@@ -34,17 +36,45 @@ router = APIRouter(
 #     result = await session.execute(query)
 #     return result.scalars().all()
 
+@router.get('/test', response_model=list[CategoryBase])
+async def get_categories(session: AsyncSession = Depends(get_async_session)):
+    return await get_all_categories(session=session)
 
-@router.get("/")
-async def get_all_categories(session: AsyncSession = Depends(get_async_session)):
+
+@router.get("/", response_model=list[CategoryBase])
+async def get_alcategories(session: AsyncSession = Depends(get_async_session)):
     try:
-        query = select(Category).order_by(Category.id.desc())
-        result = await session.execute(query)
-        return result.scalars().all()
+        categories = await get_all_categories(session)
+        return categories
     except Exception as e:
         await session.rollback()
         raise HTTPException(
             status_code=500, detail=f"An error occurred: {str(e)}")
+
+# @router.get("/", response_model=list[CategoryBase])
+# async def get_all_categories(skip: int = 0, limit: int = 10, session: AsyncSession = Depends(get_async_session)):
+#     try:
+#         categories = await get_categories(session, skip=skip, limit=limit)
+#         return categories
+
+    # query = select(Category).order_by(Category.id.desc())
+    # print(query)
+    # result = await session.execute(query)
+    # print(type(result))
+    # print(result)
+    # for row in result:
+    #     print(row)
+    # # list_of_dicts = [dict(row) for row in result]
+    # # return list_of_dicts
+
+    # result = await session.execute(query)
+    # categories = result.scalars().all()
+    # category_dicts = [category.__dict__ for category in categories]
+    # return category_dicts
+    # except Exception as e:
+    #     await session.rollback()
+    #     raise HTTPException(
+    #         status_code=500, detail=f"An error occurred: {str(e)}")
 
 
 @router.post("/")
@@ -52,7 +82,7 @@ async def create_new_category(new_category: CategoryCreate, session: AsyncSessio
     stmt = insert(Category).values(**new_category.dict())
     await session.execute(stmt)
     await session.commit()
-    return {"status": "success"}
+    return {"status": 200, 'date': new_category}
 
 
 @router.put("/")

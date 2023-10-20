@@ -6,7 +6,7 @@ from typing import List
 class ProductList(BaseModel):
     id: int
     # category_id: int
-    category_id: str  # Добавляем поле для отображения названия категории
+    category_id: str
     name_rus: str
     price: float
     availability: bool
@@ -64,19 +64,8 @@ class UnitCreate(BaseModel):
     name: str
 
 
-class ProductUpdate(BaseModel):
-    category_id: int
-    name_rus: str = None
-    # name_en: str = None
-    description_rus: str = None
-    # description_en: str = None
-    price: float = None
-    # image: str = None
-    availability: bool = True
-    popular: bool = False
-    delivery: bool = True
-    takeaway: bool = True
-    dinein: bool = True
+class ProductUpdate(ProductCreate):
+    pass
 
 
 class ProductModel(ProductOne):

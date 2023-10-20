@@ -1,3 +1,4 @@
+from sqlalchemy import and_
 from sqlalchemy.orm import selectinload
 import jwt
 from datetime import datetime, timedelta
@@ -10,6 +11,7 @@ from fastapi import APIRouter, Depends, HTTPException, Header
 from sqlalchemy.orm import Session
 from sqlalchemy import insert, select, update, delete
 from .models import Product, Unit
+from src.category.models import Category
 from .schemas import ProductModel, ProductCreate, ProductUpdate, ProductList, ProductOne, UnitCreate, UnitBase
 from sqlalchemy.ext.asyncio import AsyncSession
 from ..database import get_async_session
@@ -60,19 +62,19 @@ router = APIRouter(
 #     products = result.scalars().all()
 #     product_dicts = [product.__dict__ for product in products]
 #     return product_dicts
+
+
 @router.get("/", response_model=List[ProductList])
 async def get_all_product(session: AsyncSession = Depends(get_async_session)):
     stmt = select(Product).options(selectinload(
         Product.category)).order_by(Product.id)
     result = await session.execute(stmt)
     products = result.scalars().all()
-
-    # Создаем список словарей с данными о продуктах
+    print(products)
     product_dicts = [
         {
             "id": product.id,
-            # "category_id": product.category_id,
-            "category_id": product.category.name_rus,  # Добавляем название категории
+            "category_id": product.category.name_rus,
             "name_rus": product.name_rus,
             "price": product.price,
             "availability": product.availability,
@@ -81,8 +83,10 @@ async def get_all_product(session: AsyncSession = Depends(get_async_session)):
             "takeaway": product.takeaway,
             "dinein": product.dinein
         }
+
         for product in products
     ]
+    print(product_dicts)
 
     return product_dicts
 
