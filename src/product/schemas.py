@@ -26,16 +26,16 @@ class ProductOne(ProductList):
     category_id: int
     name_rus: str
     # name_en: str = None
-    description_rus: str = None
+    description_rus: str
     # description_en: str = None
     price: float
-    image: str = None
-    wt: int = None
-    unit: int = None
-    kilocalories: int = None
-    proteins: int = None
-    fats: int = None
-    carbohydrates: int = None
+    image: str
+    wt: int
+    # unit: int = None
+    kilocalories: int
+    proteins: int
+    fats: int
+    carbohydrates: int
     availability: bool
     popular: bool
     delivery: bool
