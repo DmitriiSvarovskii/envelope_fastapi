@@ -108,7 +108,7 @@ async def create_new_product(new_product: ProductCreate, session: AsyncSession =
     return {"status": "success"}
 
 
-@router.put("/{product_id}")
+@router.patch("/{product_id}")
 async def update_product(product_id: int, new_date: ProductUpdate, session: AsyncSession = Depends(get_async_session)):
     stmt = update(Product).where(
         Product.id == product_id).values(**new_date.dict())
