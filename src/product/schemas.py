@@ -43,21 +43,22 @@ class ProductOne(ProductList):
     dinein: bool
 
 
-class ProductCreate(BaseModel):
-    category_id: int
-    name_rus: str
-    # name_en: str = None
-    description_rus: str = None
-    # description_en: str = None
-    price: float
-    wt: int
-    # image: str = None
-    unit: int
-    availability: bool
-    popular: bool
-    delivery: bool
-    takeaway: bool
-    dinein: bool
+class ProductCreate(ProductOne):
+    pass
+    # category_id: int
+    # name_rus: str
+    # # name_en: str = None
+    # description_rus: str
+    # # description_en: str = None
+    # price: float
+    # wt: int
+    # # image: str = None
+    # unit: int
+    # availability: bool
+    # popular: bool
+    # delivery: bool
+    # takeaway: bool
+    # dinein: bool
 
 
 class UnitCreate(BaseModel):
