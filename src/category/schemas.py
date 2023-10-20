@@ -34,7 +34,10 @@ class CategoryBase(BaseModel):
     # shop_id: int
 
 
-class CategoryCreate(CategoryBase1):
+class CategoryCreate(BaseModel):
+    name_rus: str
+    availability: bool = True
+
     class Config:
         from_attributes = True
 
