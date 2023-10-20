@@ -42,7 +42,7 @@ class CategoryCreate(BaseModel):
         from_attributes = True
 
 
-class CategoryUpdate(CategoryBase):
+class CategoryUpdate(CategoryCreate):
     pass
 
 
