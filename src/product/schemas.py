@@ -49,8 +49,12 @@ class ProductCreate(BaseModel):
     # # name_en: str = None
     description_rus: str
     # # description_en: str = None
-    # price: float
-    # wt: int
+    price: float
+    wt: int
+    kilocalories: int
+    proteins: int
+    fats: int
+    carbohydrates: int
     # # image: str = None
     # unit: int
     # availability: bool
