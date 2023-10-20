@@ -69,7 +69,7 @@ class UnitCreate(BaseModel):
 
 
 class ProductUpdate(ProductCreate):
-    pass
+    id: int
 
 
 class ProductModel(ProductOne):

@@ -91,7 +91,7 @@ async def get_all_product(session: AsyncSession = Depends(get_async_session)):
     return product_dicts
 
 
-@router.get("/{product_id}", response_model=List[ProductOne])
+@router.get("/{product_id}/", response_model=List[ProductOne])
 async def get_one_product(product_id: int, session: AsyncSession = Depends(get_async_session)):
     query = select(Product).where(Product.id == product_id)
     result = await session.execute(query)
@@ -108,7 +108,7 @@ async def create_new_product(new_product: ProductCreate, session: AsyncSession =
     return {"status": "success"}
 
 
-@router.put("/{product_id}/")
+@router.put("/")
 async def update_product(product_id: int, new_date: ProductUpdate, session: AsyncSession = Depends(get_async_session)):
     stmt = update(Product).where(
         Product.id == product_id).values(**new_date.dict())
