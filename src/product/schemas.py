@@ -47,7 +47,7 @@ class ProductCreate(BaseModel):
     category_id: int
     name_rus: str
     # # name_en: str = None
-    # description_rus: str
+    description_rus: str
     # # description_en: str = None
     # price: float
     # wt: int
