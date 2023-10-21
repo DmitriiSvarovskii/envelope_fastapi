@@ -70,23 +70,21 @@ async def get_all_product(session: AsyncSession = Depends(get_async_session)):
         Product.category)).order_by(Product.id)
     result = await session.execute(stmt)
     products = result.scalars().all()
-    print(products)
-    product_dicts = [
-        {
-            "id": product.id,
-            "category_id": product.category.name_rus,
-            "name_rus": product.name_rus,
-            "price": product.price,
-            "availability": product.availability,
-            "popular": product.popular,
-            "delivery": product.delivery,
-            "takeaway": product.takeaway,
-            "dinein": product.dinein
-        }
-
-        for product in products
-    ]
-    print(product_dicts)
+    # product_dicts = [
+    #     {
+    #         "id": product.id,
+    #         "category_id": product.category.name_rus,
+    #         "name_rus": product.name_rus,
+    #         "price": product.price,
+    #         "availability": product.availability,
+    #         "popular": product.popular,
+    #         "delivery": product.delivery,
+    #         "takeaway": product.takeaway,
+    #         "dinein": product.dinein
+    #     }
+    #     for product in products
+    # ]
+    product_dicts = [product.__dict__ for product in products]
 
     return product_dicts
 
@@ -117,7 +115,7 @@ async def update_product(product_id: int, new_date: ProductUpdate, session: Asyn
     return {"status": "success"}
 
 
-@router.put("/{product_id}/checkbox")
+@router.put("/{product_id}/checkbox/")
 async def update_product_field(product_id: int, checkbox: str, session: AsyncSession = Depends(get_async_session)):
     product = await session.get(Product, product_id)
     if product is None:
