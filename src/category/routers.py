@@ -1,5 +1,7 @@
 from .crud import get_all_categories
 from fastapi import APIRouter, Depends, HTTPException, Form
+from sqlalchemy.exc import IntegrityError
+
 from sqlalchemy.orm import Session
 from sqlalchemy import insert, select, delete, update
 from .models import Category
@@ -101,6 +103,11 @@ async def delete_category(category_id: int, session: Session = Depends(get_async
         await session.execute(stmt)
         await session.commit()
         return {"status": "success"}
+    except IntegrityError as e:
+        await session.rollback()
+        raise HTTPException(
+            status_code=400, detail=f"Integrity error: {str(e)}"
+        )
     except Exception as e:
         await session.rollback()
         raise HTTPException(
