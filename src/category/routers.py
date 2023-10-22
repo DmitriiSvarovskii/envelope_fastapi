@@ -106,7 +106,7 @@ async def delete_category(category_id: int, session: Session = Depends(get_async
     except IntegrityError as e:
         await session.rollback()
         raise HTTPException(
-            status_code=400, detail=f"Integrity error: {str(e)}"
+            status_code=400, detail=f"Данная категория связь с товаром"
         )
     except Exception as e:
         await session.rollback()
