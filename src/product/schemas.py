@@ -85,17 +85,18 @@ class UnitBase(BaseModel):
     id: int
     name: str
 
+    class Config:
+        from_attributes = True
 
-class UnitCreate(UnitBase):
-    pass
+
+class UnitCreate(BaseModel):
+    name: str
 
 
-class UnitUpdate(UnitBase):
+class UnitUpdate(UnitCreate):
     pass
 
 
 class UnitModel(UnitBase):
-    id: int
-
     class Config:
         from_attributes = True
