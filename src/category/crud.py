@@ -24,7 +24,7 @@ async def get_all_categories(session: AsyncSession) -> list[Category]:
         {
             "id": category.id,
             "name_rus": category.name_rus,
-            # "availability": category.availability
+            "availability": category.availability
         }
 
         for category in categories
