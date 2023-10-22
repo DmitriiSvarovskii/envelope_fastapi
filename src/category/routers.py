@@ -107,6 +107,18 @@ async def delete_category(category_id: int, session: Session = Depends(get_async
             status_code=500, detail=f"An error occurred: {str(e)}")
 
 
+@router.put("/{category_id}/checkbox/")
+async def update_product_field(category_id: int, checkbox: str, session: AsyncSession = Depends(get_async_session)):
+    product = await session.get(Category, category_id)
+    if product is None:
+        raise HTTPException(status_code=404, detail="Продукт не найден")
+    if not hasattr(product, checkbox):
+        raise HTTPException(status_code=400, detail="Поле не существует")
+    setattr(product, checkbox, not getattr(product, checkbox))
+    await session.commit()
+    return {"status": "success"}
+
+
 # @router.get("/categories/{shop_id}/{category_id}")
 # async def get_one_category(shop_id: int, category_id: int, session: AsyncSession = Depends(get_async_session)) -> List[CategoryModel]:
 #     query = select(Category).where(Category.shop_id ==
