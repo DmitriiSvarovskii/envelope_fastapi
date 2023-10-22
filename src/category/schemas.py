@@ -14,7 +14,7 @@ class CategoryBase(BaseModel):
     # model_config = ConfigDict(from_attributes=True)
     id: int
     name_rus: str
-    # availability: bool
+    availability: bool
 
     class Config:
         from_attributes = True
