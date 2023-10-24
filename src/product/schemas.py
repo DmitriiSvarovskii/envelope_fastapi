@@ -50,18 +50,18 @@ class ProductCreate(BaseModel):
     description_rus: str
     # # description_en: str = None
     price: float
-    # wt: int
-    # kilocalories: int
-    # proteins: int
-    # fats: int
-    # carbohydrates: int
-    # # image: str = None
-    # unit: int
-    # availability: bool
-    # popular: bool
-    # delivery: bool
-    # takeaway: bool
-    # dinein: bool
+    wt: int
+    kilocalories: int
+    proteins: int
+    fats: int
+    carbohydrates: int
+    # image: str = None
+    unit_id: int
+    availability: bool
+    popular: bool
+    delivery: bool
+    takeaway: bool
+    dinein: bool
 
 
 class UnitCreate(BaseModel):

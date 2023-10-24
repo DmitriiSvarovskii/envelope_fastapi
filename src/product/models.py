@@ -1,4 +1,8 @@
+from sqlalchemy.orm import Session
+from sqlalchemy.event import listens_for
 import os
+from sqlalchemy import event
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from datetime import datetime
 from sqlalchemy import create_engine, Column, Integer, TIMESTAMP, String, Boolean, Float, ForeignKey
@@ -6,7 +10,8 @@ from sqlalchemy.orm import relationship
 from PIL import Image as PILImage
 
 
-from src.database import Base
+from src.database import Base, get_async_session
+from src.category.models import Category
 
 
 class Product(Base):
@@ -14,24 +19,40 @@ class Product(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     category_id = Column(Integer, ForeignKey("categories.id"))
+    subcategory_id = Column(Integer, ForeignKey(
+        "subcategories.id"), default=None)
     name_rus = Column(String, nullable=True)
     description_rus = Column(String, nullable=True)
     price = Column(Float, nullable=True)
-    # image = Column(
-    #     String, nullable=False, default="/var/www/envelope_fastapi/media/caprese-salad.webp")
     wt = Column(Integer, default=None)
-    unit = Column(Integer, ForeignKey("units.id"))
+    unit_id = Column(Integer, ForeignKey("units.id"))
     kilocalories = Column(Integer, default=None)
     proteins = Column(Integer, default=None)
     fats = Column(Integer, default=None)
     carbohydrates = Column(Integer, default=None)
-    availability = Column(Boolean, nullable=True, default=True)
-    popular = Column(Boolean, default=False)
-    delivery = Column(Boolean, default=True)
-    takeaway = Column(Boolean, default=True)
-    dinein = Column(Boolean, default=True)
+    availability = Column(Boolean)
+    popular = Column(Boolean)
+    delivery = Column(Boolean)
+    takeaway = Column(Boolean)
+    dinein = Column(Boolean)
 
-    category = relationship("Category")
+    category = relationship("Category", back_populates="products")
+    subcategory = relationship("Subcategory", back_populates="products")
+    unit = relationship("Unit", back_populates="products")
+
+
+# @event.listens_for(Category.availability, 'set')
+# async def on_category_availability_set(target, value, oldvalue, initiator):
+#     # Обновление availability продуктов внутри сессии
+#     async with get_async_session() as session:
+#         products = session.query(Product).filter_by(category=target).all()
+#         for product in products:
+#             if product.availability != value:
+#                 product.availability = value
+#         await session.commit()
+
+    # image = Column(
+    #     String, nullable=False, default="/var/www/envelope_fastapi/media/caprese-salad.webp")
     # shop_id = Column(Integer, ForeignKey("users.id"))
     # name_en = Column(String, default=None)
     # description_en = Column(String, default=None)
@@ -62,3 +83,4 @@ class Unit(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String)
+    products = relationship("Product", back_populates="unit")
