@@ -44,7 +44,7 @@ async def create_new_role(new_role: RoleCreate, session: AsyncSession = Depends(
 
     Параметры:
 
-    - new_role: имя роли, например: User, Admin и тп.
+    - `new_role`: имя роли, например: User, Admin и тп.
 
     Возвращает:
     - Сообщение о успешном выполнении операции.
@@ -67,9 +67,9 @@ async def update_role(role_id: int, new_date: RoleUpdate, session: AsyncSession 
 
     Параметры:
 
-    - Role_id: Идентификатор роли, которую необходимо обновить.
+    - `role_id`: Идентификатор роли, которую необходимо обновить.
 
-    - new_date: Новое название для роли.
+    - `new_date`: Новое название для роли.
 
     Возвращает:
 
@@ -91,7 +91,7 @@ async def delete_role(role_id: int, session: Session = Depends(get_async_session
 
     Параметры:
 
-    - role_id: Идентификатор роли, которую необходимо удалить.
+    - `role_id`: Идентификатор роли, которую необходимо удалить.
 
     Возвращает:
 

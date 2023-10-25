@@ -146,7 +146,7 @@ async def delete_user(user_id: int, session: Session = Depends(get_async_session
 
     Параметры:
 
-    - user_id: Идентификатор пользователя, которого необходимо удалить.
+    - `user_id`: Идентификатор пользователя, которого необходимо удалить.
 
     Возвращает:
 

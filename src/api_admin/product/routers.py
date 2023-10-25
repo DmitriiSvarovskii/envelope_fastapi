@@ -113,6 +113,7 @@ async def update_product_field(product_id: int, checkbox: str, session: AsyncSes
     Параметры:
     - `product_id`: идентификатор продукта.
     - `checkbox`: имя поля, которое требуется изменить.
+    Для продуктов доступны следующие значения: `availability`, `popular`, `delivery`, `takeaway`, `dinein`
 
     Возвращает:
     - Сообщение о успешном изменении или ошибку, если продукт не найден или поле не существует.
