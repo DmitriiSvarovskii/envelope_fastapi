@@ -19,8 +19,16 @@ router = APIRouter(
     tags=["User"])
 
 
-@router.get("/", status_code=201)
+@router.get("/", summary="Получение списка пользователей", status_code=201)
 async def get_all_users(session: AsyncSession = Depends(get_async_session)) -> List[UserList]:
+    """
+    Получение списка пользователей.
+
+    Этот маршрут позволяет получить список всех пользователей.
+
+    Возвращает:
+    - Список пользователей.
+    """
     query = select(UserData).order_by(UserData.id.desc())
     result = await session.execute(query)
     users = result.scalars().all()
@@ -28,8 +36,19 @@ async def get_all_users(session: AsyncSession = Depends(get_async_session)) -> L
     return user_dicts
 
 
-@router.post("/")
+@router.post("/", summary="Регистрация нового пользователя")
 async def register(user_data: UserCreate, session: AsyncSession = Depends(get_async_session)):
+    """
+    Регистрация нового пользователя.
+
+    Этот маршрут позволяет зарегистрировать нового пользователя.
+
+    Параметры:
+    - `user_data`: данные для регистрации нового пользователя.
+
+    Возвращает:
+    - Сообщение о успешной регистрации или ошибку, если пользователь с таким именем пользователя уже существует.
+    """
     query = select(UserData).where(UserData.username == user_data.username)
     result = await session.execute(query)
     existing_user_data = result.scalar()
@@ -55,6 +74,18 @@ async def register(user_data: UserCreate, session: AsyncSession = Depends(get_as
 
 @router.put("/data/", summary="Обновление информации о пользователе, кроме пароля")
 async def update_user_data(user_id: int, new_date: UserUpdateData, session: AsyncSession = Depends(get_async_session)):
+    """
+    Обновление информации о пользователе, кроме пароля.
+
+    Этот маршрут позволяет обновить информацию о пользователе, за исключением пароля.
+
+    Параметры:
+    - `user_id`: идентификатор пользователя.
+    - `new_date`: данные для обновления информации о пользователе.
+
+    Возвращает:
+    - Сообщение о успешном обновлении.
+    """
     stmt = update(UserData).where(
         UserData.user_id == user_id).values(**new_date.dict())
     await session.execute(stmt)
@@ -68,6 +99,18 @@ async def update_user_data(user_id: int, new_date: UserUpdateData, session: Asyn
 
 @router.put("/update_password/", summary="Обновление пароля")
 async def update_user_password(user_id: int, password_data: UserUpdatePassword, session: AsyncSession = Depends(get_async_session)):
+    """
+    Обновление пароля пользователя.
+
+    Этот маршрут позволяет обновить пароль пользователя.
+
+    Параметры:
+    - `user_id`: идентификатор пользователя.
+    - `password_data`: данные для обновления пароля.
+
+    Возвращает:
+    - Сообщение о успешном обновлении пароля или ошибку, если старый пароль введен неверно или новый пароль совпадает с текущим.
+    """
     user = await session.get(User, user_id)
     if not user:
         raise HTTPException(status_code=404, detail="Пользователь не найден")
