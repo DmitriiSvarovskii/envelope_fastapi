@@ -6,14 +6,15 @@ from logging.config import fileConfig
 
 from alembic import context
 from sqlalchemy import engine_from_config, pool
-from src.cart.models import *
-from src.category.models import *
-from src.product.models import *
-from src.customer.models import *
-from src.employee.models import *
-from src.order.models import *
-from src.user.models import *
-from src.auth.models import *
+# from src.cart.models import *
+# from src.category.models import *
+# from src.product.models import *
+# from src.customer.models import *
+# from src.employee.models import *
+# from src.order.models import *
+# from src.user.models import *
+# from src.auth.models import *
+from src.api_admin.models import *
 
 sys.path.append(os.path.join(sys.path[0], 'src'))
 
