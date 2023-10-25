@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from src.api_admin.routers import routers
-from src.config import ORIGINS
+# from src.config import ORIGINS
 
 
 app = FastAPI(
@@ -13,6 +13,12 @@ app = FastAPI(
     redoc_url=None,
 )
 
+ORIGINS = [
+    "http://localhost",
+    "http://localhost:5173",
+    "https://swarovskidmitrii.ru",
+    "https://www.swarovskidmitrii.ru",
+]
 
 app.add_middleware(
     CORSMiddleware,
