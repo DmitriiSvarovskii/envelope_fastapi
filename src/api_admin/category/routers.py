@@ -165,6 +165,9 @@ async def delete_category(category_id: int, session: Session = Depends(get_async
         await session.execute(stmt)
         await session.commit()
         return {"status": "success", "message": f"Продукт, c id {category_id}, успешно удален."}
+    except IntegrityError as e:
+        raise HTTPException(
+            status_code=400, detail="Удаление этой категории невозможно, так как на нее ссылаются продукты.")
     except Exception as e:
         await session.rollback()
         raise HTTPException(
