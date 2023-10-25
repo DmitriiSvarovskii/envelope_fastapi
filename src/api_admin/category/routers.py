@@ -26,7 +26,7 @@ router = APIRouter(
 
 
 @router.get("/", summary="Получение списка категорий", response_model=List[CategoryBase], status_code=200)
-async def get_all_categories(session: AsyncSession = Depends(get_async_session)):
+async def get_all_category(session: AsyncSession = Depends(get_async_session)):
     """
     Получение списка категорий.
 
