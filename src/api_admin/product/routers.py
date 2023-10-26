@@ -41,21 +41,23 @@ async def get_all_product(session: AsyncSession = Depends(get_async_session)):
         Product.category)).where(Product.deleted_flag != True).order_by(Product.id)
     result = await session.execute(stmt)
     products = result.scalars().all()
-    product_dicts = [
-        {
-            "id": product.id,
-            "category_id": product.category.name_rus,
-            "name_rus": product.name_rus,
-            "price": product.price,
-            "availability": product.availability,
-            "popular": product.popular,
-            "delivery": product.delivery,
-            "takeaway": product.takeaway,
-            "dinein": product.dinein
-        }
-        for product in products
-    ]
-    return product_dicts
+    products_dict = [product.__dict__ for product in products]
+    return products_dict
+    # product_dicts = [
+    #     {
+    #         "id": product.id,
+    #         "category_id": product.category.name_rus,
+    #         "name_rus": product.name_rus,
+    #         "price": product.price,
+    #         "availability": product.availability,
+    #         "popular": product.popular,
+    #         "delivery": product.delivery,
+    #         "takeaway": product.takeaway,
+    #         "dinein": product.dinein
+    #     }
+    #     for product in products
+    # ]
+    # return product_dicts
 
 
 @router.post("/", summary="Создание нового продукта", response_model=dict)

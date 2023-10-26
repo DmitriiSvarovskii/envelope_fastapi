@@ -36,3 +36,17 @@ class UserData(Base):
     employees = relationship('Employee', foreign_keys=[employee_id])
     # users = relationship('User', foreign_keys=[user_id])
     roles = relationship('Role', foreign_keys=[role_id])
+
+
+class CategoryTest(Base):
+    __tablename__ = "categories_test"
+
+    id = Column(Integer, primary_key=True, index=True)
+    availability = Column(Boolean, default=True)
+
+    def __init__(self, schema_name, availability):
+        self.id = Column(Integer, primary_key=True)
+        self.availability = Column(Boolean, default=True)
+
+        # Указываем схему
+        __table_args__ = {"schema": schema_name}

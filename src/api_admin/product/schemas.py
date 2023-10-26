@@ -5,7 +5,8 @@ from typing import List
 
 class ProductList(BaseModel):
     id: int
-    category_id: str
+    category_id: int
+    category_name: str
     name_rus: str
     price: float
     availability: bool

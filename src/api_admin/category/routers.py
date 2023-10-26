@@ -1,3 +1,5 @@
+from src.database import get_async_session, metadata
+from sqlalchemy import Table
 from datetime import datetime
 from alembic import command
 from alembic.config import Config
@@ -66,6 +68,24 @@ async def create_new_category(new_category: CategoryCreate, session: AsyncSessio
         await session.rollback()
         raise HTTPException(
             status_code=500, detail=f"An error occurred: {str(e)}")
+
+
+@router.post("/test_schema/", summary="Создание новой категории", status_code=201)
+async def create_new_category(schema_name: str, name_rus: str, created_by: int, availability: bool, session: AsyncSession = Depends(get_async_session)):
+    table = Table('categories', metadata, schema=schema_name)
+    # try:
+    stmt = table.insert().values(name_rus=name_rus,
+                                 created_by=created_by, availability=availability)
+
+    print(stmt)
+    await session.execute(stmt)
+    await session.commit()
+    return {"status": 201}
+
+    # except Exception as e:
+    #     await session.rollback()
+    #     raise HTTPException(
+    #         status_code=500, detail=f"An error occurred: {str(e)}")
 
 
 @router.put("/", summary="Обновление категории", status_code=200)

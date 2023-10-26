@@ -1,17 +1,19 @@
+from sqlalchemy.schema import CreateSchema
 import bcrypt
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from sqlalchemy import insert, select, update, delete
+from sqlalchemy import insert, select, update, delete, text
 from .models import *
 from .schemas import *
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.database import get_async_session
+from src.database import get_async_session, metadata
 from typing import List, Annotated
 from src.secure import apikey_scheme
 from .controller import register
 from fastapi.encoders import jsonable_encoder
 from src.secure import pwd_context
 from migrations.alembic import run_alembic_migrations
+from .db_schema import *
 
 
 router = APIRouter(
@@ -66,7 +68,10 @@ async def register(user_data: UserCreate, session: AsyncSession = Depends(get_as
         user_id=new_user.id
     )
     session.add(new_user_data)
+    raw_sql_query = f"CREATE SCHEMA IF NOT EXISTS {user_data.username} AUTHORIZATION postgres;"
+    await session.execute(text(raw_sql_query))
     await session.commit()
+    await create_table_new_schema(user_data.username, session)
     return jsonable_encoder({
         "username": new_user_data.username,
     })
@@ -93,6 +98,7 @@ async def update_user_data(user_id: int, new_date: UserUpdateData, session: Asyn
     result = await session.execute(stmt_updated_at)
     user = result.scalars().all()
     user[0].updated_at = datetime.now()
+
     await session.commit()
     return {"status": "success"}
 
@@ -171,3 +177,30 @@ async def delete_user(user_id: int, session: Session = Depends(get_async_session
         await session.rollback()
         raise HTTPException(
             status_code=500, detail=f"An error occurred: {str(e)}")
+
+
+@router.post("/test/", summary="Регистрация нового пользователя")
+async def register(user_data: UserCreate, session: AsyncSession = Depends(get_async_session)):
+    new_user = User(is_active=True)
+    session.add(new_user)
+    await session.commit()
+    new_user_data = UserData(
+        username=user_data.username,
+        hashed_password=pwd_context.hash(user_data.hashed_password),
+        user_id=new_user.id
+    )
+    session.add(new_user_data)
+    await session.execute(CreateSchema(user_data.username))
+    await session.commit()
+
+    # # Создание таблицы CategoryTest в указанной схеме
+    # schema_name = user_data.username
+    # category_test_table = CategoryTest.__table__
+    # category_test_table.schema = schema_name
+
+    # async with session.begin() as trans:
+    #     await metadata.create_all(session.connection(), schema=schema_name, checkfirst=True)
+
+    return jsonable_encoder({
+        "username": new_user_data.username,
+    })
