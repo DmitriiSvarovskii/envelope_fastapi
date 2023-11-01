@@ -8,6 +8,7 @@ class CategoryBase(BaseModel):
 
     name: str
     availability: bool
+
     # position: int
 
 
