@@ -20,8 +20,8 @@ class CategoryList(CategoryBase):
 
 class CategoryCreate(CategoryBase):
     created_by: int
-    updated_by: int
-    deleted_by: int
+    # updated_by: int
+    # deleted_by: int
 
 
 # class CategoryBase(CategoryTest):

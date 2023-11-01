@@ -58,7 +58,7 @@ class ProductCreate(BaseModel):
     delivery: bool
     takeaway: bool
     dinein: bool
-    # created_by: int
+    created_by: int
     # updated_by: int
 
 
