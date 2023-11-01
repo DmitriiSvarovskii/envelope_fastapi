@@ -16,7 +16,7 @@
 #     __tablename__ = 'categories'
 
 #     id = Column(Integer, primary_key=True, index=True)
-#     name_rus = Column(String, default=None)
+#     name = Column(String, default=None)
 #     availability = Column(Boolean, default=True)
 #     position = Column(Integer, nullable=True)
 #     created_at = Column(DateTime, default=func.now(), nullable=True)
@@ -50,6 +50,6 @@
 #     parent_category = relationship("Category", back_populates="subcategories")
 #     products = relationship("Product", back_populates="subcategory")
 
-#     # name_rus: Mapped[str]
+#     # name: Mapped[str]
 #     # name_en = Column(String, default=None)
 #     # shop_id = Column(Integer, ForeignKey("users.id"))

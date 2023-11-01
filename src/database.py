@@ -1,24 +1,14 @@
-from typing import AsyncGenerator
+import datetime
+from typing import Annotated, AsyncGenerator, Any
+from sqlalchemy import MetaData, String, text, ForeignKey, Column, Boolean, Integer
 from sqlalchemy.types import JSON
-from typing import Any
-
-from sqlalchemy import MetaData
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.pool import NullPool
-from sqlalchemy.orm import DeclarativeBase
-
 from src.config import DB_HOST, DB_NAME, DB_PASS, DB_PORT, DB_USER
 
+
 DATABASE_URL = f"postgresql+asyncpg://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}"
-
-
-class Base(DeclarativeBase):
-    type_annotation_map = {
-        dict[str, Any]: JSON
-    }
-
 
 metadata = MetaData()
 
@@ -30,3 +20,45 @@ async_session_maker = sessionmaker(
 async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
     async with async_session_maker() as session:
         yield session
+
+
+str_64 = Annotated[str, 64]
+str_256 = Annotated[str, 256]
+
+
+class Base(DeclarativeBase):
+    type_annotation_map = {
+        dict[str, Any]: JSON,
+        str_64: String(64),
+        str_256: String(256),
+
+    }
+
+
+intpk = Annotated[int, mapped_column(primary_key=True, index=True)]
+
+is_active = Annotated[bool, mapped_column(server_default=text("true"))]
+
+created_at = Annotated[datetime.datetime, mapped_column(
+    server_default=text("TIMEZONE('utc', now())"))]
+
+# created_by = Annotated[int, mapped_column(
+#     ForeignKey("users.id", ondelete="CASCADE"))]
+
+updated_at = Annotated[datetime.datetime, mapped_column(
+    server_default=text("TIMEZONE('utc', now())"),
+    onupdate=datetime.datetime.utcnow,
+)]
+
+updated_by = Annotated[int, mapped_column(
+    ForeignKey("public.users.id", ondelete="CASCADE"), nullable=True)]
+
+deleted_at = Annotated[datetime.datetime, mapped_column(
+    server_default=text("null"),
+    onupdate=datetime.datetime.utcnow, nullable=True
+)]
+
+deleted_flag = Annotated[bool, mapped_column(server_default=text("false"))]
+
+deleted_by = Annotated[int, mapped_column(
+    ForeignKey("users.id", ondelete="CASCADE"), nullable=True)]

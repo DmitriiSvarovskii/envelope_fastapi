@@ -4,52 +4,85 @@ import os
 from sqlalchemy import event
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from sqlalchemy.orm import Mapped, mapped_column
+from src.database import *
+
 from datetime import datetime
 from sqlalchemy import create_engine, Column, Integer, TIMESTAMP, String, Boolean, Float, ForeignKey, func, DateTime, Integer, String, Boolean
 from sqlalchemy.orm import relationship
 from PIL import Image as PILImage
-
-
 from src.database import Base, get_async_session
-from src.api_admin.category.models import Category
+import enum
+
+from typing import List, TYPE_CHECKING
+if TYPE_CHECKING:
+    from ..category import Category, Subcategory
+    from ..user import User
+
+
+class Unit(Base):
+    __tablename__ = "units"
+    __table_args__ = {'schema': None}
+
+    id: Mapped[intpk]
+    name: Mapped[str_64] = mapped_column(unique=True)
+
+    product_unit: Mapped[List['Product']
+                         ] = relationship(back_populates="unit")
+
+    def __init__(self, schema):
+        super().__init__()
+        self.__table_args__ = {'schema': schema}
 
 
 class Product(Base):
     __tablename__ = 'products'
+    __table_args__ = {'schema': None}
 
-    id = Column(Integer, primary_key=True, index=True)
-    category_id = Column(Integer, ForeignKey("categories.id"))
-    subcategory_id = Column(Integer, ForeignKey(
-        "subcategories.id"), default=None)
-    name_rus = Column(String, nullable=True)
-    description_rus = Column(String, nullable=True)
-    price = Column(Float, nullable=True)
-    wt = Column(Integer, default=None)
-    unit_id = Column(Integer, ForeignKey("units.id"))
-    kilocalories = Column(Integer, default=None)
-    proteins = Column(Integer, default=None)
-    fats = Column(Integer, default=None)
-    carbohydrates = Column(Integer, default=None)
-    availability = Column(Boolean)
-    popular = Column(Boolean)
-    delivery = Column(Boolean)
-    takeaway = Column(Boolean)
-    dinein = Column(Boolean)
-    # position = Column(Integer, nullable=True)
-    created_at = Column(DateTime, default=func.now(), nullable=True)
-    created_by = Column(Integer, ForeignKey('users.id'), nullable=True)
-    updated_at = Column(DateTime, default=func.now(),
-                        onupdate=func.now(), nullable=True)
-    updated_by = Column(Integer, ForeignKey('users.id'), nullable=True)
-    deleted_flag = Column(Boolean, default=False)
-    deleted_at = Column(DateTime, nullable=True)
+    id: Mapped[intpk]
+    category_id: Mapped[int] = mapped_column(
+        ForeignKey("categories.id", ondelete="CASCADE"))
+    subcategory_id: Mapped[int | None] = mapped_column(
+        ForeignKey("subcategories.id", ondelete="CASCADE"))
+    name: Mapped[str_64]
+    description: Mapped[str_256 | None]
+    price: Mapped[float]
+    wt: Mapped[int | None]
+    unit_id: Mapped[int] = mapped_column(
+        ForeignKey("units.id", ondelete="CASCADE"))
+    kilocalories: Mapped[int | None]
+    proteins: Mapped[int | None]
+    fats: Mapped[int | None]
+    carbohydrates: Mapped[int | None]
+    availability: Mapped[bool]
+    popular: Mapped[bool]
+    delivery: Mapped[bool]
+    takeaway: Mapped[bool]
+    dinein: Mapped[bool]
+    # position: Mapped[int] = mapped_column(Integer, nullable=True)
+    created_by: Mapped[int] = mapped_column(
+        ForeignKey("public.users.id", ondelete="CASCADE"))
+    created_at: Mapped[created_at]
+    updated_at: Mapped[updated_at]
+    updated_by: Mapped[int | None] = mapped_column(
+        ForeignKey("public.users.id", ondelete="CASCADE"))
+    deleted_flag: Mapped[deleted_flag]
+    deleted_at: Mapped[deleted_at]
+    deleted_by: Mapped[int | None] = mapped_column(
+        ForeignKey("public.users.id", ondelete="CASCADE"))
 
-    created_by_user = relationship('User', foreign_keys=[created_by])
-    updated_by_user = relationship('User', foreign_keys=[updated_by])
+    unit: Mapped['Unit'] = relationship(
+        back_populates="product_unit")
+    category: Mapped['Category'] = relationship(
+        back_populates="product_category")
+    subcategory: Mapped['Subcategory'] = relationship(
+        back_populates="product_subcategory")
+    # user_product: Mapped[List['User']] = relationship(
+    #     back_populates="product")
 
-    category = relationship("Category", back_populates="products")
-    subcategory = relationship("Subcategory", back_populates="products")
-    unit = relationship("Unit", back_populates="products")
+    def __init__(self, schema):
+        super().__init__()
+        self.__table_args__ = {'schema': schema}
 
 
 # @event.listens_for(Category.availability, 'set')

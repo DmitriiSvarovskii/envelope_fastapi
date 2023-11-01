@@ -6,7 +6,7 @@ from typing import List
 class ProductList(BaseModel):
     id: int
     category_id: str
-    name_rus: str
+    name: str
     price: float
     availability: bool
     popular: bool
@@ -16,16 +16,16 @@ class ProductList(BaseModel):
     # shop_id: int
     # image: str
     # name_en: str = None
-    # description_rus: str = None
+    # description: str = None
     # description_en: str = None
 
 
 class ProductOne(ProductList):
     # shop_id: int
     category_id: int
-    name_rus: str
+    name: str
     # name_en: str = None
-    description_rus: str
+    description: str
     # description_en: str = None
     price: float
     # image: str
@@ -44,9 +44,9 @@ class ProductOne(ProductList):
 
 class ProductCreate(BaseModel):
     category_id: int
-    name_rus: str
+    name: str
     # # name_en: str = None
-    description_rus: str
+    description: str
     # # description_en: str = None
     price: float
     wt: int

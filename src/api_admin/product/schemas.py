@@ -1,37 +1,36 @@
 from datetime import datetime
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from typing import List
 
 
 class ProductList(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
-    category_id: int
-    category_name: str
-    name_rus: str
+    # category_id: int
+    # category_name: str
+    name: str
     price: float
-    availability: bool
-    popular: bool
-    delivery: bool
-    takeaway: bool
-    dinein: bool
+    # availability: bool
+    # popular: bool
+    # delivery: bool
+    # takeaway: bool
+    # dinein: bool
     # shop_id: int
     # image: str
     # name_en: str = None
-    # description_rus: str = None
+    # description: str = None
     # description_en: str = None
 
 
 class ProductOne(ProductList):
-    # shop_id: int
     category_id: int
-    name_rus: str
-    # name_en: str = None
-    description_rus: str
-    # description_en: str = None
+    name: str
+    description: str
     price: float
     # image: str
     wt: int
-    # unit: int = None
+    unit: int = None
     kilocalories: int
     proteins: int
     fats: int
@@ -45,27 +44,28 @@ class ProductOne(ProductList):
 
 class ProductCreate(BaseModel):
     category_id: int
-    name_rus: str
-    description_rus: str
+    name: str
+    description: str | None
     price: float
     wt: int
-    kilocalories: int
-    proteins: int
-    fats: int
-    carbohydrates: int
+    kilocalories: int | None
+    proteins: int | None
+    fats: int | None
+    carbohydrates: int | None
     unit_id: int
     availability: bool
     popular: bool
     delivery: bool
     takeaway: bool
     dinein: bool
-    created_by: int
+    # created_by: int
+    # updated_by: int
 
 
 class ProductUpdate(BaseModel):
     category_id: int
-    name_rus: str
-    description_rus: str
+    name: str
+    description: str
     price: float
     wt: int
     kilocalories: int

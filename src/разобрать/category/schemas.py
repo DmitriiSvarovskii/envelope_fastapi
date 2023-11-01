@@ -4,7 +4,7 @@
 
 
 # # class CategoryBase1(BaseModel):
-# #     name_rus: str
+# #     name: str
 # #     # availability: bool
 
 # #     class Config:
@@ -13,7 +13,7 @@
 
 # class CategoryBase(BaseModel):
 #     id: int
-#     name_rus: str
+#     name: str
 #     availability: bool
 #     # position: int
 
@@ -34,7 +34,7 @@
 
 
 # class CategoryCreate(BaseModel):
-#     name_rus: str
+#     name: str
 #     availability: bool
 #     # created_at: datetime
 #     created_by: int
@@ -44,7 +44,7 @@
 
 
 # class CategoryUpdate(BaseModel):
-#     name_rus: str
+#     name: str
 #     availability: bool
 #     # updated_at: datetime
 #     updated_by: int

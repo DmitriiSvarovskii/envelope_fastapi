@@ -18,7 +18,7 @@ class CartCreate(CartBase):
 
 class CartItem(BaseModel):
     id: int
-    name_rus: str
-    description_rus: str
+    name: str
+    description: str
     quantity: int
     unit_price: float

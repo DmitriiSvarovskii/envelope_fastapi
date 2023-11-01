@@ -17,8 +17,8 @@ router = APIRouter(
 @router.get("/", response_model=List[CartItem])
 async def read_cart_items(tg_user_id: int, session: AsyncSession = Depends(get_async_session)):
     query = select(Product.id,
-                   Product.name_rus,
-                   Product.description_rus,
+                   Product.name,
+                   Product.description,
                    Cart.quantity,
                    (Cart.quantity * Product.price).label("unit_price")).join(Cart, Cart.product_id == Product.id).where(Cart.tg_user_id == tg_user_id)
     result = await session.execute(query)
@@ -26,8 +26,8 @@ async def read_cart_items(tg_user_id: int, session: AsyncSession = Depends(get_a
     for row in result:
         cart_items.append(CartItem(
             id=row[0],
-            name_rus=row[1],
-            description_rus=row[2],
+            name=row[1],
+            description=row[2],
             quantity=row[3],
             unit_price=row[4]
         ))

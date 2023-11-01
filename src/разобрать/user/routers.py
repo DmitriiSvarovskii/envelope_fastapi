@@ -10,7 +10,6 @@
 # from .controller import register
 # from fastapi.encoders import jsonable_encoder
 # from src.secure import pwd_context
-# from migrations.alembic import run_alembic_migrations
 
 
 # router = APIRouter(

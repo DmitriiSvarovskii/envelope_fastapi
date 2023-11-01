@@ -1,6 +1,7 @@
 from datetime import datetime
 from pydantic import BaseModel
 from typing import Optional
+from pydantic import BaseModel, ConfigDict
 
 
 class UserBase(BaseModel):
@@ -12,28 +13,26 @@ class UserBase(BaseModel):
 
 
 class UserList(UserBase):
-    user_id: int
+    model_config = ConfigDict(from_attributes=True)
     number_phone: Optional[int] = None
     employee_id: Optional[int] = None
-    role_id: Optional[int] = 1
-    # updated_at: datetime
+    role_id: int
+    id: int
 
-    class Config:
-        from_attributes = True
+    # class Config:
+    #     from_attributes = True
 
 
 class UserCreate(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
     username: str
     hashed_password: str
-
-    class Config:
-        from_attribute = True
 
 
 class UserUpdateData(UserBase):
     number_phone: int
     employee_id: Optional[int] = None
-    role_id: Optional[int] = 1
+    role: str
 
     class Config:
         from_attribute = True
@@ -49,3 +48,27 @@ class UserUpdatePassword(BaseModel):
 
 class UserModel(UserBase):
     pass
+
+
+class RolesBase(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    name: str
+
+
+class RolesList(RolesBase):
+    id: int
+
+
+class RolesCreate(RolesBase):
+    pass
+
+
+class RolesUpdate(RolesBase):
+    pass
+
+
+class RolesDelete(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: str

@@ -11,7 +11,7 @@
 # def category_to_dict(category):
 #     return {
 #         "id": category.id,
-#         "name_rus": category.name_rus,
+#         "name": category.name,
 #         "availability": category.availability,
 #         "position": category.position,
 
@@ -26,7 +26,7 @@
 #     category_dicts = [
 #         {
 #             "id": category.id,
-#             "name_rus": category.name_rus,
+#             "name": category.name,
 #             "availability": category.availability,
 #             # "position": category.position,
 #         }
@@ -34,5 +34,5 @@
 #         for category in categories
 #     ]
 #     return category_dicts
-#     # name_rus: str
+#     # name: str
 #     # # availability: bool}

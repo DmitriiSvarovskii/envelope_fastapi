@@ -73,8 +73,8 @@
 #     product_dicts = [
 #         {
 #             "id": product.id,
-#             "category_id": product.category.name_rus,
-#             "name_rus": product.name_rus,
+#             "category_id": product.category.name,
+#             "name": product.name,
 #             "price": product.price,
 #             "availability": product.availability,
 #             "popular": product.popular,

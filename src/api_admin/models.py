@@ -1,19 +1,16 @@
-from .role.models import Role
-from .user.models import User, UserData
-from .employee.models import Employee, EmployeeData
-from .category.models import Category, Subcategory
-from .product.models import Product
-from .unit.models import Unit
+from .user import Role, User
+from .product import Unit, Product
+from .category import Category, Subcategory
+from .employee import Employee
 
 
-all = [
+all = (
+    'Employee',
     'Role',
     'User',
-    'UserData',
-    'Employee',
-    'EmployeeData',
-    'Category',
+    'Catyegory',
     'Subcategory',
-    'Product',
     'Unit',
-]
+    'Product',
+
+)

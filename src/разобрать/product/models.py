@@ -21,8 +21,8 @@
 #     category_id = Column(Integer, ForeignKey("categories.id"))
 #     subcategory_id = Column(Integer, ForeignKey(
 #         "subcategories.id"), default=None)
-#     name_rus = Column(String, nullable=True)
-#     description_rus = Column(String, nullable=True)
+#     name = Column(String, nullable=True)
+#     description = Column(String, nullable=True)
 #     price = Column(Float, nullable=True)
 #     wt = Column(Integer, default=None)
 #     unit_id = Column(Integer, ForeignKey("units.id"))

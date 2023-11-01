@@ -7,7 +7,7 @@ from fastapi import APIRouter, Depends, HTTPException
 async def create_table_new_schema(schema_name: str, session: AsyncSession = Depends(get_async_session)):
     await session.execute(text(f"""CREATE TABLE {schema_name}.categories (
         id SERIAL PRIMARY KEY,
-        name_rus VARCHAR,
+        name VARCHAR,
         availability BOOLEAN DEFAULT true,
         created_at TIMESTAMP DEFAULT NOW(),
         created_by INTEGER,
@@ -26,8 +26,8 @@ async def create_table_new_schema(schema_name: str, session: AsyncSession = Depe
         id SERIAL PRIMARY KEY,
         category_id INTEGER REFERENCES {schema_name}.categories(id),
         subcategory_id INTEGER REFERENCES {schema_name}.subcategories(id),
-        name_rus VARCHAR,
-        description_rus VARCHAR,
+        name VARCHAR,
+        description VARCHAR,
         price FLOAT,
         wt INTEGER,
         unit_id INTEGER REFERENCES units(id),

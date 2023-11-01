@@ -6,50 +6,71 @@ from sqlalchemy.orm import relationship, Mapped, mapped_column
 from PIL import Image as PILImage
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, func
 from sqlalchemy.orm import relationship
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.sql import expression
+from src.database import *
 
-from src.database import Base
+from typing import List, TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ..category import Category, Subcategory
+    from ..user import User
+    from ..product import Product
 
 
 class Category(Base):
     __tablename__ = 'categories'
+    __table_args__ = {'schema': None}
 
-    id = Column(Integer, primary_key=True, index=True)
-    name_rus = Column(String, default=None)
-    availability = Column(Boolean, default=True)
-    # position = Column(Integer, nullable=True)
-    created_at = Column(DateTime, default=func.now(), nullable=True)
-    created_by = Column(Integer, ForeignKey('users.id'), nullable=True)
-    updated_at = Column(DateTime, default=func.now(),
-                        onupdate=func.now(), nullable=True)
-    updated_by = Column(Integer, ForeignKey('users.id'), nullable=True)
-    deleted_flag = Column(Boolean, default=False)
-    deleted_at = Column(DateTime, nullable=True)
+    id: Mapped[intpk]
+    name: Mapped[str_64]
+    availability: Mapped[bool]
+    # position: Mapped[int] = mapped_column(Integer, nullable=True)
+    created_by: Mapped[int] = mapped_column(
+        ForeignKey("public.users.id", ondelete="CASCADE"))
+    created_at: Mapped[created_at]
+    updated_at: Mapped[updated_at]
+    updated_by: Mapped[int | None] = mapped_column(
+        ForeignKey("public.users.id", ondelete="CASCADE"))
+    deleted_flag: Mapped[deleted_flag]
+    deleted_at: Mapped[deleted_at]
+    deleted_by: Mapped[int | None] = mapped_column(
+        ForeignKey("public.users.id", ondelete="CASCADE"))
 
-    created_by_user = relationship('User', foreign_keys=[created_by])
-    updated_by_user = relationship('User', foreign_keys=[updated_by])
+    product_category: Mapped[List['Product']
+                             ] = relationship(back_populates="category")
+    category_subcategory: Mapped[List['Subcategory']
+                                 ] = relationship(back_populates="subcategory_category")
 
-    subcategories = relationship(
-        "Subcategory", back_populates="parent_category")
-    products = relationship("Product", back_populates="category")
-
-    def __init__(self, *args, **kwargs):
-        if 'position' not in kwargs:
-            kwargs['position'] = self.id
-        super().__init__(*args, **kwargs)
+    def __init__(self, schema):
+        super().__init__()
+        self.__table_args__ = {'schema': schema}
 
 
 class Subcategory(Base):
     __tablename__ = 'subcategories'
+    __table_args__ = {'schema': None}
 
-    id = Column(Integer, primary_key=True, index=True)
-    name = Column(String)
-    parent_category_id = Column(Integer, ForeignKey('categories.id'))
+    id: Mapped[intpk]
+    name: Mapped[str_64]
+    availability: Mapped[bool]
+    parent_category_id: Mapped[int] = mapped_column(
+        ForeignKey("categories.id", ondelete="CASCADE"))
+    # position: Mapped[int] = mapped_column(Integer, nullable=True)
+    created_by: Mapped[int] = mapped_column(
+        ForeignKey("public.users.id", ondelete="CASCADE"))
+    created_at: Mapped[created_at]
+    updated_at: Mapped[updated_at]
+    updated_by: Mapped[int] = mapped_column(
+        ForeignKey("public.users.id", ondelete="CASCADE"))
+    deleted_flag: Mapped[deleted_flag]
+    deleted_at: Mapped[deleted_at]
+    deleted_by: Mapped[int] = mapped_column(
+        ForeignKey("public.users.id", ondelete="CASCADE"))
 
-    parent_category = relationship("Category", back_populates="subcategories")
-    products = relationship("Product", back_populates="subcategory")
+    product_subcategory: Mapped[List['Product']
+                                ] = relationship(back_populates="subcategory")
+    subcategory_category: Mapped['Category'] = relationship(
+        back_populates="category_subcategory")
 
-    # name_rus: Mapped[str]
-    # name_en = Column(String, default=None)
-    # shop_id = Column(Integer, ForeignKey("users.id"))
+    def __init__(self, schema):
+        super().__init__()
+        self.__table_args__ = {'schema': schema}

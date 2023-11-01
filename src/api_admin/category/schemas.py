@@ -3,22 +3,25 @@ from pydantic import BaseModel, ConfigDict
 from typing import List, Optional
 
 
-# class CategoryBase1(BaseModel):
-#     name_rus: str
-#     # availability: bool
-
-#     class Config:
-#         from_attributes = True
-
-
 class CategoryBase(BaseModel):
-    id: int
-    name_rus: str
+    model_config = ConfigDict(from_attributes=True)
+
+    name: str
     availability: bool
     # position: int
 
-    class Config:
-        from_attributes = True
+
+class CategoryList(CategoryBase):
+    id: int
+    name: str
+    availability: bool
+    # position: int
+
+
+class CategoryCreate(CategoryBase):
+    created_by: int
+    updated_by: int
+    deleted_by: int
 
 
 # class CategoryBase(CategoryTest):
@@ -33,17 +36,8 @@ class CategoryDeleted(BaseModel):
     deleted_at: bool
 
 
-class CategoryCreate(BaseModel):
-    name_rus: str
-    availability: bool
-    created_by: int
-
-    class Config:
-        from_attributes = True
-
-
 class CategoryUpdate(BaseModel):
-    name_rus: str
+    name: str
     availability: bool
     updated_by: int
 
