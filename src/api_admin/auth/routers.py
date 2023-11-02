@@ -18,8 +18,8 @@ import jwt
 from datetime import datetime, timedelta
 
 router = APIRouter(
-    prefix="/api/v1/auth",
-    tags=["Auth"])
+    prefix="/api/v1/login",
+    tags=["Login"])
 
 SECRET_KEY = "your_secret_key_here"
 
