@@ -30,9 +30,9 @@ router = APIRouter(
 
 
 @router.get("/", response_model=List[CategoryList], status_code=200)
-async def get_all_category(schema: str, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
+async def get_all_category(current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
     try:
-        categories = await crud_get_all_categories(schema=schema, session=session)
+        categories = await crud_get_all_categories(schema=current_user.username, session=session)
         return categories
     except Exception as e:
         await session.rollback()
@@ -41,9 +41,9 @@ async def get_all_category(schema: str, current_user: User = Depends(get_current
 
 
 @router.post("/", status_code=201)
-async def create_new_category(schema: str, data: CategoryCreate, session: AsyncSession = Depends(get_async_session)):
+async def create_new_category(data: CategoryCreate,  current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
     try:
-        new_category = await crud_create_new_category(schema=schema, data=data, session=session)
+        new_category = await crud_create_new_category(schema=current_user.username, data=data, user_id=current_user.id, session=session)
         return new_category
     except Exception as e:
         await session.rollback()

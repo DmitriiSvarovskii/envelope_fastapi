@@ -10,6 +10,8 @@ from typing import List, Annotated
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.database import get_async_session
 from fastapi import APIRouter, Depends
+from ..user import User
+from ..auth.routers import get_current_user_from_token
 
 
 async def crud_get_all_categories(schema: str, session: AsyncSession = Depends(get_async_session)) -> List[CategoryList]:
@@ -20,7 +22,10 @@ async def crud_get_all_categories(schema: str, session: AsyncSession = Depends(g
     return categories
 
 
-async def crud_create_new_category(schema: str, data: CategoryCreate, session: AsyncSession = Depends(get_async_session)) -> List[CategoryCreate]:
+async def crud_create_new_category(schema: str, data: CategoryCreate, user_id: int, session: AsyncSession = Depends(get_async_session)) -> List[CategoryCreate]:
+    category_data = data.dict()
+    # Устанавливаем created_by из текущего пользователя
+    category_data["created_by"] = user_id
     stmt = insert(Category).values(**data.dict()
                                    ).execution_options(schema_translate_map={None: schema})
     await session.execute(stmt)
