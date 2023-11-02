@@ -12,7 +12,7 @@ from typing import List, TYPE_CHECKING
 if TYPE_CHECKING:
     from ..category import Category, Subcategory
     from ..user import User
-    from ..product import Product
+    from ..auth import Token
     from ..employee import Employee
 
 
@@ -51,6 +51,7 @@ class User(Base):
 
     role: Mapped['Role'] = relationship(back_populates="user_role")
     employee: Mapped['Employee'] = relationship(back_populates="user_employee")
+    token: Mapped['Token'] = relationship(back_populates="token_user")
     # product: Mapped[List['Product']] = relationship(
     #     back_populates="user_product")
 

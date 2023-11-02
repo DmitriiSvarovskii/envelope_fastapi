@@ -1,16 +1,14 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
 class UserAuth(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     username: str
     hashed_password: str
 
-    class Config:
-        from_attribute = True
-
 
 class TokenCreate(BaseModel):
-    access_token: str
+    model_config = ConfigDict(from_attributes=True)
 
-    class Config:
-        from_attribute = True
+    access_token: str

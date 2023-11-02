@@ -1,27 +1,17 @@
-# from typing import Optional
-
-# from fastapi_users import schemas
-# from pydantic import ConfigDict, BaseModel
+from pydantic import BaseModel, ConfigDict
 
 
-# class UserRead(schemas.BaseUser[int]):
-#     id: int
-#     email: str
-#     is_active: bool = True
-#     is_superuser: bool = False
-#     is_verified: bool = False
+class UserAuth(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
 
-#     model_config = ConfigDict(from_attributes=True)
-
-
-# class UserCreate(schemas.BaseUserCreate):
-#     username: str
-#     email: str
-#     password: str
-#     is_active: Optional[bool] = True
-#     is_superuser: Optional[bool] = False
-#     is_verified: Optional[bool] = False
+    id: int
+    username: str
+    name: str | None
+    number_phone: int | None
+    role_id: int
 
 
-# class UserUpdate(schemas.BaseUserUpdate):
-#     pass
+class TokenCreate(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    access_token: str

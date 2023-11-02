@@ -2,6 +2,7 @@ from .user import Role, User
 from .product import Unit, Product
 from .category import Category, Subcategory
 from .employee import Employee
+from .auth import Token
 
 
 all = (
@@ -12,5 +13,6 @@ all = (
     'Subcategory',
     'Unit',
     'Product',
+    'Token',
 
 )
