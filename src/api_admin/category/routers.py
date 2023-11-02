@@ -19,6 +19,8 @@ from src.database import get_async_session
 from typing import List, Annotated
 from src.secure import apikey_scheme
 from typing import List
+from ..user import User
+from ..auth.routers import get_current_user_from_token
 # from src.product.models import on_category_availability_set
 
 
@@ -28,7 +30,7 @@ router = APIRouter(
 
 
 @router.get("/", response_model=List[CategoryList], status_code=200)
-async def get_all_category(schema: str, session: AsyncSession = Depends(get_async_session)):
+async def get_all_category(schema: str, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
     try:
         categories = await crud_get_all_categories(schema=schema, session=session)
         return categories
