@@ -23,7 +23,8 @@ from src.secure import apikey_scheme
 from fastapi import FastAPI, HTTPException
 import hashlib
 import hmac
-
+from ..user import User
+from ..auth.routers import get_current_user_from_token
 
 router = APIRouter(
     prefix="/api/v1/product",
@@ -31,9 +32,9 @@ router = APIRouter(
 
 
 @router.get("/", response_model=List[ProductList])
-async def get_all_product(schema: str, session: AsyncSession = Depends(get_async_session)):
+async def get_all_product(current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
     query = select(Product).options(selectinload(Product.category)).order_by(
-        Product.id).execution_options(schema_translate_map={None: schema})
+        Product.id).execution_options(schema_translate_map={None: current_user.username})
     print(query)
     result = await session.execute(query)
     products = result.scalars().all()
@@ -66,10 +67,10 @@ async def get_all_product(schema: str, session: AsyncSession = Depends(get_async
 
 
 @router.post("/")
-async def create_new_product(schema: str, new_product: ProductCreate, session: AsyncSession = Depends(get_async_session)):
+async def create_new_product(new_product: ProductCreate, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
     try:
         stmt = insert(Product).values(**new_product.dict()).execution_options(
-            schema_translate_map={None: schema})
+            schema_translate_map={None: current_user.username})
         await session.execute(stmt)
         await session.commit()
         return {"status": 201, 'date': new_product}
