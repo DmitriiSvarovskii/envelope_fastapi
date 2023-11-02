@@ -1,5 +1,5 @@
 from datetime import datetime
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from typing import List
 
 
@@ -7,19 +7,22 @@ class ProductList(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
-    # category_id: int
-    # category_name: str
+    category_id: int
+    category_name: str
     name: str
+    description: str = None
     price: float
-    # availability: bool
-    # popular: bool
-    # delivery: bool
-    # takeaway: bool
-    # dinein: bool
+    availability: bool
+    popular: bool
+    delivery: bool
+    takeaway: bool
+    dinein: bool
+
+    # class Category(BaseModel):
+    #     name: str
     # shop_id: int
     # image: str
     # name_en: str = None
-    # description: str = None
     # description_en: str = None
 
 

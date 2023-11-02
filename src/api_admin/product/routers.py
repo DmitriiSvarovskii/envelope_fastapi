@@ -2,7 +2,7 @@ import requests
 from fastapi import Header, HTTPException
 from sqlalchemy import select, text
 from sqlalchemy import and_
-from sqlalchemy.orm import selectinload
+from sqlalchemy.orm import selectinload, joinedload
 import jwt
 from datetime import datetime, timedelta
 from urllib.parse import urlparse, parse_qs
@@ -30,13 +30,39 @@ router = APIRouter(
     tags=["Product"])
 
 
-@router.get("/", )
+@router.get("/", response_model=List[ProductList])
 async def get_all_product(schema: str, session: AsyncSession = Depends(get_async_session)):
-    query = select(Category).order_by(Category.id).execution_options(
-        schema_translate_map={None: schema})
+    query = select(Product).options(selectinload(Product.category)).order_by(
+        Product.id).execution_options(schema_translate_map={None: schema})
+    print(query)
     result = await session.execute(query)
     products = result.scalars().all()
-    return products
+    # return products
+    product_dicts = [
+        {
+            "id": product.id,
+            "category_id": product.category.id,
+            "category_name": product.category.name,
+            "name": product.name,
+            "price": product.price,
+            "availability": product.availability,
+            "popular": product.popular,
+            "delivery": product.delivery,
+            "takeaway": product.takeaway,
+            "dinein": product.dinein
+        }
+        for product in products
+    ]
+    return product_dicts
+
+
+# @router.get("/", response_model=List[ProductList])
+# async def get_all_product(schema: str, session: AsyncSession = Depends(get_async_session)):
+#     query = select(Product).order_by(Product.id).execution_options(
+#         schema_translate_map={None: schema})
+#     result = await session.execute(query)
+#     products = result.scalars().all()
+#     return products
 
 
 @router.post("/")
