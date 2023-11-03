@@ -13,6 +13,7 @@ from src.secure import pwd_context
 from .db_schema import *
 from src.database import Base
 from .crud import *
+from ..auth.routers import create_jwt_token
 from .controller import check_duplication, create_new_schema_and_table, create_new_unit
 
 
@@ -28,12 +29,15 @@ async def get_all_users_list(session: AsyncSession = Depends(get_async_session))
 
 
 @router.post("/register/", status_code=201)
-async def register_new_user(user_data: UserCreate, session: AsyncSession = Depends(get_async_session)):
+async def register_new_user(response: Response, user_data: UserCreate, session: AsyncSession = Depends(get_async_session)):
     await check_duplication(user_data=user_data, session=session)
     create_user = await crud_register_new_user(user_data=user_data, session=session)
     await create_new_schema_and_table(user_data=user_data, session=session)
     await create_new_unit(schema=user_data.username, session=session)
-    return create_user
+    token_data = {"sub": create_user}
+    jwt_token = create_jwt_token(token_data)
+    response.set_cookie(key="access_token", value=jwt_token, expires=3600)
+    return {"access_token": jwt_token, "data": create_user}
 
 
 @router.put("/", summary="Обновление информации о пользователе, кроме пароля")
