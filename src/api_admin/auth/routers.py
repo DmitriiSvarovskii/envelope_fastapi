@@ -39,18 +39,13 @@ async def create_token(response: Response, user_data: OAuth2PasswordRequestForm 
             status_code=404,
             detail="User not found"
         )
-
     if not pwd_context.verify(user_data.password, user.hashed_password):
         raise HTTPException(
             status_code=400, detail="Incorrect username or password")
-
     token_data = {"sub": user_data.username}
     jwt_token = create_jwt_token(token_data)
-
-    # Устанавливаем токен в куках с именем "access_token" и временем истечения в секундах
     response.set_cookie(key="access_token", value=jwt_token, expires=3600)
-
-    return {"access_token": jwt_token, "user_id": user.id}
+    return {"access_token": jwt_token, "data": {'username': user.username, 'id': user.id}}
 
 
 async def get_user(username: str, session: AsyncSession = Depends(get_async_session)) -> List[UserAuth]:

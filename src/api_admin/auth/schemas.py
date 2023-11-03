@@ -15,4 +15,6 @@ class TokenCreate(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     access_token: str
-    user_id: int
+    data: dict
+    # username: int
+    # id: int
