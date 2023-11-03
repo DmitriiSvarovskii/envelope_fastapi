@@ -44,7 +44,6 @@ async def crud_change_delete_flag_category(schema: str, user_id: int, category_i
     await session.execute(stmt)
     await session.commit()
     return {"message": f"Статус для deleted_flag изменен"}
-    return {"status": "success", 'date': data}
 
 
 async def crud_update_category_field(schema: str, category_id: int, user_id: int, checkbox: str, session: AsyncSession = Depends(get_async_session)):

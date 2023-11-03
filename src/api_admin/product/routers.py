@@ -16,6 +16,7 @@ from sqlalchemy import insert, select, update, delete
 # from ..models_new_schema import Product, Category
 from ..models import Product, Category
 from .schemas import *
+from .crud import *
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.database import get_async_session
 from typing import List, Annotated
@@ -33,7 +34,7 @@ router = APIRouter(
 
 @router.get("/", response_model=List[ProductList])
 async def get_all_product(current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
-    query = select(Product).options(selectinload(Product.category)).order_by(
+    query = select(Product).options(selectinload(Product.category)).where(Product.deleted_flag != True).order_by(
         Product.id).execution_options(schema_translate_map={None: current_user.username})
     print(query)
     result = await session.execute(query)
@@ -67,39 +68,42 @@ async def get_all_product(current_user: User = Depends(get_current_user_from_tok
 
 
 @router.post("/")
-async def create_new_product(new_product: ProductCreate, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
+async def create_new_product(data: ProductCreate, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
     try:
-        stmt = insert(Product).values(**new_product.dict()).execution_options(
-            schema_translate_map={None: current_user.username})
-        await session.execute(stmt)
-        await session.commit()
-        return {"status": 201, 'date': new_product}
+        new_product = await crud_create_new_product(schema=current_user.username, user_id=current_user.id, data=data, session=session)
+        return new_product
     except Exception as e:
         await session.rollback()
         raise HTTPException(
             status_code=500, detail=f"An error occurred: {str(e)}")
 
 
-# @router.put("/", summary="Обновление продукта", response_model=dict)
-# async def update_product(product_id: int, new_data: ProductUpdate, session: AsyncSession = Depends(get_async_session)):
-#     """
-#     Обновление продукта.
+@router.put("/", status_code=200)
+async def update_product(product_id: int, data: ProductUpdate,  current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
+    try:
+        up_product = await crud_update_product(schema=current_user.username, product_id=product_id, data=data, user_id=current_user.id, session=session)
+        return up_product
+    except Exception as e:
+        await session.rollback()
+        raise HTTPException(
+            status_code=500, detail=f"An error occurred: {str(e)}")
 
-#     Этот маршрут позволяет обновить данные о существующем продукте.
 
-#     Параметры:
-#     - `product_id`: идентификатор продукта.
-#     - `new_data`: данные для обновления.
-
-#     Возвращает:
-#     - Сообщение о успешном обновлении.
-#     """
-#     stmt = update(Product).where(
-#         Product.id == product_id).values(**new_data.dict())
-#     await session.execute(stmt)
-#     await session.commit()
-#     return {"status": "success"}
-
+@router.patch("/{product_id}/checkbox/",)
+async def update_product_field(product_id: int, checkbox: str, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
+    """
+    Параметры:
+    #     - `product_id`: идентификатор продукта.
+    #     - `checkbox`: имя поля, которое требуется изменить.
+    #     Для продуктов доступны следующие значения: `availability`, `popular`, `delivery`, `takeaway`, `dinein`
+    """
+    try:
+        change_product = await crud_update_product_field(schema=current_user.username, user_id=current_user.id, product_id=product_id, checkbox=checkbox, session=session)
+        return change_product
+    except Exception as e:
+        await session.rollback()
+        raise HTTPException(
+            status_code=500, detail=f"An error occurred: {str(e)}")
 
 # @router.put("/{product_id}/checkbox/", summary="Изменение поля продукта", response_model=dict)
 # async def update_product_field(product_id: int, checkbox: str, session: AsyncSession = Depends(get_async_session)):
@@ -126,52 +130,26 @@ async def create_new_product(new_product: ProductCreate, current_user: User = De
 #     return {"status": "success"}
 
 
-# @router.put("/delete/", summary="Удаление/восстановление продукта", response_model=dict)
-# async def delete_product(product_id: int, session: Session = Depends(get_async_session)):
-#     """
-#     Удаление/восстановление продукта.
-
-#     Этот маршрут позволяет удалить или восстановить продукт.
-
-#     Параметры:
-#     - `product_id`: идентификатор продукта.
-
-#     Возвращает:
-#     - Сообщение о успешном удалении/восстановлении продукта.
-#     """
-#     product = await session.get(Product, product_id)
-#     if product is None:
-#         raise HTTPException(status_code=404, detail="Продукт не найден")
-
-#     product.deleted_flag = not product.deleted_flag
-#     product.deleted_at = datetime.now()
-#     await session.commit()
-
-#     return {"message": "Продукт успешно перенесён в удалённые"}
+@router.patch("/delete/")
+async def change_delete_flag_product(product_id: int, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
+    try:
+        change_product = await crud_change_delete_flag_product(schema=current_user.username, user_id=current_user.id, product_id=product_id, session=session)
+        return change_product
+    except Exception as e:
+        await session.rollback()
+        raise HTTPException(
+            status_code=500, detail=f"An error occurred: {str(e)}")
 
 
-# @router.delete("/", summary="Удаление продукта", response_model=dict)
-# async def delete_product(product_id: int, session: Session = Depends(get_async_session)):
-#     """
-#     Удаление продукта.
-
-#     Этот маршрут позволяет удалить продукт.
-
-#     Параметры:
-#     - `product_id`: идентификатор продукта.
-
-#     Возвращает:
-#     - Сообщение о успешном удалении или ошибке, если удаление не удалось.
-#     """
-#     try:
-#         stmt = delete(Product).where(Product.id == product_id)
-#         await session.execute(stmt)
-#         await session.commit()
-#         return {"status": "success", "message": f"Продукт, c id {product_id}, успешно удален."}
-#     except Exception as e:
-#         await session.rollback()
-#         raise HTTPException(
-#             status_code=500, detail=f"An error occurred: {str(e)}")
+@router.delete("/")
+async def delete_product(product_id: int, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
+    try:
+        change_product = await crud_delete_product(schema=current_user.username, product_id=product_id, session=session)
+        return change_product
+    except Exception as e:
+        await session.rollback()
+        raise HTTPException(
+            status_code=500, detail=f"An error occurred: {str(e)}")
 
 
 # # @router.get("/{product_id}/", response_model=List[ProductOne])
@@ -210,7 +188,7 @@ async def create_new_product(new_product: ProductCreate, current_user: User = De
 # #     # query = select(Product).order_by(Product.id)
 # #     # result = await session.execute(query)
 # #     # products = result.scalars().all()
-# #     # Выберите все поля из таблицы Product и связанное поле category
+# #     # Выберите все поля из таблицы Product и связанное поле product
 # #     stmt = select(Product).options(selectinload(
 # #         Product.category)).order_by(Product.id)
 

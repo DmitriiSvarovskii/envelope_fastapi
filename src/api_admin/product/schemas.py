@@ -61,27 +61,28 @@ class ProductCreate(BaseModel):
     delivery: bool
     takeaway: bool
     dinein: bool
-    created_by: int
+    # created_by: int
     # updated_by: int
 
 
-class ProductUpdate(BaseModel):
-    category_id: int
-    name: str
-    description: str
-    price: float
-    wt: int
-    kilocalories: int
-    proteins: int
-    fats: int
-    carbohydrates: int
-    unit_id: int
-    availability: bool
-    popular: bool
-    delivery: bool
-    takeaway: bool
-    dinein: bool
-    updated_by: int
+class ProductUpdate(ProductCreate):
+    pass
+    # category_id: int
+    # name: str
+    # description: str
+    # price: float
+    # wt: int
+    # kilocalories: int
+    # proteins: int
+    # fats: int
+    # carbohydrates: int
+    # unit_id: int
+    # availability: bool
+    # popular: bool
+    # delivery: bool
+    # takeaway: bool
+    # dinein: bool
+    # updated_by: int
 
 
 class ProductModel(ProductOne):
