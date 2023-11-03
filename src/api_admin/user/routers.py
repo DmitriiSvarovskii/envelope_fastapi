@@ -13,7 +13,7 @@ from src.secure import pwd_context
 from .db_schema import *
 from src.database import Base
 from .crud import *
-from ..auth.routers import create_jwt_token
+from ..auth.routers import create_jwt_token, get_current_user_from_token
 from .controller import check_duplication, create_new_schema_and_table, create_new_unit
 
 
@@ -23,7 +23,7 @@ router = APIRouter(
 
 
 @router.get("/", status_code=201)
-async def get_all_users_list(session: AsyncSession = Depends(get_async_session)) -> List[UserList]:
+async def get_all_users_list(current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)) -> List[UserList]:
     users = await crud_get_all_users(session)
     return users
 
@@ -41,40 +41,40 @@ async def register_new_user(response: Response, user_data: UserCreate, session: 
 
 
 @router.put("/", summary="Обновление информации о пользователе, кроме пароля")
-async def update_user_data(user_id: int, new_date: UserUpdateData, session: AsyncSession = Depends(get_async_session)):
+async def update_user_data(user_id: int, new_date: UserUpdateData, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
     pass
 
 
 @router.put("/update_password/", summary="Обновление пароля")
-async def update_user_password(user_id: int, password_data: UserUpdatePassword, session: AsyncSession = Depends(get_async_session)):
+async def update_user_password(user_id: int, password_data: UserUpdatePassword, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
     pass
 
 
 @router.delete("/", summary="Удаление пользователя, без возможности восстановить")
-async def delete_user(user_id: int, session: Session = Depends(get_async_session)):
+async def delete_user(user_id: int, current_user: User = Depends(get_current_user_from_token), session: Session = Depends(get_async_session)):
     pass
 
 
 @router.get("/roles/", status_code=201)
-async def get_all_roles_list(session: AsyncSession = Depends(get_async_session)) -> List[RolesList]:
+async def get_all_roles_list(current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)) -> List[RolesList]:
     roles = await crud_get_all_roles(session)
     return roles
 
 
 @router.post("/roles/", status_code=201)
-async def create_new_role(date: RolesCreate, session: AsyncSession = Depends(get_async_session)):
+async def create_new_role(date: RolesCreate, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
     new_roles = await crud_create_new_role(date=date, session=session)
     return new_roles
 
 
 @router.put("/roles/")
-async def update_role(role_id: int, new_data: RolesUpdate, session: AsyncSession = Depends(get_async_session)):
+async def update_role(role_id: int, new_data: RolesUpdate, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
     update_role = await crud_update_role(role_id=role_id, new_data=new_data, session=session)
     return update_role
 
 
 @router.delete("/roles/")
-async def deleted_role(role_id: int, session: AsyncSession = Depends(get_async_session)):
+async def deleted_role(role_id: int, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
     deleted_role = await crud_deleted_role(role_id=role_id, session=session)
     return deleted_role
 
