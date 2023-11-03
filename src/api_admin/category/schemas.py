@@ -20,7 +20,7 @@ class CategoryList(CategoryBase):
 
 
 class CategoryCreate(CategoryBase):
-    created_by: int
+    pass
     # updated_by: int
     # deleted_by: int
 
@@ -35,12 +35,17 @@ class CategoryCreate(CategoryBase):
 
 class CategoryDeleted(BaseModel):
     deleted_at: bool
+    deleted_flag: bool
+
+
+# class CategoryDeletedFlag(BaseModel):
+#     deleted_flag: bool
 
 
 class CategoryUpdate(BaseModel):
     name: str
     availability: bool
-    updated_by: int
+    # updated_by: int
 
 
 class CategoryModel(CategoryBase):
