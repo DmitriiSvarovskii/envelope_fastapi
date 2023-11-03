@@ -45,7 +45,7 @@ async def create_token(response: Response, user_data: OAuth2PasswordRequestForm 
     token_data = {"sub": user_data.username}
     jwt_token = create_jwt_token(token_data)
     response.set_cookie(key="access_token", value=jwt_token, expires=3600)
-    return {"access_token": jwt_token, "data": {'username': user.username, 'id': user.id}}
+    return {"access_token": jwt_token, "data": {'username': user.username, 'user_id': user.id}}
 
 
 async def get_user(username: str, session: AsyncSession = Depends(get_async_session)) -> List[UserAuth]:

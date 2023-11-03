@@ -23,7 +23,7 @@ async def crud_register_new_user(user_data: UserCreate, session: AsyncSession = 
     result = await session.execute(stmt)
     created_user = result.fetchone()
     await session.commit()
-    return {'username': created_user[0], 'id': created_user[1]}
+    return {'username': created_user[0], 'user_id': created_user[1]}
     # return users
 
     # await session.commit()
