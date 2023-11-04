@@ -1,25 +1,19 @@
-import bcrypt
-from fastapi import APIRouter, Depends, HTTPException, Response
+from typing import List
+from fastapi import APIRouter, Depends, Response
 from sqlalchemy.orm import Session
-from sqlalchemy import insert, select, update, delete, text
-from src.api_admin.models import User, Product, Category, Subcategory, Unit
-from .schemas import *
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.database import get_async_session, metadata
-from typing import List, Annotated
-from src.secure import apikey_scheme
-from fastapi.encoders import jsonable_encoder
-from src.secure import pwd_context
-from .db_schema import *
-from src.database import Base
-from .crud import *
+
+from src.database import get_async_session
 from ..auth.routers import create_jwt_token, get_current_user_from_token
 from .controller import check_duplication, create_new_schema_and_table, create_new_unit
+from .models import User
+from .schemas import *
+from .crud import *
 
 
 router = APIRouter(
     prefix="/api/v1/user",
-    tags=["User"])
+    tags=["User (admin)"])
 
 
 @router.get("/", status_code=201)

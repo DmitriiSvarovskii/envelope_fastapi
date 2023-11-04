@@ -1,35 +1,20 @@
-import requests
-from fastapi import Header, HTTPException
-from sqlalchemy import select, text
-from sqlalchemy import and_
-from sqlalchemy.orm import selectinload, joinedload
-import jwt
-from datetime import datetime, timedelta
-from urllib.parse import urlparse, parse_qs
-from urllib.parse import unquote
-from hashlib import sha256
-import re
-import base64
-from fastapi import APIRouter, Depends, HTTPException, Header
-from sqlalchemy.orm import Session
-from sqlalchemy import insert, select, update, delete
-# from ..models_new_schema import Product, Category
-from ..models import Product, Category
+from typing import List
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import select
+from sqlalchemy.orm import selectinload
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from src.database import get_async_session
+from .models import Product
 from .schemas import *
 from .crud import *
-from sqlalchemy.ext.asyncio import AsyncSession
-from src.database import get_async_session
-from typing import List, Annotated
-from src.secure import apikey_scheme
-from fastapi import FastAPI, HTTPException
-import hashlib
-import hmac
 from ..user import User
 from ..auth.routers import get_current_user_from_token
 
+
 router = APIRouter(
     prefix="/api/v1/product",
-    tags=["Product"])
+    tags=["Product (admin)"])
 
 
 @router.get("/", response_model=List[ProductList])
@@ -104,30 +89,6 @@ async def update_product_field(product_id: int, checkbox: str, current_user: Use
         await session.rollback()
         raise HTTPException(
             status_code=500, detail=f"An error occurred: {str(e)}")
-
-# @router.put("/{product_id}/checkbox/", summary="Изменение поля продукта", response_model=dict)
-# async def update_product_field(product_id: int, checkbox: str, session: AsyncSession = Depends(get_async_session)):
-#     """
-#     Изменение поля продукта.
-
-#     Этот маршрут позволяет изменить определенное поле продукта.
-
-#     Параметры:
-#     - `product_id`: идентификатор продукта.
-#     - `checkbox`: имя поля, которое требуется изменить.
-#     Для продуктов доступны следующие значения: `availability`, `popular`, `delivery`, `takeaway`, `dinein`
-
-#     Возвращает:
-#     - Сообщение о успешном изменении или ошибку, если продукт не найден или поле не существует.
-#     """
-#     product = await session.get(Product, product_id)
-#     if product is None:
-#         raise HTTPException(status_code=404, detail="Продукт не найден")
-#     if not hasattr(product, checkbox):
-#         raise HTTPException(status_code=400, detail="Поле не существует")
-#     setattr(product, checkbox, not getattr(product, checkbox))
-#     await session.commit()
-#     return {"status": "success"}
 
 
 @router.patch("/delete/")

@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import datetime
 from typing import List
 
-from ..models import Product, Category
+from ..models import Product
 from .schemas import *
 from src.database import get_async_session
 

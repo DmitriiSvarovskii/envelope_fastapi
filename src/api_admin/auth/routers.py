@@ -1,34 +1,33 @@
-from sqlalchemy.ext.asyncio import AsyncSession
+import jwt
+from typing import List
 from jose import JWTError
-from typing import Annotated, List
-from fastapi import HTTPException, status, Response
-from uuid import uuid4
-
-from fastapi import APIRouter, Depends, HTTPException, Header
+from datetime import datetime, timedelta
+from fastapi import APIRouter, Depends, HTTPException, status, Response
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy import select
-from sqlalchemy.orm import Session
-from src.database import get_async_session
+from sqlalchemy.ext.asyncio import AsyncSession
 
-from ..models import User
-from .models import Token
-from .schemas import *
 from src.secure import pwd_context, oauth2_scheme
-import jwt
-from datetime import datetime, timedelta
+from src.config import SECRET_KEY_JWT, ALGORITHM
+from src.database import get_async_session
+from ..models import User
+from .schemas import *
+
 
 router = APIRouter(
     prefix="/api/v1/login",
-    tags=["Login"])
+    tags=["Login (admin)"])
 
-SECRET_KEY = "your_secret_key_here"
+
+SECRET_KEY = SECRET_KEY_JWT
+ALGORITHM = ALGORITHM
 
 
 def create_jwt_token(data: dict):
     to_encode = data.copy()
     expiration = datetime.utcnow() + timedelta(hours=24)
     to_encode.update({"exp": expiration})
-    return jwt.encode(to_encode, SECRET_KEY, algorithm="HS256")
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 
 @router.post("/", response_model=TokenCreate)
@@ -62,7 +61,7 @@ async def get_current_user_from_token(token: str = Depends(oauth2_scheme), sessi
         detail="Could not validate credentials",
     )
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
         if username is None:
             raise credentials_exception

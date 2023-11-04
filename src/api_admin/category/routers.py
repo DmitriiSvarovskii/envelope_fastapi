@@ -12,7 +12,7 @@ from ..auth.routers import get_current_user_from_token
 
 router = APIRouter(
     prefix="/api/v1/category",
-    tags=["Category"])
+    tags=["Category (admin)"])
 
 
 @router.get("/", response_model=List[CategoryList], status_code=200)
