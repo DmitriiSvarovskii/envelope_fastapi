@@ -93,11 +93,10 @@ class ProductModel(ProductOne):
 
 
 class UnitBase(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     name: str
-
-    class Config:
-        from_attributes = True
 
 
 class UnitCreate(BaseModel):
@@ -108,6 +107,6 @@ class UnitUpdate(UnitCreate):
     pass
 
 
-class UnitModel(UnitBase):
-    class Config:
-        from_attributes = True
+class UnitList(UnitBase):
+    model_config = ConfigDict(from_attributes=True)
+    pass

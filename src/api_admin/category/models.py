@@ -59,11 +59,11 @@ class Subcategory(Base):
         ForeignKey("public.users.id", ondelete="CASCADE"))
     created_at: Mapped[created_at]
     updated_at: Mapped[updated_at]
-    updated_by: Mapped[int] = mapped_column(
+    updated_by: Mapped[int | None] = mapped_column(
         ForeignKey("public.users.id", ondelete="CASCADE"))
     deleted_flag: Mapped[deleted_flag]
     deleted_at: Mapped[deleted_at]
-    deleted_by: Mapped[int] = mapped_column(
+    deleted_by: Mapped[int | None] = mapped_column(
         ForeignKey("public.users.id", ondelete="CASCADE"))
 
     product_subcategory: Mapped[List['Product']

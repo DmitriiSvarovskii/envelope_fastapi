@@ -8,7 +8,6 @@ class CategoryBase(BaseModel):
 
     name: str
     availability: bool
-
     # position: int
 
 
@@ -21,16 +20,6 @@ class CategoryList(CategoryBase):
 
 class CategoryCreate(CategoryBase):
     pass
-    # updated_by: int
-    # deleted_by: int
-
-
-# class CategoryBase(CategoryTest):
-
-#     items: List[CategoryTest] = []
-
-#     class Config:
-#         from_attributes = True
 
 
 class CategoryDeleted(BaseModel):
@@ -38,18 +27,47 @@ class CategoryDeleted(BaseModel):
     deleted_flag: bool
 
 
-# class CategoryDeletedFlag(BaseModel):
-#     deleted_flag: bool
-
-
 class CategoryUpdate(BaseModel):
     name: str
     availability: bool
-    # updated_by: int
 
 
 class CategoryModel(CategoryBase):
     id: int
 
-    class Config:
-        from_attributes = True
+
+class SubcategoryBase(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    name: str
+    availability: bool
+    parent_category_id: int
+
+    # position: int
+
+
+class SubcategoryList(SubcategoryBase):
+    id: int
+    name: str
+    availability: bool
+    parent_category_id: int
+    # position: int
+
+
+class SubcategoryCreate(SubcategoryBase):
+    pass
+
+
+class SubcategoryDeleted(BaseModel):
+    deleted_at: bool
+    deleted_flag: bool
+
+
+class SubcategoryUpdate(BaseModel):
+    name: str
+    availability: bool
+    parent_category_id: int
+
+
+class SubcategoryModel(SubcategoryBase):
+    id: int
