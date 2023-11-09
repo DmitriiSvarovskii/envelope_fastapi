@@ -1,6 +1,6 @@
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field
-from typing import List
+from typing import Optional
 
 
 class ProductList(BaseModel):
@@ -10,8 +10,8 @@ class ProductList(BaseModel):
     category_id: int
     category_name: str
     name: str
-    image: str | None
-    description: str = None
+    image: Optional[str] = None
+    description: Optional[str] = None
     price: float
     availability: bool
     popular: bool
