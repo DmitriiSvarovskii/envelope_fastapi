@@ -59,7 +59,7 @@ async def change_delete_flag_category(category_id: int, current_user: User = Dep
             status_code=500, detail=f"An error occurred: {str(e)}")
 
 
-@router.put("/{category_id}/checkbox/", summary="Изменение поля категории")
+@router.put("/checkbox/",)
 async def update_category_field(category_id: int, checkbox: str, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
     """
     Параметры:
