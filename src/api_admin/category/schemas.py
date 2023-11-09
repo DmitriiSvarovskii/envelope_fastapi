@@ -29,7 +29,7 @@ class CategoryDeleted(BaseModel):
 
 class CategoryUpdate(BaseModel):
     name: str
-    availability: bool
+    # availability: bool
 
 
 class CategoryModel(CategoryBase):
