@@ -1,8 +1,8 @@
 """1 migrations
 
-Revision ID: b2ceef6bcb14
+Revision ID: 216efdc79971
 Revises: 
-Create Date: 2023-11-01 16:17:36.553501
+Create Date: 2023-11-10 00:03:15.785894
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'b2ceef6bcb14'
+revision: str = '216efdc79971'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -89,6 +89,15 @@ def upgrade() -> None:
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_categories_id'), 'categories', ['id'], unique=False)
+    op.create_table('tokens',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('access_token', sa.String(length=64), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['user_id'], ['public.users.id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_tokens_access_token'), 'tokens', ['access_token'], unique=True)
+    op.create_index(op.f('ix_tokens_id'), 'tokens', ['id'], unique=False)
     op.create_table('subcategories',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=64), nullable=False),
@@ -97,10 +106,10 @@ def upgrade() -> None:
     sa.Column('created_by', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), server_default=sa.text("TIMEZONE('utc', now())"), nullable=False),
     sa.Column('updated_at', sa.DateTime(), server_default=sa.text("TIMEZONE('utc', now())"), nullable=False),
-    sa.Column('updated_by', sa.Integer(), nullable=False),
+    sa.Column('updated_by', sa.Integer(), nullable=True),
     sa.Column('deleted_flag', sa.Boolean(), server_default=sa.text('false'), nullable=False),
     sa.Column('deleted_at', sa.DateTime(), server_default=sa.text('null'), nullable=True),
-    sa.Column('deleted_by', sa.Integer(), nullable=False),
+    sa.Column('deleted_by', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['created_by'], ['public.users.id'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['deleted_by'], ['public.users.id'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['parent_category_id'], ['categories.id'], ondelete='CASCADE'),
@@ -114,6 +123,7 @@ def upgrade() -> None:
     sa.Column('subcategory_id', sa.Integer(), nullable=True),
     sa.Column('name', sa.String(length=64), nullable=False),
     sa.Column('description', sa.String(length=256), nullable=True),
+    sa.Column('image', sa.String(), nullable=True),
     sa.Column('price', sa.Float(), nullable=False),
     sa.Column('wt', sa.Integer(), nullable=True),
     sa.Column('unit_id', sa.Integer(), nullable=False),
@@ -151,6 +161,9 @@ def downgrade() -> None:
     op.drop_table('products')
     op.drop_index(op.f('ix_subcategories_id'), table_name='subcategories')
     op.drop_table('subcategories')
+    op.drop_index(op.f('ix_tokens_id'), table_name='tokens')
+    op.drop_index(op.f('ix_tokens_access_token'), table_name='tokens')
+    op.drop_table('tokens')
     op.drop_index(op.f('ix_categories_id'), table_name='categories')
     op.drop_table('categories')
     op.drop_index(op.f('ix_public_users_id'), table_name='users', schema='public')

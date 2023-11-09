@@ -10,6 +10,7 @@ class ProductList(BaseModel):
     category_id: int
     category_name: str
     name: str
+    image: str | None
     description: str = None
     price: float
     availability: bool

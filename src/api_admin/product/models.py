@@ -46,6 +46,7 @@ class Product(Base):
         ForeignKey("subcategories.id", ondelete="CASCADE"))
     name: Mapped[str_64]
     description: Mapped[str_256 | None]
+    image: Mapped[str | None]
     price: Mapped[float]
     wt: Mapped[int | None]
     unit_id: Mapped[int] = mapped_column(
