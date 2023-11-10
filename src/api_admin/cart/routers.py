@@ -4,11 +4,11 @@ from sqlalchemy.sql import func
 
 from sqlalchemy import insert, select, label, join, update, delete
 from .models import Cart
-from src.api_admin.product.models import Product
+from ..models import Product, Order, OrderDetail
 from .schemas import CartBase, CartCreate, CartItem
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.database import get_async_session
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 
 router = APIRouter(
@@ -79,3 +79,65 @@ async def delete_cart_items_by_tg_user_id(schema: str, store_id: int, tg_user_id
         await session.rollback()
         raise HTTPException(
             status_code=500, detail=f"An error occurred: {str(e)}")
+
+
+@router.post("/order/")
+async def create_order(
+    schema: str,
+    tg_user_id: int,
+    store_id: int,
+    delivery_city: Optional[str] = None,
+    delivery_address: Optional[str] = None,
+    customer_name: Optional[str] = None,
+    customer_phone: Optional[str] = None,
+    customer_comment: Optional[str] = None,
+    session: AsyncSession = Depends(get_async_session)
+):
+    cart_query = select(Cart).filter(
+        Cart.tg_user_id == tg_user_id,
+        Cart.store_id == store_id
+    ).execution_options(
+            schema_translate_map={None: schema})
+    cart_items = await session.execute(cart_query)
+    cart_items = cart_items.scalars().all()
+
+    if not cart_items:
+        raise HTTPException(status_code=400, detail="Cart is empty")
+
+    order = Order(
+        store_id=store_id,
+        tg_user_id=tg_user_id,
+        delivery_city=delivery_city,
+        delivery_address=delivery_address,
+        customer_name=customer_name,
+        customer_phone=customer_phone,
+        customer_comment=customer_comment
+    ).execution_options(
+            schema_translate_map={None: schema})
+    session.add(order)
+    await session.flush()
+
+    for cart_item in cart_items:
+        product = await session.get(Product, cart_item.product_id).execution_options(
+            schema_translate_map={None: schema})
+        unit_price = product.price
+
+        order_detail = OrderDetail(
+            order_id=order.id,
+            product_id=cart_item.product_id,
+            quantity=cart_item.quantity,
+            unit_price=unit_price,
+            store_id=store_id
+        ).execution_options(
+            schema_translate_map={None: schema})
+        session.add(order_detail)
+
+    await session.execute(Cart.__table__.delete().where(
+        Cart.tg_user_id == tg_user_id,
+        Cart.store_id == store_id
+    ).execution_options(
+            schema_translate_map={None: schema}))
+
+    await session.commit()
+
+    return {"status": "Order created successfully"}
