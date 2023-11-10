@@ -8,31 +8,36 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from src.database import get_async_session
 from typing import Optional
 from typing import List, Annotated
+from ..user import User
+from ..auth.routers import get_current_user_from_token
 
 
 router = APIRouter(
     prefix="/api/v1/order",
-    tags=["Order (admin)"])
+    tags=["Order (store, admin)"])
 
 
 @router.get("/")
-async def get_all_orders(session: AsyncSession = Depends(get_async_session)) -> List[OrderBase]:
-    query = select(Order).order_by(Order.id.desc())
+async def get_all_orders(store_id: int, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)) -> List[OrderBase]:
+    query = select(Order).where(Order.store_id == store_id).order_by(Order.id.desc()).execution_options(
+            schema_translate_map={None: str(current_user.id)})
     result = await session.execute(query)
     return result.scalars().all()
 
 
 @router.get("/detail")
-async def get_all_order_details(session: AsyncSession = Depends(get_async_session)) -> List[OrderDetailBase]:
-    query = select(OrderDetail).order_by(OrderDetail.id.desc())
+async def get_all_order_details(store_id: int, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)) -> List[OrderDetailBase]:
+    query = select(OrderDetail).where(OrderDetail.store_id == store_id).order_by(OrderDetail.id.desc()).execution_options(
+            schema_translate_map={None: str(current_user.id)})
     result = await session.execute(query)
     return result.scalars().all()
 
 
 @router.post("/")
 async def create_order(
+    schema: str,
     tg_user_id: int,
-    shop_id: int,
+    store_id: int,
     delivery_city: Optional[str] = None,
     delivery_address: Optional[str] = None,
     customer_name: Optional[str] = None,
@@ -42,8 +47,9 @@ async def create_order(
 ):
     cart_query = select(Cart).filter(
         Cart.tg_user_id == tg_user_id,
-        Cart.shop_id == shop_id
-    )
+        Cart.store_id == store_id
+    ).execution_options(
+            schema_translate_map={None: schema})
     cart_items = await session.execute(cart_query)
     cart_items = cart_items.scalars().all()
 
@@ -51,19 +57,21 @@ async def create_order(
         raise HTTPException(status_code=400, detail="Cart is empty")
 
     order = Order(
-        shop_id=shop_id,
+        store_id=store_id,
         tg_user_id=tg_user_id,
         delivery_city=delivery_city,
         delivery_address=delivery_address,
         customer_name=customer_name,
         customer_phone=customer_phone,
         customer_comment=customer_comment
-    )
+    ).execution_options(
+            schema_translate_map={None: schema})
     session.add(order)
     await session.flush()
 
     for cart_item in cart_items:
-        product = await session.get(Product, cart_item.product_id)
+        product = await session.get(Product, cart_item.product_id).execution_options(
+            schema_translate_map={None: schema})
         unit_price = product.price
 
         order_detail = OrderDetail(
@@ -71,14 +79,16 @@ async def create_order(
             product_id=cart_item.product_id,
             quantity=cart_item.quantity,
             unit_price=unit_price,
-            shop_id=shop_id
-        )
+            store_id=store_id
+        ).execution_options(
+            schema_translate_map={None: schema})
         session.add(order_detail)
 
     await session.execute(Cart.__table__.delete().where(
         Cart.tg_user_id == tg_user_id,
-        Cart.shop_id == shop_id
-    ))
+        Cart.store_id == store_id
+    ).execution_options(
+            schema_translate_map={None: schema}))
 
     await session.commit()
 

@@ -14,7 +14,7 @@ class CartCreate(CartBase):
     model_config = ConfigDict(from_attributes=True)
 
     tg_user_id: int
-    # store_id: int
+    store_id: int
 
 
 class CartItem(BaseModel):

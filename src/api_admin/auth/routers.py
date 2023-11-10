@@ -71,10 +71,12 @@ async def get_current_user_from_token(token: str = Depends(oauth2_scheme), sessi
     if user is None:
         raise credentials_exception
     user_response = UserAuth(id=user[0].id,
+                             store_id=str(user[0].id),
                              username=user[0].username,
                              name=user[0].name,
                              number_phone=user[0].number_phone,
                              role_id=user[0].role_id)
+    
     return user_response
 
 

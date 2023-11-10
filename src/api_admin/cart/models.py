@@ -18,3 +18,13 @@ class Cart(Base):
     def __init__(self, schema):
             super().__init__()
             self.__table_args__ = {'schema': schema}
+
+
+    # def __init__(self, schema, product_id, quantity, tg_user_id):
+    #         super().__init__()
+    #         self.__table_args__ = {'schema': schema}
+    #         self.product_id = product_id
+    #         self.quantity = quantity
+    #         self.tg_user_id = tg_user_id
+ 
+            

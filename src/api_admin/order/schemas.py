@@ -1,17 +1,19 @@
 from typing import List
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict
+from typing import Optional
+
 
 class OrderBase(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    shop_id: int
+    store_id: int
     tg_user_id: int
-    delivery_city: str
-    delivery_address: str
-    customer_name: str
-    customer_phone: str
-    customer_comment: str
+    delivery_city: Optional[str] = None
+    delivery_address: Optional[str] = None
+    customer_name: Optional[str] = None
+    customer_phone: Optional[str] = None
+    customer_comment: Optional[str] = None
 
 
 class OrderCreate(OrderBase):
@@ -30,7 +32,7 @@ class Order(OrderBase):
 class OrderDetailBase(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    shop_id: int
+    store_id: int
     order_id: int
     product_id: int
     quantity: int

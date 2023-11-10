@@ -18,7 +18,7 @@ router = APIRouter(
 @router.get("/", response_model=List[StoreList], status_code=200)
 async def get_all_store(current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
     try:
-        categories = await crud_get_all_stores(schema=current_user.username, session=session)
+        categories = await crud_get_all_stores(schema=str(current_user.id), session=session)
         return categories
     except Exception as e:
         await session.rollback()
@@ -29,7 +29,7 @@ async def get_all_store(current_user: User = Depends(get_current_user_from_token
 @router.post("/", status_code=201)
 async def create_new_store(data: StoreCreate,  current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
     try:
-        new_store = await crud_create_new_store(schema=current_user.username, data=data, user_id=current_user.id, session=session)
+        new_store = await crud_create_new_store(schema=str(current_user.id), data=data, user_id=current_user.id, session=session)
         return new_store
     except Exception as e:
         await session.rollback()
@@ -40,7 +40,7 @@ async def create_new_store(data: StoreCreate,  current_user: User = Depends(get_
 @router.put("/", status_code=200)
 async def update_store(store_id: int, data: StoreUpdate,  current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
     try:
-        up_store = await crud_update_store(schema=current_user.username, store_id=store_id, data=data, user_id=current_user.id, session=session)
+        up_store = await crud_update_store(schema=str(current_user.id), store_id=store_id, data=data, user_id=current_user.id, session=session)
         return up_store
     except Exception as e:
         await session.rollback()
@@ -51,7 +51,7 @@ async def update_store(store_id: int, data: StoreUpdate,  current_user: User = D
 @router.put("/delete/")
 async def change_delete_flag_store(store_id: int, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
     try:
-        change_store = await crud_change_delete_flag_store(schema=current_user.username, user_id=current_user.id, store_id=store_id, session=session)
+        change_store = await crud_change_delete_flag_store(schema=str(current_user.id), user_id=current_user.id, store_id=store_id, session=session)
         return change_store
     except Exception as e:
         await session.rollback()
@@ -68,7 +68,7 @@ async def change_delete_flag_store(store_id: int, current_user: User = Depends(g
 #     - `checkbox`: имя поля, которое требуется изменить. Для категории доступно только: `availability`.
 #    """
 #     try:
-#         change_store = await crud_update_store_field(schema=current_user.username, user_id=current_user.id, store_id=store_id, checkbox=checkbox, session=session)
+#         change_store = await crud_update_store_field(schema=str(current_user.id), user_id=current_user.id, store_id=store_id, checkbox=checkbox, session=session)
 #         return change_store
 #     except Exception as e:
 #         await session.rollback()
@@ -79,7 +79,7 @@ async def change_delete_flag_store(store_id: int, current_user: User = Depends(g
 @router.delete("/")
 async def delete_store(store_id: int, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
     try:
-        change_store = await crud_delete_store(schema=current_user.username, store_id=store_id, session=session)
+        change_store = await crud_delete_store(schema=str(current_user.id), store_id=store_id, session=session)
         return change_store
     except Exception as e:
         await session.rollback()

@@ -20,7 +20,7 @@ router = APIRouter(
 @router.get("/", response_model=List[ProductList])
 async def get_all_product(store_id: int, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
     query = select(Product).options(selectinload(Product.category)).where(Product.deleted_flag != True).where(Product.store_id == store_id).order_by(
-        Product.id).execution_options(schema_translate_map={None: current_user.username})
+        Product.id).execution_options(schema_translate_map={None: str(current_user.id)})
     print(query)
     result = await session.execute(query)
     products = result.scalars().all()
@@ -56,7 +56,7 @@ async def get_all_product(store_id: int, current_user: User = Depends(get_curren
 @router.post("/")
 async def create_new_product(store_id: int, data: ProductCreate, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
     try:
-        new_product = await crud_create_new_product(schema=current_user.username, store_id=store_id,  user_id=current_user.id, data=data, session=session)
+        new_product = await crud_create_new_product(schema=str(current_user.id), store_id=store_id,  user_id=current_user.id, data=data, session=session)
         return new_product
     except Exception as e:
         await session.rollback()
@@ -67,7 +67,7 @@ async def create_new_product(store_id: int, data: ProductCreate, current_user: U
 @router.put("/", status_code=200)
 async def update_product(product_id: int, data: ProductUpdate,  current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
     try:
-        up_product = await crud_update_product(schema=current_user.username, product_id=product_id, data=data, user_id=current_user.id, session=session)
+        up_product = await crud_update_product(schema=str(current_user.id), product_id=product_id, data=data, user_id=current_user.id, session=session)
         return up_product
     except Exception as e:
         await session.rollback()
@@ -84,7 +84,7 @@ async def update_product_field(product_id: int, checkbox: str, current_user: Use
     #     Для продуктов доступны следующие значения: `availability`, `popular`, `delivery`, `takeaway`, `dinein`
     """
     try:
-        change_product = await crud_update_product_field(schema=current_user.username, user_id=current_user.id, product_id=product_id, checkbox=checkbox, session=session)
+        change_product = await crud_update_product_field(schema=str(current_user.id), user_id=current_user.id, product_id=product_id, checkbox=checkbox, session=session)
         return change_product
     except Exception as e:
         await session.rollback()
@@ -95,7 +95,7 @@ async def update_product_field(product_id: int, checkbox: str, current_user: Use
 @router.put("/delete/")
 async def change_delete_flag_product(product_id: int, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
     try:
-        change_product = await crud_change_delete_flag_product(schema=current_user.username, user_id=current_user.id, product_id=product_id, session=session)
+        change_product = await crud_change_delete_flag_product(schema=str(current_user.id), user_id=current_user.id, product_id=product_id, session=session)
         return change_product
     except Exception as e:
         await session.rollback()
@@ -106,7 +106,7 @@ async def change_delete_flag_product(product_id: int, current_user: User = Depen
 @router.delete("/")
 async def delete_product(product_id: int, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
     try:
-        change_product = await crud_delete_product(schema=current_user.username, product_id=product_id, session=session)
+        change_product = await crud_delete_product(schema=str(current_user.id), product_id=product_id, session=session)
         return change_product
     except Exception as e:
         await session.rollback()
@@ -202,7 +202,7 @@ async def delete_product(product_id: int, current_user: User = Depends(get_curre
 # @router.get("/unit", response_model=List[UnitList], status_code=200)
 # async def get_all_unit(current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
 #     try:
-#         categories = await crud_get_all_units(schema=current_user.username, session=session)
+#         categories = await crud_get_all_units(schema=str(current_user.id), session=session)
 #         return categories
 #     except Exception as e:
 #         await session.rollback()
@@ -213,7 +213,7 @@ async def delete_product(product_id: int, current_user: User = Depends(get_curre
 # @router.post("/unit", status_code=201)
 # async def create_new_unit(data: UnitCreate,  current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
 #     try:
-#         new_unit = await crud_create_new_unit(schema=current_user.username, data=data, user_id=current_user.id, session=session)
+#         new_unit = await crud_create_new_unit(schema=str(current_user.id), data=data, user_id=current_user.id, session=session)
 #         return new_unit
 #     except Exception as e:
 #         await session.rollback()
@@ -224,7 +224,7 @@ async def delete_product(product_id: int, current_user: User = Depends(get_curre
 # @router.put("/unit", status_code=200)
 # async def update_unit(unit_id: int, data: UnitUpdate,  current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
 #     try:
-#         up_unit = await crud_update_unit(schema=current_user.username, unit_id=unit_id, data=data, user_id=current_user.id, session=session)
+#         up_unit = await crud_update_unit(schema=str(current_user.id), unit_id=unit_id, data=data, user_id=current_user.id, session=session)
 #         return up_unit
 #     except Exception as e:
 #         await session.rollback()
@@ -235,7 +235,7 @@ async def delete_product(product_id: int, current_user: User = Depends(get_curre
 # @router.delete("/unit")
 # async def delete_unit(unit_id: int, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
 #     try:
-#         change_unit = await crud_delete_unit(schema=current_user.username, unit_id=unit_id, session=session)
+#         change_unit = await crud_delete_unit(schema=str(current_user.id), unit_id=unit_id, session=session)
 #         return change_unit
 #     except Exception as e:
 #         await session.rollback()

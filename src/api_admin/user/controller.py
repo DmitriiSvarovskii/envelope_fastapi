@@ -36,9 +36,10 @@ async def check_duplication(user_data: UserCreate, session: AsyncSession = Depen
         )
 
 
-async def create_new_schema_and_table(user_data: UserCreate, session: AsyncSession = Depends(get_async_session)):
-    await session.execute(CreateSchema(user_data.username))
+# async def create_new_schema_and_table(user_data: UserCreate, session: AsyncSession = Depends(get_async_session)):
+async def create_new_schema_and_table(user_data: str, session: AsyncSession = Depends(get_async_session)):
+    await session.execute(CreateSchema(user_data))
     for table in tables_to_create:
         await session.execute(
-            CreateTable(table).execution_options(schema_translate_map={None: user_data.username}))
+            CreateTable(table).execution_options(schema_translate_map={None: user_data}))
     await session.commit()

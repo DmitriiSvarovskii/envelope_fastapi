@@ -26,8 +26,10 @@ async def get_all_users_list(current_user: User = Depends(get_current_user_from_
 async def register_new_user(response: Response, user_data: UserCreate, session: AsyncSession = Depends(get_async_session)):
     await check_duplication(user_data=user_data, session=session)
     create_user = await crud_register_new_user(user_data=user_data, session=session)
-    await create_new_schema_and_table(user_data=user_data, session=session)
-    await create_new_unit(schema=user_data.username, session=session)
+    print(type(create_user['user_id']))
+    await create_new_schema_and_table(user_data=str(create_user['user_id']), session=session)
+    # await create_new_schema_and_table(user_data=create_user[1], session=session)
+    await create_new_unit(schema=str(create_user['user_id']), session=session)
     token_data = {"sub": create_user}
     jwt_token = create_jwt_token(token_data)
     response.set_cookie(key="access_token", value=jwt_token, expires=3600)

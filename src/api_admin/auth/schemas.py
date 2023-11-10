@@ -5,6 +5,7 @@ class UserAuth(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
+    store_id: str
     username: str
     name: str | None
     number_phone: int | None

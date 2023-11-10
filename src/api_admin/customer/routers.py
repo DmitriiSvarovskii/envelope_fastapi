@@ -16,33 +16,33 @@ router = APIRouter(
 
 
 @router.get("/")
-async def get_all_customer(session: AsyncSession = Depends(get_async_session)) -> List[CustomerBase]:
-    query = select(Customer).order_by(Customer.id.desc())
+async def get_all_customer(schema:str, session: AsyncSession = Depends(get_async_session)) -> List[CustomerBase]:
+    query = select(Customer).order_by(Customer.id.desc()).execution_options(schema_translate_map={None: schema})
     result = await session.execute(query)
     return result.scalars().all()
 
 
 @router.post("/")
-async def create_new_customer(new_customer: CustomerCreate, session: AsyncSession = Depends(get_async_session)):
-    stmt = insert(Customer).values(**new_customer.dict())
+async def create_new_customer(schema:str, new_customer: CustomerCreate, session: AsyncSession = Depends(get_async_session)):
+    stmt = insert(Customer).values(**new_customer.dict()).execution_options(schema_translate_map={None: schema})
     await session.execute(stmt)
     await session.commit()
     return {"status": "success"}
 
 
 @router.put("/")
-async def update_customer(customer_id: int, new_date: CustomerUpdate, session: AsyncSession = Depends(get_async_session)):
+async def update_customer(schema:str, customer_id: int, new_date: CustomerUpdate, session: AsyncSession = Depends(get_async_session)):
     stmt = update(Customer).where(
-        Customer.id == customer_id).values(**new_date.dict())
+        Customer.id == customer_id).values(**new_date.dict()).execution_options(schema_translate_map={None: schema})
     await session.execute(stmt)
     await session.commit()
     return {"status": "success"}
 
 
 @router.delete("/")
-async def delete_customer(customer_id: int, session: AsyncSession = Depends(get_async_session)):
+async def delete_customer(schema:str, customer_id: int, session: AsyncSession = Depends(get_async_session)):
     stmt = delete(Customer).where(
-        Customer.id == customer_id)
+        Customer.id == customer_id).execution_options(schema_translate_map={None: schema})
     await session.execute(stmt)
     await session.commit()
     return {"status": "success"}
