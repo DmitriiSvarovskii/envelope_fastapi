@@ -31,6 +31,7 @@ async def get_all_product(current_user: User = Depends(get_current_user_from_tok
             "category_id": product.category.id,
             "category_name": product.category.name,
             "name": product.name,
+            "image": product.image,
             "price": product.price,
             "availability": product.availability,
             "popular": product.popular,
@@ -111,52 +112,6 @@ async def delete_product(product_id: int, current_user: User = Depends(get_curre
         await session.rollback()
         raise HTTPException(
             status_code=500, detail=f"An error occurred: {str(e)}")
-
-
-# # @router.get("/{product_id}/", response_model=List[ProductOne])
-# # async def get_one_product(product_id: int, session: AsyncSession = Depends(get_async_session)):
-# #     query = select(Product).where(Product.id == product_id)
-# #     result = await session.execute(query)
-# #     products = result.scalars().all()
-# #     product_dicts = [product.__dict__ for product in products]
-# #     return product_dicts
-
-
-# # @router.get("/products/{shop_id}/")
-# # async def get_all_products(shop_id: int, user_data=Depends(verify_token), session: AsyncSession = Depends(get_async_session)) -> List[ProductList]:
-# #     print(shop_id)
-# #     print(user_data)
-# #     # Проверка, что пользователь имеет доступ к магазину shop_id
-# #     # user_data может содержать идентификатор пользователя или другую информацию, которая помогает в этой проверке
-
-# #     # Пример проверки доступа, предполагая, что user_data содержит идентификатор пользователя
-# #     user_id = user_data.get("user_id")
-# #     if user_id is not None:
-# #         # Здесь вы можете выполнить проверку, имеет ли пользователь доступ к магазину shop_id
-# #         # Например, проверить, что пользователь имеет права доступа к этому магазину
-
-# #         # Если пользователь имеет доступ, выполните запрос к базе данных
-# #         query = select(Product).where(Product.shop_id ==
-# #                                       shop_id).where(Product.availability == True)
-# #         result = await session.execute(query)
-# #         return result.scalars().all()
-# #     else:
-# #         raise HTTPException(status_code=403, detail="Access denied")
-
-
-# # @router.get("/", response_model=List[ProductList])
-# # async def get_all_product(session: AsyncSession = Depends(get_async_session)):
-# #     # query = select(Product).order_by(Product.id)
-# #     # result = await session.execute(query)
-# #     # products = result.scalars().all()
-# #     # Выберите все поля из таблицы Product и связанное поле product
-# #     stmt = select(Product).options(selectinload(
-# #         Product.category)).order_by(Product.id)
-
-# #     result = await session.execute(stmt)
-# #     products = result.scalars().all()
-# #     product_dicts = [product.__dict__ for product in products]
-# #     return product_dicts
 
 
 # # BOT_TOKEN = '6141111072:AAH8CBhf7iQUVNFCjR_STaBf9h_mYHSggvo'
