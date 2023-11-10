@@ -18,8 +18,8 @@ router = APIRouter(
 
 
 @router.get("/", response_model=List[ProductList])
-async def get_all_product(current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
-    query = select(Product).options(selectinload(Product.category)).where(Product.deleted_flag != True).order_by(
+async def get_all_product(store_id: int, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
+    query = select(Product).options(selectinload(Product.category)).where(Product.deleted_flag != True).where(Product.store_id == store_id).order_by(
         Product.id).execution_options(schema_translate_map={None: current_user.username})
     print(query)
     result = await session.execute(query)
@@ -54,9 +54,9 @@ async def get_all_product(current_user: User = Depends(get_current_user_from_tok
 
 
 @router.post("/")
-async def create_new_product(data: ProductCreate, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
+async def create_new_product(store_id: int, data: ProductCreate, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
     try:
-        new_product = await crud_create_new_product(schema=current_user.username, user_id=current_user.id, data=data, session=session)
+        new_product = await crud_create_new_product(schema=current_user.username, store_id=store_id,  user_id=current_user.id, data=data, session=session)
         return new_product
     except Exception as e:
         await session.rollback()

@@ -10,24 +10,27 @@ import sqlalchemy
 from typing import List, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from ..category import Category, Subcategory
+    from ..category import Category
+    from ..subcategory import Subcategory
     from ..user import User
+    from ..role import Role
+
     from ..auth import Token
     from ..employee import Employee
 
 
-class Role(Base):
-    __tablename__ = "roles"
-    __table_args__ = {'schema': 'public'}
+# class Role(Base):
+#     __tablename__ = "roles"
+#     __table_args__ = {'schema': 'public'}
 
-    id: Mapped[intpk]
-    name: Mapped[str_64]
+#     id: Mapped[intpk]
+#     name: Mapped[str_64]
 
-    user_role: Mapped[List['User']] = relationship(back_populates="role")
+#     user_role: Mapped[List['User']] = relationship(back_populates="role")
 
-    # def __init__(self, schema):
-    #     super().__init__()
-    #     self.__table_args__ = {'schema': schema}
+#     # def __init__(self, schema):
+#     #     super().__init__()
+#     #     self.__table_args__ = {'schema': schema}
 
 
 class User(Base):

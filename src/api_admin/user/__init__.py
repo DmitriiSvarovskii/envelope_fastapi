@@ -1,7 +1,6 @@
-from .models import Role, User
+from .models import User
 
 
 all = [
-    Role,
     User,
 ]

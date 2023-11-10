@@ -19,7 +19,7 @@ router = APIRouter(
     tags=["Login (admin)"])
 
 
-SECRET_KEY = 'qNG4x8d26SokjhKnJcQtpHjrmKunDygYjQhtJcsmASlXGPyWR9ZmqWfwG3cIADdL'
+SECRET_KEY = SECRET_KEY_JWT
 ALGORITHM = ALGORITHM
 
 
@@ -27,7 +27,7 @@ def create_jwt_token(data: dict):
     to_encode = data.copy()
     expiration = datetime.utcnow() + timedelta(hours=24)
     to_encode.update({"exp": expiration})
-    return jwt.encode(to_encode, SECRET_KEY, algorithm='HS256')
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 
 @router.post("/", response_model=TokenCreate)
@@ -61,7 +61,7 @@ async def get_current_user_from_token(token: str = Depends(oauth2_scheme), sessi
         detail="Could not validate credentials",
     )
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=['HS256'])
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         username: str = payload.get("sub")
         if username is None:
             raise credentials_exception

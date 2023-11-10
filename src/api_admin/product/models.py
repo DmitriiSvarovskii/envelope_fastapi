@@ -16,7 +16,8 @@ import enum
 
 from typing import List, TYPE_CHECKING
 if TYPE_CHECKING:
-    from ..category import Category, Subcategory
+    from ..category import Category
+    from ..subcategory import Subcategory
     from ..user import User
 
 
@@ -44,6 +45,8 @@ class Product(Base):
         ForeignKey("categories.id", ondelete="CASCADE"))
     subcategory_id: Mapped[int | None] = mapped_column(
         ForeignKey("subcategories.id", ondelete="CASCADE"))
+    store_id: Mapped[int] = mapped_column(
+        ForeignKey("stores.id", ondelete="CASCADE"))
     name: Mapped[str_64]
     description: Mapped[str_256 | None]
     image: Mapped[str | None]

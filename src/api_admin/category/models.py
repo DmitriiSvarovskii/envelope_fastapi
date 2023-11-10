@@ -11,7 +11,8 @@ from src.database import *
 from typing import List, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from ..category import Category, Subcategory
+    from ..category import Category
+    from ..subcategory import Subcategory
     from ..user import User
     from ..product import Product
 
@@ -23,6 +24,8 @@ class Category(Base):
     id: Mapped[intpk]
     name: Mapped[str_64]
     availability: Mapped[bool]
+    store_id: Mapped[int] = mapped_column(
+        ForeignKey("stores.id", ondelete="CASCADE"))
     # position: Mapped[int] = mapped_column(Integer, nullable=True)
     created_by: Mapped[int] = mapped_column(
         ForeignKey("public.users.id", ondelete="CASCADE"))
@@ -45,32 +48,34 @@ class Category(Base):
         self.__table_args__ = {'schema': schema}
 
 
-class Subcategory(Base):
-    __tablename__ = 'subcategories'
-    __table_args__ = {'schema': None}
+# class Subcategory(Base):
+#     __tablename__ = 'subcategories'
+#     __table_args__ = {'schema': None}
 
-    id: Mapped[intpk]
-    name: Mapped[str_64]
-    availability: Mapped[bool]
-    parent_category_id: Mapped[int] = mapped_column(
-        ForeignKey("categories.id", ondelete="CASCADE"))
-    # position: Mapped[int] = mapped_column(Integer, nullable=True)
-    created_by: Mapped[int] = mapped_column(
-        ForeignKey("public.users.id", ondelete="CASCADE"))
-    created_at: Mapped[created_at]
-    updated_at: Mapped[updated_at]
-    updated_by: Mapped[int | None] = mapped_column(
-        ForeignKey("public.users.id", ondelete="CASCADE"))
-    deleted_flag: Mapped[deleted_flag]
-    deleted_at: Mapped[deleted_at]
-    deleted_by: Mapped[int | None] = mapped_column(
-        ForeignKey("public.users.id", ondelete="CASCADE"))
+#     id: Mapped[intpk]
+#     name: Mapped[str_64]
+#     availability: Mapped[bool]
+#     parent_category_id: Mapped[int] = mapped_column(
+#         ForeignKey("categories.id", ondelete="CASCADE"))
+#     store_id: Mapped[int] = mapped_column(
+#         ForeignKey("stores.id", ondelete="CASCADE"))
+#     # position: Mapped[int] = mapped_column(Integer, nullable=True)
+#     created_by: Mapped[int] = mapped_column(
+#         ForeignKey("public.users.id", ondelete="CASCADE"))
+#     created_at: Mapped[created_at]
+#     updated_at: Mapped[updated_at]
+#     updated_by: Mapped[int | None] = mapped_column(
+#         ForeignKey("public.users.id", ondelete="CASCADE"))
+#     deleted_flag: Mapped[deleted_flag]
+#     deleted_at: Mapped[deleted_at]
+#     deleted_by: Mapped[int | None] = mapped_column(
+#         ForeignKey("public.users.id", ondelete="CASCADE"))
 
-    product_subcategory: Mapped[List['Product']
-                                ] = relationship(back_populates="subcategory")
-    subcategory_category: Mapped['Category'] = relationship(
-        back_populates="category_subcategory")
+#     product_subcategory: Mapped[List['Product']
+#                                 ] = relationship(back_populates="subcategory")
+#     subcategory_category: Mapped['Category'] = relationship(
+#         back_populates="category_subcategory")
 
-    def __init__(self, schema):
-        super().__init__()
-        self.__table_args__ = {'schema': schema}
+#     def __init__(self, schema):
+#         super().__init__()
+#         self.__table_args__ = {'schema': schema}

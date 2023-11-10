@@ -5,12 +5,12 @@ from sqlalchemy.future import select
 from sqlalchemy.schema import CreateSchema, CreateTable
 
 from src.database import get_async_session
-from src.api_admin.models import User, Product, Category, Subcategory, Unit
+from src.api_admin.models import Store, User, Product, Category, Subcategory, Unit
 from .schemas import *
 from .crud import *
 
 
-tables_to_create = [Category.__table__,
+tables_to_create = [Store.__table__, Category.__table__,
                     Subcategory.__table__, Unit.__table__, Product.__table__]
 
 

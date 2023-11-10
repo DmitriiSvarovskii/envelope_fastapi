@@ -11,9 +11,9 @@ from .schemas import *
 from src.database import get_async_session
 
 
-async def crud_create_new_product(schema: str, data: ProductCreate, user_id: int, session: AsyncSession = Depends(get_async_session)):
+async def crud_create_new_product(store_id: int, schema: str, data: ProductCreate, user_id: int, session: AsyncSession = Depends(get_async_session)):
     try:
-        stmt = insert(Product).values(**data.dict(), created_by=user_id).execution_options(
+        stmt = insert(Product).values(**data.dict(), store_id=store_id, created_by=user_id).execution_options(
             schema_translate_map={None: schema})
         await session.execute(stmt)
         await session.commit()

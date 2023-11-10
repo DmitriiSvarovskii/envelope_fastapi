@@ -1,6 +1,5 @@
-from .models import Category, Subcategory
+from .models import Category
 
 all = [
     Category,
-    Subcategory
 ]

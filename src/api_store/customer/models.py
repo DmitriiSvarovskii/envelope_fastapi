@@ -1,23 +1,25 @@
-import os
-
 from datetime import datetime
-from sqlalchemy import create_engine, Column, BIGINT, Integer, TIMESTAMP, String, Boolean, Float, ForeignKey
-from sqlalchemy.orm import relationship
-from PIL import Image as PILImage
+from sqlalchemy import BIGINT, ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.database import Base
+from src.database import *
 
 
 class Customer(Base):
     __tablename__ = "customers"
+    __table_args__ = {'schema': None}
 
-    id = Column(Integer, primary_key=True, index=True)
-    shop_id = Column(Integer, ForeignKey("users.id"))
-    tg_user_id = Column(BIGINT, unique=True)
-    first_name = Column(String, default=None)
-    last_name = Column(String, default=None)
-    username = Column(String, default=None)
-    is_premium = Column(Boolean, default=False)
-    query_id = Column(String)
-    hash = Column(String)
-    # last_order = Column(TIMESTAMP, default=datetime.utcnow)
+    id: Mapped[intpk]
+    shop_id: Mapped[int] = mapped_column(ForeignKey("shops.id", ondelete="CASCADE"))
+    tg_user_id: Mapped[int] = mapped_column(BIGINT, unique=True)
+    first_name: Mapped[str | None]
+    last_name: Mapped[str | None]
+    username: Mapped[str | None]
+    is_premium: Mapped[bool] = mapped_column(server_default=text("false"))
+    query_id: Mapped[str]
+    hash: Mapped[str]
+    created_at: Mapped[created_at]
+
+    def __init__(self, schema):
+            super().__init__()
+            self.__table_args__ = {'schema': schema}
