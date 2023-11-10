@@ -18,6 +18,7 @@ class Store(Base):
     id: Mapped[intpk]
     name: Mapped[str_64]
     # is_active: Mapped[bool]
+    token_bot: Mapped[str]
     user_id: Mapped[int] = mapped_column(
         ForeignKey("public.users.id", ondelete="CASCADE"))
     created_by: Mapped[int] = mapped_column(

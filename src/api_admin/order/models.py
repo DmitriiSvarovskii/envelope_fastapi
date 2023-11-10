@@ -11,7 +11,7 @@ class Order(Base):
 
 
     id: Mapped[intpk]
-    shop_id: Mapped[int] = mapped_column(ForeignKey("shops.id", ondelete="CASCADE"))
+    store_id: Mapped[int] = mapped_column(ForeignKey("stores.id", ondelete="CASCADE"))
     tg_user_id: Mapped[int] = mapped_column(ForeignKey("customers.tg_user_id", ondelete="CASCADE"))
     delivery_city: Mapped[str | None]
     delivery_address: Mapped[str | None]
@@ -30,7 +30,7 @@ class OrderDetail(Base):
     __table_args__ = {'schema': None}
 
     id: Mapped[intpk]
-    shop_id: Mapped[int] = mapped_column(ForeignKey("shops.id", ondelete="CASCADE"))
+    store_id: Mapped[int] = mapped_column(ForeignKey("stores.id", ondelete="CASCADE"))
     order_id: Mapped[int] = mapped_column(ForeignKey("orders.id", ondelete="CASCADE"))
     product_id: Mapped[int] = mapped_column(ForeignKey("products.id", ondelete="CASCADE"))
     quantity: Mapped[int]

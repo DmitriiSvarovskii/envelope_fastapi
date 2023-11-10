@@ -6,6 +6,7 @@ from typing import List, Optional
 class CategoryBase(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
+
     name: str
     availability: bool
     # position: int

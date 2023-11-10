@@ -5,13 +5,15 @@ from sqlalchemy.future import select
 from sqlalchemy.schema import CreateSchema, CreateTable
 
 from src.database import get_async_session
-from src.api_admin.models import Store, User, Product, Category, Subcategory, Unit
+from src.api_admin.models import *
 from .schemas import *
 from .crud import *
 
 
 tables_to_create = [Store.__table__, Category.__table__,
-                    Subcategory.__table__, Unit.__table__, Product.__table__]
+                    Subcategory.__table__, Unit.__table__, Product.__table__, 
+                    Customer.__table__,Cart.__table__, Order.__table__, 
+                    OrderDetail.__table__,]
 
 
 async def create_new_unit(schema: str, session: AsyncSession = Depends(get_async_session)):

@@ -1,9 +1,10 @@
-from pydantic import BaseModel
 from typing import List
 from datetime import datetime
-
+from pydantic import BaseModel, ConfigDict
 
 class OrderBase(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     shop_id: int
     tg_user_id: int
     delivery_city: str
@@ -18,15 +19,17 @@ class OrderCreate(OrderBase):
 
 
 class Order(OrderBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     order_date: datetime
     # customer: "Customer"
 
-    class Config:
-        from_attributes = True
 
 
 class OrderDetailBase(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     shop_id: int
     order_id: int
     product_id: int
@@ -39,9 +42,8 @@ class OrderDetailCreate(OrderDetailBase):
 
 
 class OrderDetail(OrderDetailBase):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     order_date: datetime
     shop_id: int
-
-    class Config:
-        from_attributes = True

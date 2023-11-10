@@ -1,0 +1,48 @@
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession
+from typing import List
+from sqlalchemy import insert, select, delete, update
+
+from src.database import get_async_session
+
+from .crud import *
+from .models import *
+from .schemas import *
+from ..auth.routers import get_current_user_from_token
+
+router = APIRouter(
+    prefix="/api/v1/customer",
+    tags=["Customer (store)"])
+
+
+@router.get("/")
+async def get_all_customer(session: AsyncSession = Depends(get_async_session)) -> List[CustomerBase]:
+    query = select(Customer).order_by(Customer.id.desc())
+    result = await session.execute(query)
+    return result.scalars().all()
+
+
+@router.post("/")
+async def create_new_customer(new_customer: CustomerCreate, session: AsyncSession = Depends(get_async_session)):
+    stmt = insert(Customer).values(**new_customer.dict())
+    await session.execute(stmt)
+    await session.commit()
+    return {"status": "success"}
+
+
+@router.put("/")
+async def update_customer(customer_id: int, new_date: CustomerUpdate, session: AsyncSession = Depends(get_async_session)):
+    stmt = update(Customer).where(
+        Customer.id == customer_id).values(**new_date.dict())
+    await session.execute(stmt)
+    await session.commit()
+    return {"status": "success"}
+
+
+@router.delete("/")
+async def delete_customer(customer_id: int, session: AsyncSession = Depends(get_async_session)):
+    stmt = delete(Customer).where(
+        Customer.id == customer_id)
+    await session.execute(stmt)
+    await session.commit()
+    return {"status": "success"}

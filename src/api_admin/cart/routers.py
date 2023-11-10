@@ -10,15 +10,15 @@ from typing import List, Dict
 
 
 router = APIRouter(
-    prefix="/cart",
-    tags=["Cart"])
+    prefix="/api/v1/cart",
+    tags=["Cart (store)"])
 
 
 @router.get("/", response_model=List[CartItem])
 async def read_cart_items(tg_user_id: int, session: AsyncSession = Depends(get_async_session)):
     query = select(Product.id,
                    Product.name,
-                   Product.description,
+                #    Product.description,
                    Cart.quantity,
                    (Cart.quantity * Product.price).label("unit_price")).join(Cart, Cart.product_id == Product.id).where(Cart.tg_user_id == tg_user_id)
     result = await session.execute(query)
@@ -27,9 +27,8 @@ async def read_cart_items(tg_user_id: int, session: AsyncSession = Depends(get_a
         cart_items.append(CartItem(
             id=row[0],
             name=row[1],
-            description=row[2],
-            quantity=row[3],
-            unit_price=row[4]
+            quantity=row[2],
+            unit_price=row[3]
         ))
 
     return cart_items
