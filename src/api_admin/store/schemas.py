@@ -19,7 +19,7 @@ class StoreList(StoreBase):
 
 
 class StoreCreate(StoreBase):
-    pass
+    token_bot: str
 
 
 class StoreDeleted(BaseModel):
