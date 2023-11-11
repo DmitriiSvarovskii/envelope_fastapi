@@ -30,14 +30,24 @@ async def get_all_product(store_id: int, current_user: User = Depends(get_curren
             "id": product.id,
             "category_id": product.category.id,
             "category_name": product.category.name,
+            "subcategory_id": product.subcategory.id,
+            "store_id":product.store.id,
             "name": product.name,
+            "description": product.description,
             "image": product.image,
             "price": product.price,
+            "wt": product.wt,
+            "unit_id": product.unit.id,
+            "kilocalories": product.kilocalories,
+            "proteins": product.proteins,
+            "fats": product.fats,
+            "carbohydrates": product.carbohydrates,
             "availability": product.availability,
             "popular": product.popular,
             "delivery": product.delivery,
             "takeaway": product.takeaway,
             "dinein": product.dinein
+            
         }
         for product in products
     ]

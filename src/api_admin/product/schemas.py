@@ -7,24 +7,26 @@ class ProductList(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
-    category_id: int
     category_name: str
+    category_id: int
+    subcategory_id: Optional[int] = None
+    store_id: int
     name: str
-    image: Optional[str] = None
     description: Optional[str] = None
+    image: Optional[str] = None
     price: float
+    wt: Optional[int] = None
+    unit_id: int
+    kilocalories: Optional[int] = None
+    proteins: Optional[int] = None
+    fats: Optional[int] = None
+    carbohydrates: Optional[int] = None
     availability: bool
     popular: bool
     delivery: bool
     takeaway: bool
     dinein: bool
-
-    # class Category(BaseModel):
-    #     name: str
-    # shop_id: int
-    # image: str
-    # name_en: str = None
-    # description_en: str = None
+    # position
 
 
 class ProductOne(ProductList):
@@ -66,24 +68,17 @@ class ProductCreate(BaseModel):
     # updated_by: int
 
 
-class ProductUpdate(ProductCreate):
-    pass
-    # category_id: int
-    # name: str
-    # description: str
-    # price: float
-    # wt: int
-    # kilocalories: int
-    # proteins: int
-    # fats: int
-    # carbohydrates: int
-    # unit_id: int
-    # availability: bool
-    # popular: bool
-    # delivery: bool
-    # takeaway: bool
-    # dinein: bool
-    # updated_by: int
+class ProductUpdate(BaseModel):
+    category_id: int
+    name: str
+    description: str | None
+    price: float
+    wt: int
+    kilocalories: int | None
+    proteins: int | None
+    fats: int | None
+    carbohydrates: int | None
+    unit_id: int
 
 
 class ProductModel(ProductOne):
