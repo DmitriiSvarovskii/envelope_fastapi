@@ -9,8 +9,8 @@ class ProductList(BaseModel):
     id: int
     category_name: str
     category_id: int
-    subcategory_id: Optional[int] = None
-    store_id: int
+    # subcategory_id: Optional[int] = None
+    # store_id: int
     name: str
     description: Optional[str] = None
     image: Optional[str] = None

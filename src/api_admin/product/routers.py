@@ -19,7 +19,7 @@ router = APIRouter(
 
 @router.get("/", response_model=List[ProductList])
 async def get_all_product(store_id: int, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
-    query = select(Product).options(selectinload(Product.category)).where(Product.deleted_flag != True).where(Product.store_id == store_id).order_by(
+    query = select(Product).options(selectinload(Product.category)).options(selectinload(Product.unit)).where(Product.deleted_flag != True).where(Product.store_id == store_id).order_by(
         Product.id).execution_options(schema_translate_map={None: str(current_user.id)})
     print(query)
     result = await session.execute(query)
@@ -30,8 +30,8 @@ async def get_all_product(store_id: int, current_user: User = Depends(get_curren
             "id": product.id,
             "category_id": product.category.id,
             "category_name": product.category.name,
-            "subcategory_id": product.subcategory.id,
-            "store_id":product.store.id,
+            # "subcategory_id": product.subcategory.id,
+            # "store_id":product.store.id,
             "name": product.name,
             "description": product.description,
             "image": product.image,
