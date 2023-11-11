@@ -14,7 +14,6 @@ async def crud_get_all_categories(schema: str, store_id: int, session: AsyncSess
         Category.deleted_flag != True).where(Category.store_id == store_id).order_by(Category.id.desc()).execution_options(schema_translate_map={None: schema})
     result = await session.execute(query)
     categories = result.scalars().all()
-    print(categories)
     return categories
 
 
