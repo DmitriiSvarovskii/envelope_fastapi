@@ -18,7 +18,7 @@ from sqlalchemy.orm import selectinload
 
 
 router = APIRouter(
-    prefix="/api/v1/store_bot/",
+    prefix="/api/v1/store_bot",
     tags=["Store (bot)"])
 
 
