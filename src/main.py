@@ -15,8 +15,9 @@ app = FastAPI(
 ORIGINS = [
     "http://localhost",
     "http://localhost:5173",
-    "https://swarovskidmitrii.ru",
-    "https://www.swarovskidmitrii.ru",
+    "https://envelope-app.ru",
+    "https://www.envelope-app.ru",
+    "https://store.envelope-app.ru",
 ]
 
 
