@@ -29,5 +29,5 @@ class CartItem(BaseModel):
 class CartItemTotal(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    tg_user_id: int
+    # tg_user_id: int
     total_price: int

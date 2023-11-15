@@ -104,7 +104,7 @@ async def read_cart_items(schema: str, store_id: int, tg_user_id: int, session: 
     result = await session.execute(query)
 
     cart_items = [
-        CartItemTotal(tg_user_id=row[0], total_price=row[1])
+        CartItemTotal(total_price=row[0])
         for row in result.fetchall()
     ]
 
