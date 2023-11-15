@@ -105,7 +105,7 @@ async def add_to_cart(schema: str, data: CartCreate, session: AsyncSession = Dep
     return {"status": 201, 'date': data}
 
 
-@router.post("/cart/decrease/")
+@router.delete("/cart/decrease/")
 async def decrease_cart_item(schema: str, data: CartCreate, session: AsyncSession = Depends(get_async_session)):
     query = select(Cart).where(Cart.tg_user_id == data.tg_user_id, Cart.product_id ==
                                data.product_id).execution_options(schema_translate_map={None: schema})
