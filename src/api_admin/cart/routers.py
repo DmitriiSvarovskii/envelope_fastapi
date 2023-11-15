@@ -5,7 +5,7 @@ from sqlalchemy.sql import func
 from sqlalchemy import insert, select, label, join, update, delete
 from .models import Cart
 from ..models import Product, Order, OrderDetail
-from .schemas import CartBase, CartCreate, CartItem
+from .schemas import CartBase, CartCreate, CartItem, CartItemTotal
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.database import get_async_session
 from typing import List, Dict, Optional
@@ -84,6 +84,30 @@ async def read_cart_items(schema: str, store_id: int, tg_user_id: int, session: 
             quantity=row[2],
             unit_price=row[3]
         ))
+    return cart_items
+
+
+@router.get("/cart_items/", response_model=List[CartItemTotal])
+async def read_cart_items(schema: str, store_id: int, tg_user_id: int, session: AsyncSession = Depends(get_async_session)):
+    query = (
+        select(
+            Cart.tg_user_id,
+            func.sum(Cart.quantity * Product.price).label("total_price")
+        )
+        .join(Product, Cart.product_id == Product.id)
+        .where(
+            (Cart.tg_user_id == tg_user_id) & (Cart.store_id == store_id)
+        ).group_by(Cart.tg_user_id)
+        .execution_options(schema_translate_map={None: schema})
+    )
+
+    result = await session.execute(query)
+
+    cart_items = [
+        CartItemTotal(tg_user_id=row[0], total_price=row[1])
+        for row in result.fetchall()
+    ]
+
     return cart_items
 
 

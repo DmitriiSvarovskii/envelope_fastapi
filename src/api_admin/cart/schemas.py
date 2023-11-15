@@ -19,8 +19,15 @@ class CartCreate(CartBase):
 
 class CartItem(BaseModel):
     model_config = ConfigDict(from_attributes=True)
- 
+
     id: int
     name: str
     quantity: int
     unit_price: float
+
+
+class CartItemTotal(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    tg_user_id: int
+    total_price: int
