@@ -10,7 +10,8 @@ class Customer(Base):
     __table_args__ = {'schema': None}
 
     id: Mapped[intpk]
-    store_id: Mapped[int | None] = mapped_column(ForeignKey("stores.id", ondelete="CASCADE"))
+    store_id: Mapped[int | None] = mapped_column(
+        ForeignKey("stores.id", ondelete="CASCADE"))
     tg_user_id: Mapped[int] = mapped_column(BIGINT, unique=True)
     # first_name: Mapped[str | None]
     # last_name: Mapped[str | None]
@@ -21,5 +22,5 @@ class Customer(Base):
     created_at: Mapped[created_at]
 
     def __init__(self, schema):
-            super().__init__()
-            self.__table_args__ = {'schema': schema}
+        super().__init__()
+        self.__table_args__ = {'schema': schema}
