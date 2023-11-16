@@ -1,6 +1,13 @@
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field
-from typing import Optional
+from typing import Optional, List
+
+
+class UnitBase(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    name: str
 
 
 class ProductList(BaseModel):
@@ -58,17 +65,17 @@ class ProductOne(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
-    category_id: int
+    # category_id: int
     name: str
     description: str
     price: float
     image: Optional[str] = None
     wt: int
-    unit_id: int
     kilocalories: int
     proteins: int
     fats: int
     carbohydrates: int
+    unit: Optional[UnitBase]
     # availability: bool
     # popular: bool
     # delivery: bool
@@ -114,13 +121,6 @@ class ProductModel(ProductOne):
 
     class Config:
         from_attributes = True
-
-
-class UnitBase(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
-
-    id: int
-    name: str
 
 
 class UnitCreate(BaseModel):

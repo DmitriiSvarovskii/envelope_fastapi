@@ -1,9 +1,9 @@
-from keyboards import keyboard_store
+from .keyboards import keyboard_store
 from aiogram.types import Message
 from aiogram.filters import Command, CommandStart
 from aiogram import Router
 from aiogram.methods.answer_web_app_query import AnswerWebAppQuery
-from ..database import get_async_session
+from src.database import get_async_session
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Depends
 from ..api_admin.models import Customer, Store

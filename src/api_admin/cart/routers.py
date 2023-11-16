@@ -33,7 +33,7 @@ async def get_all_product(schema: str, store_id: int, session: AsyncSession = De
 
 @router.get("/product/{product_id}/", response_model=Optional[ProductOne])
 async def get_all_product(schema: str, store_id: int, product_id: int, session: AsyncSession = Depends(get_async_session)):
-    query = select(Product).where(
+    query = select(Product).options(selectinload(Product.unit)).where(
         Product.deleted_flag != True).where(Product.store_id == store_id).where(Product.id == product_id).execution_options(schema_translate_map={None: schema})
     result = await session.execute(query)
     products = result.scalar()

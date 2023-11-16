@@ -1,10 +1,15 @@
+from src.bot import handlers
+from aiogram import Bot, Dispatcher
 import asyncio
 import logging
 import os
 from dotenv import load_dotenv
+import sys
+import os
 
-from aiogram import Bot, Dispatcher
-from src.bot import handlers
+# Добавляем корневой каталог проекта в sys.path
+sys.path.insert(0, os.path.abspath(
+    os.path.join(os.path.dirname(__file__), "..")))
 
 
 # Инициализируем логгер
