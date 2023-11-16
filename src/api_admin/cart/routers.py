@@ -22,7 +22,7 @@ router = APIRouter(
     tags=["Store (bot)"])
 
 
-@router.get("/product/", response_model=List[ProductListStore])
+@router.post("/product/", response_model=List[ProductListStore])
 async def get_all_product(schema: str, store_id: int, session: AsyncSession = Depends(get_async_session)):
     query = select(Product).where(
         Product.deleted_flag != True).where(Product.store_id == store_id).order_by(Product.id.desc()).execution_options(schema_translate_map={None: schema})
@@ -31,7 +31,7 @@ async def get_all_product(schema: str, store_id: int, session: AsyncSession = De
     return products
 
 
-@router.get("/product/{product_id}/", response_model=Optional[ProductOne])
+@router.post("/product/{product_id}/", response_model=Optional[ProductOne])
 async def get_all_product(schema: str, store_id: int, product_id: int, session: AsyncSession = Depends(get_async_session)):
     query = select(Product).options(selectinload(Product.unit)).where(
         Product.deleted_flag != True).where(Product.store_id == store_id).where(Product.id == product_id).execution_options(schema_translate_map={None: schema})
@@ -40,7 +40,7 @@ async def get_all_product(schema: str, store_id: int, product_id: int, session: 
     return products
 
 
-@router.get("/category/", response_model=List[CategoryBaseStore], status_code=200)
+@router.post("/category/", response_model=List[CategoryBaseStore], status_code=200)
 async def get_all_category(schema: str, store_id: int, session: AsyncSession = Depends(get_async_session)):
     try:
         categories = await crud_get_all_categories(schema=schema, store_id=store_id, session=session)
