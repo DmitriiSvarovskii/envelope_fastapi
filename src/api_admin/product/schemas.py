@@ -54,23 +54,26 @@ class ProductListStore(BaseModel):
     # position
 
 
-class ProductOne(ProductList):
+class ProductOne(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
     category_id: int
     name: str
     description: str
     price: float
-    # image: str
+    image: Optional[str] = None
     wt: int
-    unit: int = None
+    unit_id: int
     kilocalories: int
     proteins: int
     fats: int
     carbohydrates: int
-    availability: bool
-    popular: bool
-    delivery: bool
-    takeaway: bool
-    dinein: bool
+    # availability: bool
+    # popular: bool
+    # delivery: bool
+    # takeaway: bool
+    # dinein: bool
 
 
 class ProductCreate(BaseModel):
