@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
+from typing import Dict, List, Union
 
 from sqlalchemy import insert, select, label, join, update, delete
 from .models import Cart
@@ -51,7 +52,7 @@ async def get_all_category(schema: str, store_id: int, session: AsyncSession = D
             status_code=500, detail=f"An error occurred: {str(e)}")
 
 
-@router.get("/cart/", response_model=Optional[CartResponse])
+@router.get("/cart/", response_model=Dict[str, Union[List[CartItem], int]])
 async def read_cart_items_and_totals(schema: str, store_id: int, tg_user_id: int, session: AsyncSession = Depends(get_async_session)):
     query = (
         select(
@@ -69,29 +70,68 @@ async def read_cart_items_and_totals(schema: str, store_id: int, tg_user_id: int
         .execution_options(schema_translate_map={None: schema})
     )
     result = await session.execute(query)
-    user_data = {}
+
+    cart_items = []
+    total_price = 0
+
     for row in result:
-        tg_user_id = row[4]
-        if tg_user_id not in user_data:
-            user_data[tg_user_id] = {
-                "cart_items": [],
-                "total_price": 0
-            }
-        user_data[tg_user_id]["cart_items"].append({
+        cart_items.append({
             "id": row[0],
             "name": row[1],
             "quantity": row[2],
             "unit_price": row[3],
         })
-        user_data[tg_user_id]["total_price"] = row[4]
-    response_data = [
-        {
-            "cart_items": user_info["cart_items"],
-            "total_price": user_info["total_price"]
-        }
-        for user_info in user_data.values()
-    ]
+        total_price = row[4]
+
+    response_data = {
+        "cart_items": cart_items,
+        "total_price": total_price
+    }
+
     return response_data
+
+
+# @router.get("/cart/", response_model=List[CartResponse])
+# async def read_cart_items_and_totals(schema: str, store_id: int, tg_user_id: int, session: AsyncSession = Depends(get_async_session)):
+#     query = (
+#         select(
+#             Product.id,
+#             Product.name,
+#             Cart.quantity,
+#             (Cart.quantity * Product.price).label("unit_price"),
+#             func.sum(Cart.quantity * Product.price).over().label("total_price")
+#         )
+#         .join(Cart, Cart.product_id == Product.id)
+#         .where(
+#             (Cart.tg_user_id == tg_user_id) & (Cart.store_id == store_id)
+#         )
+#         .group_by(Product.id, Cart.quantity, Product.name, Cart.tg_user_id)
+#         .execution_options(schema_translate_map={None: schema})
+#     )
+#     result = await session.execute(query)
+#     user_data = {}
+#     for row in result:
+#         tg_user_id = row[4]
+#         if tg_user_id not in user_data:
+#             user_data[tg_user_id] = {
+#                 "cart_items": [],
+#                 "total_price": 0
+#             }
+#         user_data[tg_user_id]["cart_items"].append({
+#             "id": row[0],
+#             "name": row[1],
+#             "quantity": row[2],
+#             "unit_price": row[3],
+#         })
+#         user_data[tg_user_id]["total_price"] = row[4]
+#     response_data = [
+#         {
+#             "cart_items": user_info["cart_items"],
+#             "total_price": user_info["total_price"]
+#         }
+#         for user_info in user_data.values()
+#     ]
+#     return response_data
 
 
 @router.post("/cart/add/")
