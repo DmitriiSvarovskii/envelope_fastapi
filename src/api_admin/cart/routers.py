@@ -5,7 +5,7 @@ from sqlalchemy.sql import func
 from sqlalchemy import insert, select, label, join, update, delete
 from .models import Cart
 from ..models import Product, Order, OrderDetail
-from .schemas import CartBase, CartCreate, CartItem, CartItemTotal
+from .schemas import *
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.database import get_async_session
 from typing import List, Dict, Optional
@@ -22,43 +22,16 @@ router = APIRouter(
     tags=["Store (bot)"])
 
 
-@router.get("/product/", response_model=List[ProductList])
+@router.get("/product/", response_model=List[ProductListStore])
 async def get_all_product(schema: str, store_id: int, session: AsyncSession = Depends(get_async_session)):
-    query = select(Product).options(selectinload(Product.category)).options(selectinload(Product.unit)).where(Product.deleted_flag != True).where(Product.store_id == store_id).order_by(
-        Product.id).execution_options(schema_translate_map={None: schema})
+    query = select(Product).where(
+        Product.deleted_flag != True).where(Product.store_id == store_id).order_by(Product.id.desc()).execution_options(schema_translate_map={None: schema})
     result = await session.execute(query)
     products = result.scalars().all()
-    # return products
-    product_dicts = [
-        {
-            "id": product.id,
-            "category_id": product.category.id,
-            "category_name": product.category.name,
-            # "subcategory_id": product.subcategory.id,
-            # "store_id":product.store.id,
-            "name": product.name,
-            "description": product.description,
-            "image": product.image,
-            "price": product.price,
-            "wt": product.wt,
-            "unit_id": product.unit.id,
-            "kilocalories": product.kilocalories,
-            "proteins": product.proteins,
-            "fats": product.fats,
-            "carbohydrates": product.carbohydrates,
-            "availability": product.availability,
-            "popular": product.popular,
-            "delivery": product.delivery,
-            "takeaway": product.takeaway,
-            "dinein": product.dinein
-
-        }
-        for product in products
-    ]
-    return product_dicts
+    return products
 
 
-@router.get("/category/", response_model=List[CategoryList], status_code=200)
+@router.get("/category/", response_model=List[CategoryBaseStore], status_code=200)
 async def get_all_category(schema: str, store_id: int, session: AsyncSession = Depends(get_async_session)):
     try:
         categories = await crud_get_all_categories(schema=schema, store_id=store_id, session=session)
@@ -69,46 +42,47 @@ async def get_all_category(schema: str, store_id: int, session: AsyncSession = D
             status_code=500, detail=f"An error occurred: {str(e)}")
 
 
-@router.get("/cart/", response_model=List[CartItem])
-async def read_cart_items(schema: str, store_id: int, tg_user_id: int, session: AsyncSession = Depends(get_async_session)):
-    query = select(Product.id,
-                   Product.name,
-                   Cart.quantity,
-                   (Cart.quantity * Product.price).label("unit_price")).join(Cart, Cart.product_id == Product.id).where(Cart.tg_user_id == tg_user_id, Cart.store_id == store_id).execution_options(schema_translate_map={None: schema})
-    result = await session.execute(query)
-    cart_items = []
-    for row in result:
-        cart_items.append(CartItem(
-            id=row[0],
-            name=row[1],
-            quantity=row[2],
-            unit_price=row[3]
-        ))
-    return cart_items
-
-
-@router.get("/cart_items/", response_model=List[CartItemTotal])
-async def read_cart_items(schema: str, store_id: int, tg_user_id: int, session: AsyncSession = Depends(get_async_session)):
+@router.get("/cart/", response_model=List[CartResponse])
+async def read_cart_items_and_totals(schema: str, store_id: int, tg_user_id: int, session: AsyncSession = Depends(get_async_session)):
     query = (
         select(
-            Cart.tg_user_id,
-            func.sum(Cart.quantity * Product.price).label("total_price")
+            Product.id,
+            Product.name,
+            Cart.quantity,
+            (Cart.quantity * Product.price).label("unit_price"),
+            func.sum(Cart.quantity * Product.price).over().label("total_price")
         )
-        .join(Product, Cart.product_id == Product.id)
+        .join(Cart, Cart.product_id == Product.id)
         .where(
             (Cart.tg_user_id == tg_user_id) & (Cart.store_id == store_id)
-        ).group_by(Cart.tg_user_id)
+        )
+        .group_by(Product.id, Cart.quantity, Product.name, Cart.tg_user_id)
         .execution_options(schema_translate_map={None: schema})
     )
-
     result = await session.execute(query)
-
-    cart_items = [
-        CartItemTotal(total_price=row[0])
-        for row in result.fetchall()
+    user_data = {}
+    for row in result:
+        tg_user_id = row[4]
+        if tg_user_id not in user_data:
+            user_data[tg_user_id] = {
+                "cart_items": [],
+                "total_price": 0
+            }
+        user_data[tg_user_id]["cart_items"].append({
+            "id": row[0],
+            "name": row[1],
+            "quantity": row[2],
+            "unit_price": row[3],
+        })
+        user_data[tg_user_id]["total_price"] = row[4]
+    response_data = [
+        {
+            "cart_items": user_info["cart_items"],
+            "total_price": user_info["total_price"]
+        }
+        for user_info in user_data.values()
     ]
-
-    return cart_items
+    return response_data
 
 
 @router.post("/cart/add/")
@@ -123,14 +97,14 @@ async def add_to_cart(schema: str, data: CartCreate, session: AsyncSession = Dep
         await session.execute(stmt)
     else:
         stmt = insert(Cart).values(
-            **data.dict()).execution_options(schema_translate_map={None: schema})
+            **data.dict(), quantity=1).execution_options(schema_translate_map={None: schema})
         await session.execute(stmt)
     await session.commit()
-    return {"status": 201, 'date': data}
+    return {"status": 201, 'data': data}
 
 
 @router.delete("/cart/decrease/")
-async def decrease_cart_item(schema: str, data: CartCreate, session: AsyncSession = Depends(get_async_session)):
+async def decrease_cart_item(schema: str, data: CartCreate,  session: AsyncSession = Depends(get_async_session)):
     query = select(Cart).where(Cart.tg_user_id == data.tg_user_id, Cart.product_id ==
                                data.product_id).execution_options(schema_translate_map={None: schema})
     result = await session.execute(query)
@@ -146,7 +120,7 @@ async def decrease_cart_item(schema: str, data: CartCreate, session: AsyncSessio
     else:
         return {"status": "error", "message": "Товар не найден в корзине"}
     await session.commit()
-    return {"status": 201, 'date': data}
+    return {"status": 201, 'data': data}
 
 
 @router.delete("/cart/clear/")
@@ -223,3 +197,45 @@ async def create_order(
     await session.commit()
 
     return {"status": "Order created successfully"}
+
+
+# @router.get("/cart/", response_model=List[CartItem])
+# async def read_cart_items(schema: str, store_id: int, tg_user_id: int, session: AsyncSession = Depends(get_async_session)):
+#     query = select(Product.id,
+#                    Product.name,
+#                    Cart.quantity,
+#                    (Cart.quantity * Product.price).label("unit_price")).join(Cart, Cart.product_id == Product.id).where(Cart.tg_user_id == tg_user_id, Cart.store_id == store_id).execution_options(schema_translate_map={None: schema})
+#     result = await session.execute(query)
+#     cart_items = []
+#     for row in result:
+#         cart_items.append(CartItem(
+#             id=row[0],
+#             name=row[1],
+#             quantity=row[2],
+#             unit_price=row[3]
+#         ))
+#     return cart_items
+
+
+# @router.get("/cart_total_price/", response_model=List[CartItemTotal])
+# async def read_cart_items(schema: str, store_id: int, tg_user_id: int, session: AsyncSession = Depends(get_async_session)):
+#     query = (
+#         select(
+#             Cart.tg_user_id,
+#             func.sum(Cart.quantity * Product.price).label("total_price")
+#         )
+#         .join(Product, Cart.product_id == Product.id)
+#         .where(
+#             (Cart.tg_user_id == tg_user_id) & (Cart.store_id == store_id)
+#         ).group_by(Cart.tg_user_id)
+#         .execution_options(schema_translate_map={None: schema})
+#     )
+
+#     result = await session.execute(query)
+
+#     cart_items = [
+#         CartItemTotal(total_price=row[0])
+#         for row in result.fetchall()
+#     ]
+
+#     return cart_items

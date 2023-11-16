@@ -8,6 +8,13 @@ class CategoryBase(BaseModel):
 
     name: str
     availability: bool
+
+
+class CategoryBaseStore(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    name: str
     # position: int
 
 

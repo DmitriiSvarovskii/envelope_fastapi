@@ -9,7 +9,7 @@ from .models import Category
 from .schemas import *
 
 
-async def crud_get_all_categories(schema: str, store_id: int, session: AsyncSession = Depends(get_async_session)) -> List[CategoryList]:
+async def crud_get_all_categories(schema: str, store_id: int, session: AsyncSession = Depends(get_async_session)):
     query = select(Category).where(
         Category.deleted_flag != True).where(Category.store_id == store_id).order_by(Category.id.desc()).execution_options(schema_translate_map={None: schema})
     result = await session.execute(query)

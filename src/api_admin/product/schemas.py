@@ -26,6 +26,31 @@ class ProductList(BaseModel):
     delivery: bool
     takeaway: bool
     dinein: bool
+
+
+class ProductListStore(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    # category_name: str
+    category_id: int
+    # subcategory_id: Optional[int] = None
+    # store_id: int
+    name: str
+    # description: Optional[str] = None
+    image: Optional[str] = None
+    price: float
+    # wt: Optional[int] = None
+    # unit_id: int
+    # kilocalories: Optional[int] = None
+    # proteins: Optional[int] = None
+    # fats: Optional[int] = None
+    # carbohydrates: Optional[int] = None
+    # availability: bool
+    # popular: bool
+    # delivery: bool
+    # takeaway: bool
+    # dinein: bool
     # position
 
 
