@@ -45,3 +45,24 @@ class CartItemTotal(CartItem):
 
     # tg_user_id: int
     total_price: int
+
+
+class CartItemsOrder(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    product_id: int
+    quantity: int
+    unit_price: int
+
+
+class CreateOrder(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    tg_user_id: int
+    store_id: int
+    # cart_items: List[CartItemsOrder]
+    delivery_city: Optional[str] = None
+    delivery_address: Optional[str] = None
+    customer_name: Optional[str] = None
+    customer_phone: Optional[str] = None
+    customer_comment: Optional[str] = None

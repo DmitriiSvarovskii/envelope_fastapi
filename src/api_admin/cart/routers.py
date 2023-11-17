@@ -70,10 +70,8 @@ async def read_cart_items_and_totals(schema: str, store_id: int, tg_user_id: int
         .execution_options(schema_translate_map={None: schema})
     )
     result = await session.execute(query)
-
     cart_items = []
     total_price = 0
-
     for row in result:
         cart_items.append({
             "id": row[0],
@@ -82,12 +80,10 @@ async def read_cart_items_and_totals(schema: str, store_id: int, tg_user_id: int
             "unit_price": row[3],
         })
         total_price = row[4]
-
     response_data = {
         "cart_items": cart_items,
         "total_price": total_price
     }
-
     return response_data
 
 
@@ -186,105 +182,51 @@ async def delete_cart_items_by_tg_user_id(schema: str, store_id: int, tg_user_id
             status_code=500, detail=f"An error occurred: {str(e)}")
 
 
-@router.post("/cart/order/")
-async def create_order(
-    schema: str,
-    tg_user_id: int,
-    store_id: int,
-    delivery_city: Optional[str] = None,
-    delivery_address: Optional[str] = None,
-    customer_name: Optional[str] = None,
-    customer_phone: Optional[str] = None,
-    customer_comment: Optional[str] = None,
-    session: AsyncSession = Depends(get_async_session)
-):
-    cart_query = select(Cart).filter(
-        Cart.tg_user_id == tg_user_id,
-        Cart.store_id == store_id
+@router.post("/create_order/")
+async def create_order(schema: str, data: CreateOrder, session: AsyncSession = Depends(get_async_session)):
+    cart_query = select(Cart.product_id,
+                        Cart.quantity,
+                        (Product.price * Cart.quantity).label("unit_price")).join(Cart, Cart.product_id == Product.id).filter(
+        Cart.tg_user_id == data.tg_user_id,
+        Cart.store_id == data.store_id
     ).execution_options(
         schema_translate_map={None: schema})
     cart_items = await session.execute(cart_query)
-    cart_items = cart_items.scalars().all()
+    cart_items = cart_items.all()
 
     if not cart_items:
         raise HTTPException(status_code=400, detail="Cart is empty")
 
-    order = Order(
-        store_id=store_id,
-        tg_user_id=tg_user_id,
-        delivery_city=delivery_city,
-        delivery_address=delivery_address,
-        customer_name=customer_name,
-        customer_phone=customer_phone,
-        customer_comment=customer_comment
-    ).execution_options(
+    stmt_order = insert(Order).values(
+        store_id=data.store_id,
+        tg_user_id=data.tg_user_id,
+        delivery_city=data.delivery_city,
+        delivery_address=data.delivery_address,
+        customer_name=data.customer_name,
+        customer_phone=data.customer_phone,
+        customer_comment=data.customer_comment
+    ).returning(Order.id).execution_options(schema_translate_map={None: schema})
+
+    result = await session.execute(stmt_order)
+    order_id = result.scalar()
+
+    values_list = [
+        {
+            "store_id": data.store_id,
+            "order_id": order_id,
+            "product_id": cart_item.product_id,
+            "quantity": cart_item.quantity,
+            "unit_price": cart_item.unit_price
+        }
+        for cart_item in cart_items
+    ]
+
+    stmt_order_detail = insert(OrderDetail).values(
+        values_list).execution_options(schema_translate_map={None: schema})
+    await session.execute(stmt_order_detail)
+    # await session.commit()
+    stmt = delete(Cart).where(Cart.tg_user_id == data.tg_user_id, Cart.store_id == data.store_id).execution_options(
         schema_translate_map={None: schema})
-    session.add(order)
-    await session.flush()
-
-    for cart_item in cart_items:
-        product = await session.get(Product, cart_item.product_id).execution_options(
-            schema_translate_map={None: schema})
-        unit_price = product.price
-
-        order_detail = OrderDetail(
-            order_id=order.id,
-            product_id=cart_item.product_id,
-            quantity=cart_item.quantity,
-            unit_price=unit_price,
-            store_id=store_id
-        ).execution_options(
-            schema_translate_map={None: schema})
-        session.add(order_detail)
-
-    await session.execute(Cart.__table__.delete().where(
-        Cart.tg_user_id == tg_user_id,
-        Cart.store_id == store_id
-    ).execution_options(
-        schema_translate_map={None: schema}))
-
+    await session.execute(stmt)
     await session.commit()
-
     return {"status": "Order created successfully"}
-
-
-# @router.get("/cart/", response_model=List[CartItem])
-# async def read_cart_items(schema: str, store_id: int, tg_user_id: int, session: AsyncSession = Depends(get_async_session)):
-#     query = select(Product.id,
-#                    Product.name,
-#                    Cart.quantity,
-#                    (Cart.quantity * Product.price).label("unit_price")).join(Cart, Cart.product_id == Product.id).where(Cart.tg_user_id == tg_user_id, Cart.store_id == store_id).execution_options(schema_translate_map={None: schema})
-#     result = await session.execute(query)
-#     cart_items = []
-#     for row in result:
-#         cart_items.append(CartItem(
-#             id=row[0],
-#             name=row[1],
-#             quantity=row[2],
-#             unit_price=row[3]
-#         ))
-#     return cart_items
-
-
-# @router.get("/cart_total_price/", response_model=List[CartItemTotal])
-# async def read_cart_items(schema: str, store_id: int, tg_user_id: int, session: AsyncSession = Depends(get_async_session)):
-#     query = (
-#         select(
-#             Cart.tg_user_id,
-#             func.sum(Cart.quantity * Product.price).label("total_price")
-#         )
-#         .join(Product, Cart.product_id == Product.id)
-#         .where(
-#             (Cart.tg_user_id == tg_user_id) & (Cart.store_id == store_id)
-#         ).group_by(Cart.tg_user_id)
-#         .execution_options(schema_translate_map={None: schema})
-#     )
-
-#     result = await session.execute(query)
-
-#     cart_items = [
-#         CartItemTotal(total_price=row[0])
-#         for row in result.fetchall()
-#     ]
-
-#     return cart_items
