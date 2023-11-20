@@ -79,10 +79,12 @@ async def create_new_product(store_id: int, data: ProductCreate, current_user: U
 
 @router.post("/upload_photo/")
 async def upload_photo(file: UploadFile, store: int, current_user: User = Depends(get_current_user_from_token)):
-    bucket_name = BUCKET_NAME
-    object_key = f"{current_user.id}/{store}/{file.filename}"
-    s3.upload_fileobj(file.file, bucket_name, object_key)
-    object_url = f'{ENDPOINT_URL}/{bucket_name}/{object_key}'
+    current_datetime = datetime.now()
+    current_date_str = current_datetime.strftime("%Y-%m-%d_%H-%M-%S")
+    object_key = f"{current_user.id}/{store}/{current_date_str}_{file.filename}"
+    s3.upload_fileobj(file.file, BUCKET_NAME, object_key)
+    object_url = f'{ENDPOINT_URL}/{BUCKET_NAME}/{object_key}'
+
     return object_url
 
 
