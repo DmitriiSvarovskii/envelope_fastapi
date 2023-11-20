@@ -87,6 +87,7 @@ class ProductCreate(BaseModel):
     category_id: int
     name: str
     description: str | None
+    image: Optional[str] = None
     price: float
     wt: int
     kilocalories: int | None

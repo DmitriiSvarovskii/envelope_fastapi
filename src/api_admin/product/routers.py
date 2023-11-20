@@ -67,9 +67,9 @@ async def get_all_product(store_id: int, current_user: User = Depends(get_curren
 
 
 @router.post("/")
-async def create_new_product(store_id: int, file: UploadFile = File(...),  data: ProductCreate = Form(...), current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
+async def create_new_product(store_id: int, data: ProductCreate, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
     try:
-        new_product = await crud_create_new_product(schema=str(current_user.id), store_id=store_id, user_id=current_user.id, data=data, file=file, session=session)
+        new_product = await crud_create_new_product(schema=str(current_user.id), store_id=store_id, user_id=current_user.id, data=data, session=session)
         return new_product
     except Exception as e:
         await session.rollback()
