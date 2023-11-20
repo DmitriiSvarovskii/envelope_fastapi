@@ -78,9 +78,9 @@ async def create_new_product(store_id: int, file: UploadFile = File(...),  data:
 
 
 @router.post("/upload_photo/")
-async def upload_photo(file: UploadFile, schema: str, store: int):
+async def upload_photo(file: UploadFile, store: int, current_user: User = Depends(get_current_user_from_token)):
     bucket_name = BUCKET_NAME
-    object_key = f"{schema}/{store}/{file.filename}"
+    object_key = f"{current_user.id}/{store}/{file.filename}"
     s3.upload_fileobj(file.file, bucket_name, object_key)
     object_url = f'{ENDPOINT_URL}/{bucket_name}/{object_key}'
     return object_url
