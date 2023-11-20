@@ -1,5 +1,7 @@
+from fastapi.responses import RedirectResponse
+from fastapi.responses import FileResponse
 from typing import List
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, Form, File
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,7 +11,9 @@ from .models import Product
 from .schemas import *
 from .crud import *
 from ..user import User
+from .controller import s3
 from ..auth.routers import get_current_user_from_token
+from src.config import BUCKET_NAME, ENDPOINT_URL
 
 
 router = APIRouter(
@@ -46,7 +50,7 @@ async def get_all_product(store_id: int, current_user: User = Depends(get_curren
             "delivery": product.delivery,
             "takeaway": product.takeaway,
             "dinein": product.dinein
-            
+
         }
         for product in products
     ]
@@ -63,14 +67,23 @@ async def get_all_product(store_id: int, current_user: User = Depends(get_curren
 
 
 @router.post("/")
-async def create_new_product(store_id: int, data: ProductCreate, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
+async def create_new_product(store_id: int, file: UploadFile = File(...),  data: ProductCreate = Form(...), current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
     try:
-        new_product = await crud_create_new_product(schema=str(current_user.id), store_id=store_id,  user_id=current_user.id, data=data, session=session)
+        new_product = await crud_create_new_product(schema=str(current_user.id), store_id=store_id, user_id=current_user.id, data=data, file=file, session=session)
         return new_product
     except Exception as e:
         await session.rollback()
         raise HTTPException(
             status_code=500, detail=f"An error occurred: {str(e)}")
+
+
+@router.post("/upload_photo/")
+async def upload_photo(file: UploadFile, schema: str, store: int):
+    bucket_name = BUCKET_NAME
+    object_key = f"{schema}/{store}/{file.filename}"
+    s3.upload_fileobj(file.file, bucket_name, object_key)
+    object_url = f'{ENDPOINT_URL}/{bucket_name}/{object_key}'
+    return object_url
 
 
 @router.put("/", status_code=200)
@@ -204,8 +217,6 @@ async def delete_product(product_id: int, current_user: User = Depends(get_curre
 # #                                   shop_id).where(Product.availability == True)
 # #     result = await session.execute(query)
 # #     return result.scalars().all()
-
-
 
 
 # @router.get("/unit", response_model=List[UnitList], status_code=200)

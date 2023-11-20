@@ -11,3 +11,8 @@ DB_PASS = os.environ.get("DB_PASS")
 
 SECRET_KEY_JWT = os.environ.get("SECRET_KEY_JWT")
 ALGORITHM = os.environ.get("ALGORITHM")
+
+BUCKET_NAME = os.environ.get("BUCKET_NAME")
+ENDPOINT_URL = os.environ.get("ENDPOINT_URL")
+AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.environ.get("AWS_SECRET_ACCESS_KEY")

@@ -1,4 +1,4 @@
-from fastapi import Depends, HTTPException
+from fastapi import Depends, HTTPException, UploadFile, File, Form
 from sqlalchemy import insert, select, update, delete
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
@@ -11,13 +11,13 @@ from .schemas import *
 from src.database import get_async_session
 
 
-async def crud_create_new_product(store_id: int, schema: str, data: ProductCreate, user_id: int, session: AsyncSession = Depends(get_async_session)):
+async def crud_create_new_product(store_id: int, schema: str, user_id: int,  data: ProductCreate,  session: AsyncSession = Depends(get_async_session)):
     try:
         stmt = insert(Product).values(**data.dict(), store_id=store_id, created_by=user_id).execution_options(
             schema_translate_map={None: schema})
         await session.execute(stmt)
         await session.commit()
-        return {"status": 201, 'date': data}
+        return {"status": 201, }
     except Exception as e:
         await session.rollback()
         raise HTTPException(

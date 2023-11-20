@@ -224,7 +224,6 @@ async def create_order(schema: str, data: CreateOrder, session: AsyncSession = D
     stmt_order_detail = insert(OrderDetail).values(
         values_list).execution_options(schema_translate_map={None: schema})
     await session.execute(stmt_order_detail)
-    # await session.commit()
     stmt = delete(Cart).where(Cart.tg_user_id == data.tg_user_id, Cart.store_id == data.store_id).execution_options(
         schema_translate_map={None: schema})
     await session.execute(stmt)
