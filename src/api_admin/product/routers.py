@@ -87,6 +87,16 @@ async def upload_photo(file: UploadFile, store_id: int, current_user: User = Dep
     return object_url
 
 
+@router.delete("/delete_photo/")
+async def delete_photo(photo_name: str, store_id: int, current_user: User = Depends(get_current_user_from_token)):
+    try:
+        object_key = f"{current_user.id}/{store_id}/{photo_name}"
+        s3.delete_object(Bucket=BUCKET_NAME, Key=object_key)
+        return f'File {photo_name} successfully deleted'
+    except Exception as e:
+        return f'Error deleting file {photo_name}: {str(e)}'
+
+
 @router.put("/", status_code=200)
 async def update_product(product_id: int, data: ProductUpdate,  current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
     try:
