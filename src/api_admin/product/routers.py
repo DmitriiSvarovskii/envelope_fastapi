@@ -14,7 +14,9 @@ from ..user import User
 from .controller import s3
 from ..auth.routers import get_current_user_from_token
 from src.config import BUCKET_NAME, ENDPOINT_URL
-
+from PIL import Image
+import io
+import os
 
 router = APIRouter(
     prefix="/api/v1/product",
@@ -77,14 +79,41 @@ async def create_new_product(store_id: int, data: ProductCreate, current_user: U
             status_code=500, detail=f"An error occurred: {str(e)}")
 
 
+# @router.post("/upload_photo/")
+# async def upload_photo(file: UploadFile, store_id: int, current_user: User = Depends(get_current_user_from_token)):
+#     current_datetime = datetime.now()
+#     current_date_str = current_datetime.strftime("%Y-%m-%d_%H-%M-%S")
+#     object_key = f"{current_user.id}/{store_id}/{current_date_str}_{file.filename}"
+#     s3.upload_fileobj(file.file, BUCKET_NAME, object_key)
+#     object_url = f'{ENDPOINT_URL}/{BUCKET_NAME}/{object_key}'
+#     return object_url
 @router.post("/upload_photo/")
-async def upload_photo(file: UploadFile, store_id: int, current_user: User = Depends(get_current_user_from_token)):
-    current_datetime = datetime.now()
-    current_date_str = current_datetime.strftime("%Y-%m-%d_%H-%M-%S")
-    object_key = f"{current_user.id}/{store_id}/{current_date_str}_{file.filename}"
-    s3.upload_fileobj(file.file, BUCKET_NAME, object_key)
-    object_url = f'{ENDPOINT_URL}/{BUCKET_NAME}/{object_key}'
-    return object_url
+async def process_and_upload_photo(file: UploadFile, store_id: int, current_user: User = Depends(get_current_user_from_token)):
+    try:
+        image = Image.open(io.BytesIO(await file.read()))
+
+        image.thumbnail((900, 900))
+
+        with io.BytesIO() as output_buffer:
+            image.save(output_buffer, format="WebP")
+            output_buffer.seek(0)
+            webp_image = Image.open(output_buffer)
+
+        current_datetime = datetime.now()
+        current_date_str = current_datetime.strftime("%Y-%m-%d_%H-%M-%S")
+
+        object_key = f"{current_user.id}/{store_id}/{current_date_str}_{file.filename}"
+
+        with io.BytesIO() as webp_output_buffer:
+            webp_image.save(webp_output_buffer, format="WebP")
+            webp_output_buffer.seek(0)
+            s3.upload_fileobj(webp_output_buffer, BUCKET_NAME, object_key)
+
+        object_url = f'{ENDPOINT_URL}/{BUCKET_NAME}/{object_key}'
+
+        return object_url
+    except Exception as e:
+        return f"Error processing and uploading photo: {str(e)}"
 
 
 @router.delete("/delete_photo/")
