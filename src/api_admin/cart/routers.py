@@ -270,8 +270,8 @@ async def create_order(schema: str, data: CreateOrder, session: AsyncSession = D
         order_text += f"{product_name} x {quantity}\n"
 
     new_datetime = datetime.now() + timedelta(minutes=45)
-    order_text = f"Дата и время выдачи: {new_datetime.strftime('%d.%m.%Y %H:%M')}\n"
-    text = order_text = f"Заказ №{order_id} от {datetime.now().strftime('%d.%m.%Y')} в {datetime.now().strftime('%H:%M')}\n" \
+    order_time = f"Дата и время выдачи: {new_datetime.strftime('%d.%m.%Y %H:%M')}\n"
+    text = f"Заказ №{order_id} от {datetime.now().strftime('%d.%m.%Y')} в {datetime.now().strftime('%H:%M')}\n" \
         f"Код клиента: {data.tg_user_id}\n" \
         "--------------------\n" \
         f"Адрес заведения: г. Томск, ул. Вадима Саратова 69\n" \
@@ -282,7 +282,7 @@ async def create_order(schema: str, data: CreateOrder, session: AsyncSession = D
         f"\nСумма: {order_sum} руб.\n" \
         "--------------------\n" \
         f"Статус: Новый\n" \
-        f"Дата и время выдачи: {new_datetime}\n"
+        f"Дата и время выдачи: {order_time}\n"
 
     await send_message(chat_id=data.tg_user_id, text=text)
 
