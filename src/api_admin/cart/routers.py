@@ -1,7 +1,14 @@
+from datetime import datetime, timedelta
+from aiogram.types.web_app_info import WebAppInfo
+from aiogram.utils.keyboard import InlineKeyboardBuilder
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.enums import ParseMode
+from aiogram import Bot, Dispatcher, types
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
 from typing import Dict, List, Union
+from aiogram.types import Message
 
 from sqlalchemy import insert, select, label, join, update, delete
 from .models import Cart
@@ -16,6 +23,7 @@ from src.api_admin.category.schemas import *
 from src.api_admin.category.crud import *
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
+from src.config import BOT_TOKEN
 
 
 router = APIRouter(
@@ -129,6 +137,25 @@ async def read_cart_items_and_totals(schema: str, store_id: int, tg_user_id: int
 #     ]
 #     return response_data
 
+# Укажите токен своего бота
+
+bot = Bot(token=BOT_TOKEN)
+dp: Dispatcher = Dispatcher()
+
+
+web_app = WebAppInfo(url='https://store.envelope-app.ru/schema=10/store_id=1/')
+
+
+button_store: InlineKeyboardButton = InlineKeyboardButton(
+    text='Онлайн-кафе',
+    web_app=web_app)
+
+
+keyboard_store_builder: InlineKeyboardBuilder = InlineKeyboardBuilder()
+
+keyboard_store_builder.row(button_store, button_store, width=1)
+keyboard_store = keyboard_store_builder
+
 
 @router.post("/cart/add/")
 async def add_to_cart(schema: str, data: CartCreate, session: AsyncSession = Depends(get_async_session)):
@@ -184,13 +211,17 @@ async def delete_cart_items_by_tg_user_id(schema: str, store_id: int, tg_user_id
 
 @router.post("/create_order/")
 async def create_order(schema: str, data: CreateOrder, session: AsyncSession = Depends(get_async_session)):
-    cart_query = select(Cart.product_id,
-                        Cart.quantity,
-                        (Product.price * Cart.quantity).label("unit_price")).join(Cart, Cart.product_id == Product.id).filter(
+    cart_query = (select(Cart.product_id,
+                         Cart.quantity,
+                         Product.name.label("product_name"),
+                         (Product.price * Cart.quantity).label("unit_price"),
+                         func.sum(Cart.quantity * Product.price).over().label("total_price")).
+                  join(Cart, Cart.product_id == Product.id).
+                  filter(
         Cart.tg_user_id == data.tg_user_id,
         Cart.store_id == data.store_id
     ).execution_options(
-        schema_translate_map={None: schema})
+        schema_translate_map={None: schema}))
     cart_items = await session.execute(cart_query)
     cart_items = cart_items.all()
 
@@ -210,16 +241,47 @@ async def create_order(schema: str, data: CreateOrder, session: AsyncSession = D
     result = await session.execute(stmt_order)
     order_id = result.scalar()
 
-    values_list = [
-        {
+    # values_list = [
+    #     {
+    #         "store_id": data.store_id,
+    #         "order_id": order_id,
+    #         "product_id": cart_item.product_id,
+    #         "quantity": cart_item.quantity,
+    #         "unit_price": cart_item.unit_price
+    #     }
+    #     for cart_item in cart_items
+    # ]
+    values_list = []
+    order_text = ""
+    order_sum = cart_items[0][4]
+    for cart_item in cart_items:
+        values_list.append({
             "store_id": data.store_id,
             "order_id": order_id,
             "product_id": cart_item.product_id,
             "quantity": cart_item.quantity,
             "unit_price": cart_item.unit_price
-        }
-        for cart_item in cart_items
-    ]
+        })
+        product_name = cart_item[2]
+        quantity = cart_item[1]
+        order_text += f"{product_name} x {quantity}\n"
+
+    new_datetime = datetime.now() + timedelta(minutes=45)
+    order_text = f"Дата и время выдачи: {new_datetime.strftime('%d.%m.%Y %H:%M')}\n"
+    text = order_text = f"Заказ №{order_id} от {datetime.now().strftime('%d.%m.%Y')} в {datetime.now().strftime('%H:%M')}\n" \
+        f"Код клиента: {data.tg_user_id}\n" \
+        "--------------------\n" \
+        f"Адрес заведения: г. Томск, ул. Вадима Саратова 69\n" \
+        f"Телефон заведения: +7969-069-69-69\n" \
+        "--------------------\n" \
+        "Ваш выбор:\n\n" \
+        f"{order_text}" \
+        f"\nСумма: {order_sum} руб.\n" \
+        "--------------------\n" \
+        f"Статус: Новый\n" \
+        f"Дата и время выдачи: {new_datetime}\n"
+
+    await send_message(chat_id=data.tg_user_id, text=text)
 
     stmt_order_detail = insert(OrderDetail).values(
         values_list).execution_options(schema_translate_map={None: schema})
@@ -229,3 +291,14 @@ async def create_order(schema: str, data: CreateOrder, session: AsyncSession = D
     await session.execute(stmt)
     await session.commit()
     return {"status": "Order created successfully"}
+
+
+@router.post("/send_message/{chat_id}")
+async def send_message(chat_id: int, text: str):
+    try:
+        # Отправка сообщения с использованием aiogram
+        await bot.send_message(chat_id, f"{text}", reply_markup=keyboard_store.as_markup(), parse_mode=ParseMode.MARKDOWN)
+        return {"status": "success", "message": "Сообщение успешно отправлено"}
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Ошибка при отправке сообщения: {str(e)}")
