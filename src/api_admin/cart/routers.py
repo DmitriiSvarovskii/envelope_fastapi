@@ -139,7 +139,8 @@ async def read_cart_items_and_totals(schema: str, store_id: int, tg_user_id: int
 
 # Укажите токен своего бота
 
-bot = Bot(token=BOT_TOKEN)
+# bot = Bot(token=BOT_TOKEN)
+bot = Bot(token="5587923962:AAGhjWKPl8bs8-2hRkyTlgjrFRG1yAM763A")
 dp: Dispatcher = Dispatcher()
 
 
@@ -270,7 +271,7 @@ async def create_order(schema: str, data: CreateOrder, session: AsyncSession = D
         order_text += f"{product_name} x {quantity}\n"
 
     new_datetime = datetime.now() + timedelta(minutes=45)
-    order_time = f"Дата и время выдачи: {new_datetime.strftime('%d.%m.%Y %H:%M')}\n"
+    order_time = new_datetime.strftime('%d.%m.%Y %H:%M')
     text = f"Заказ №{order_id} от {datetime.now().strftime('%d.%m.%Y')} в {datetime.now().strftime('%H:%M')}\n" \
         f"Код клиента: {data.tg_user_id}\n" \
         "--------------------\n" \
