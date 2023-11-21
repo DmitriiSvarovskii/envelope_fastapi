@@ -139,8 +139,7 @@ async def read_cart_items_and_totals(schema: str, store_id: int, tg_user_id: int
 
 # Укажите токен своего бота
 
-# bot = Bot(token=BOT_TOKEN)
-bot = Bot(token="5587923962:AAGhjWKPl8bs8-2hRkyTlgjrFRG1yAM763A")
+bot = Bot(token=BOT_TOKEN)
 dp: Dispatcher = Dispatcher()
 
 
