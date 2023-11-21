@@ -147,13 +147,16 @@ web_app = WebAppInfo(url='https://store.envelope-app.ru/schema=10/store_id=1/')
 
 
 button_store: InlineKeyboardButton = InlineKeyboardButton(
-    text='Онлайн-кафе',
+    text='Оплата наличными',
+    web_app=web_app)
+button_store2: InlineKeyboardButton = InlineKeyboardButton(
+    text='Оплата картой',
     web_app=web_app)
 
 
 keyboard_store_builder: InlineKeyboardBuilder = InlineKeyboardBuilder()
 
-keyboard_store_builder.row(button_store, button_store, width=1)
+keyboard_store_builder.row(button_store, button_store2, width=1)
 keyboard_store = keyboard_store_builder
 
 
