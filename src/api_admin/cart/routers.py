@@ -166,21 +166,24 @@ async def add_to_cart(schema: str, data: CartCreate, session: AsyncSession = Dep
 
 
 @router.delete("/cart/decrease/")
-async def decrease_cart_item(schema: str, data: CartCreate,  session: AsyncSession = Depends(get_async_session)):
+async def decrease_cart_item(schema: str, data: CartCreate, session: AsyncSession = Depends(get_async_session)):
     query = select(Cart).where(Cart.tg_user_id == data.tg_user_id, Cart.product_id ==
                                data.product_id).execution_options(schema_translate_map={None: schema})
     result = await session.execute(query)
     cart_item = result.scalar()
+
     if cart_item:
-        if cart_item.quantity > 0:
+        if cart_item.quantity > 1:
             stmt = update(Cart).where(Cart.tg_user_id == data.tg_user_id, Cart.product_id == data.product_id).values(
-                quantity=func.coalesce(Cart.quantity, 0) - 1).execution_options(schema_translate_map={None: schema})
+                quantity=Cart.quantity - 1).execution_options(schema_translate_map={None: schema})
         else:
-            stmt = delete(Cart).where(Cart.tg_user_id == data.tg_user_id, Cart.product_id == data.product_id).execution_options(
-                schema_translate_map={None: schema})
+            stmt = delete(Cart).where(Cart.tg_user_id == data.tg_user_id, Cart.product_id ==
+                                      data.product_id).execution_options(schema_translate_map={None: schema})
+
         await session.execute(stmt)
     else:
         return {"status": "error", "message": "Товар не найден в корзине"}
+
     await session.commit()
     return {"status": 201, 'data': data}
 
