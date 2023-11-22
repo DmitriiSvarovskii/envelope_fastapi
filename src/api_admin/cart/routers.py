@@ -1,3 +1,4 @@
+from aiohttp import web
 import yookassa
 from datetime import datetime, timedelta
 from aiogram.types.web_app_info import WebAppInfo
@@ -319,6 +320,14 @@ async def create_pay(total_price: int, order_id: int):
     })
     url = payment.confirmation.confirmation_url
     return url, payment
+
+
+async def payment_callback(request):
+    data = await request.json()
+    # Обработка данных от YooKassa
+    print("Получен обратный вызов от YooKassa:")
+    print(data)
+    return web.Response()
 
 
 def create_keyboard(url: int):
