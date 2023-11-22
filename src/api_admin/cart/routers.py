@@ -1,3 +1,4 @@
+import yookassa
 from datetime import datetime, timedelta
 from aiogram.types.web_app_info import WebAppInfo
 from aiogram.utils.keyboard import InlineKeyboardBuilder
@@ -146,20 +147,6 @@ dp: Dispatcher = Dispatcher()
 web_app = WebAppInfo(url='https://store.envelope-app.ru/schema=10/store_id=1/')
 
 
-button_store: InlineKeyboardButton = InlineKeyboardButton(
-    text='Оплата наличными',
-    web_app=web_app)
-button_store2: InlineKeyboardButton = InlineKeyboardButton(
-    text='Оплата картой',
-    web_app=web_app)
-
-
-keyboard_store_builder: InlineKeyboardBuilder = InlineKeyboardBuilder()
-
-keyboard_store_builder.row(button_store, button_store2, width=1)
-keyboard_store = keyboard_store_builder
-
-
 @router.post("/cart/add/")
 async def add_to_cart(schema: str, data: CartCreate, session: AsyncSession = Depends(get_async_session)):
     query = select(Cart).where(Cart.tg_user_id == data.tg_user_id, Cart.product_id ==
@@ -284,8 +271,8 @@ async def create_order(schema: str, data: CreateOrder, session: AsyncSession = D
         f"Статус: Новый\n" \
         f"Дата и время выдачи: {order_time}\n"
 
-    await send_message(chat_id=data.tg_user_id, text=text)
-
+    url, payment_id = await create_pay(total_price=order_sum, order_id=order_id)
+    await send_message(chat_id=data.tg_user_id, text=text, url=url)
     stmt_order_detail = insert(OrderDetail).values(
         values_list).execution_options(schema_translate_map={None: schema})
     await session.execute(stmt_order_detail)
@@ -297,11 +284,49 @@ async def create_order(schema: str, data: CreateOrder, session: AsyncSession = D
 
 
 @router.post("/send_message/{chat_id}")
-async def send_message(chat_id: int, text: str):
+async def send_message(chat_id: int, text: str, url: str):
     try:
         # Отправка сообщения с использованием aiogram
-        await bot.send_message(chat_id, f"{text}", reply_markup=keyboard_store.as_markup(), parse_mode=ParseMode.MARKDOWN)
+        await bot.send_message(chat_id, f"{text}", reply_markup=create_keyboard(url=url), parse_mode=ParseMode.MARKDOWN)
         return {"status": "success", "message": "Сообщение успешно отправлено"}
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Ошибка при отправке сообщения: {str(e)}")
+
+
+api_id = '278535'
+api_key = 'test_W5YF4StOK5ZheXJWyIodZUAUJdhU7fYMm5DFRLQI7Ww'
+
+
+async def create_pay(total_price: int, order_id: int):
+    yookassa.Configuration.account_id = api_id
+    yookassa.Configuration.secret_key = api_key
+
+    payment = yookassa.Payment.create({
+        "amount": {
+            "value": total_price,
+            "currency": "RUB"
+        },
+        "confirmation": {
+            "type": "redirect",
+            "return_url": 'https://t.me/store_demo_envelope_app_bot'
+        },
+        "description": f"Оплата заказа №{order_id}",
+        "capture": True
+    })
+    url = payment.confirmation.confirmation_url
+    return url, payment
+
+
+def create_keyboard(url: int):
+    # button_store: InlineKeyboardButton = InlineKeyboardButton(
+    #     text='Оплата наличными',
+    #     callback_data=payment_id)
+    button_store2: InlineKeyboardButton = InlineKeyboardButton(
+        text='Оплата картой',
+        url=url)
+    keyboard_store_builder: InlineKeyboardBuilder = InlineKeyboardBuilder()
+
+    keyboard_store_builder.row(button_store2, width=1)
+    keyboard_store = keyboard_store_builder.as_markup()
+    return keyboard_store
