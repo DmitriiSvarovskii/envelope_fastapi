@@ -40,6 +40,7 @@ ORIGINS = [
     "https://envelope-app.ru",
     "https://www.envelope-app.ru",
     "https://store.envelope-app.ru",
+    "https://api.telegram.org",
 ]
 
 
