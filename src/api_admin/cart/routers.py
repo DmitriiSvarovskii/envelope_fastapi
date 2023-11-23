@@ -91,7 +91,7 @@ async def read_cart_items_and_totals(schema: str, store_id: int, tg_user_id: int
             "quantity": row[3],
             "unit_price": row[4],
         })
-        total_price = row[4]
+        total_price = row[5]
     response_data = {
         "cart_items": cart_items,
         "total_price": total_price
