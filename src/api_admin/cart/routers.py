@@ -68,6 +68,7 @@ async def read_cart_items_and_totals(schema: str, store_id: int, tg_user_id: int
         select(
             Product.id,
             Product.name,
+            Product.image,
             Cart.quantity,
             (Cart.quantity * Product.price).label("unit_price"),
             func.sum(Cart.quantity * Product.price).over().label("total_price")
@@ -86,8 +87,9 @@ async def read_cart_items_and_totals(schema: str, store_id: int, tg_user_id: int
         cart_items.append({
             "id": row[0],
             "name": row[1],
-            "quantity": row[2],
-            "unit_price": row[3],
+            "image": row[2],
+            "quantity": row[3],
+            "unit_price": row[4],
         })
         total_price = row[4]
     response_data = {

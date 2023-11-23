@@ -14,6 +14,8 @@ ALGORITHM = os.environ.get("ALGORITHM")
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
 
+URL_NGROK = os.environ.get("URL_NGROK")
+
 BUCKET_NAME = os.environ.get("BUCKET_NAME")
 ENDPOINT_URL = os.environ.get("ENDPOINT_URL")
 AWS_ACCESS_KEY_ID = os.environ.get("AWS_ACCESS_KEY_ID")
