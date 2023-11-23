@@ -42,8 +42,15 @@ def is_bot_token(value: str) -> Union[bool, Dict[str, Any]]:
     return True
 
 
-@main_router.message(Command("add", magic=F.args.func(is_bot_token)))
+# @main_router.message(Command(commands=["/add"], magic=F.args.func(is_bot_token)))
+# async def command_add_bot(message: Message, command: CommandObject, bot: Bot) -> Any:
+#     await message.answer(text='хмммм')
+
+
+# @main_router.message(Command("add", magic=F.args.func(is_bot_token)))
+@main_router.message(Command(commands=["/add"], magic=F.args.func(is_bot_token)))
 async def command_add_bot(message: Message, command: CommandObject, bot: Bot) -> Any:
+    print('работает')
     new_bot = Bot(token=command.args, session=bot.session)
     try:
         bot_user = await new_bot.get_me()
