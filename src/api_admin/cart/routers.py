@@ -62,7 +62,8 @@ async def get_all_category(schema: str, store_id: int, session: AsyncSession = D
             status_code=500, detail=f"An error occurred: {str(e)}")
 
 
-@router.get("/cart/", response_model=Dict[str, Union[List[CartItem], int]])
+# @router.get("/cart/", response_model=Dict[str, Union[List[CartItem], int]])
+@router.get("/cart/", response_model=CartResponse)
 async def read_cart_items_and_totals(schema: str, store_id: int, tg_user_id: int, session: AsyncSession = Depends(get_async_session)):
     query = (
         select(
