@@ -36,6 +36,8 @@ class CartItem(BaseModel):
 
 
 class CartResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     cart_items: List[CartItem]
     total_price: float
 
