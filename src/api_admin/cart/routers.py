@@ -14,7 +14,7 @@ from aiogram.types import Message
 
 from sqlalchemy import insert, select, label, join, update, delete
 from .models import Cart
-from ..models import Product, Order, OrderDetail
+from ..models import Product, Order, OrderDetail, Customer
 from .schemas import *
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.database import get_async_session
@@ -34,12 +34,26 @@ router = APIRouter(
 
 
 @router.get("/product/", response_model=List[ProductListStore])
-async def get_all_product(schema: str, store_id: int, session: AsyncSession = Depends(get_async_session)):
+async def get_all_product(schema: str, store_id: int, tg_user_id: int, session: AsyncSession = Depends(get_async_session)):
     query = select(Product).where(
         Product.deleted_flag != True).where(Product.store_id == store_id).order_by(Product.id.desc()).execution_options(schema_translate_map={None: schema})
     result = await session.execute(query)
     products = result.scalars().all()
+    await add_tg_user(schema=schema, store_id=store_id, tg_user_id=tg_user_id, session=session)
     return products
+
+
+async def add_tg_user(schema: str, store_id: int, tg_user_id: int, session: AsyncSession = Depends(get_async_session)):
+    query = select(Customer).filter(
+        Customer.tg_user_id == tg_user_id, Customer.store_id == store_id).execution_options(schema_translate_map={None: schema})
+    result = await session.execute(query)
+    customer = result.scalar()
+    if customer is None:
+        stmt = insert(Customer).values(store_id=store_id, tg_user_id=tg_user_id
+                                       ).execution_options(schema_translate_map={None: schema})
+        await session.execute(stmt)
+        await session.commit()
+        return {"status": 201, 'tg_user_id': tg_user_id}
 
 
 @router.get("/product/{product_id}/", response_model=Optional[ProductOne])
