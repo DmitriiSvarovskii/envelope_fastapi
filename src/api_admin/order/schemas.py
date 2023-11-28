@@ -62,4 +62,4 @@ class ReportProductTotal(BaseModel):
 
     product_name: str
     category_name: str
-    total_price: float
+    total_sales: float
