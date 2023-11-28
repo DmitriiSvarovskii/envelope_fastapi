@@ -22,7 +22,7 @@ class ReportCustomer(BaseModel):
     username: Optional[str] = None
     is_premium: Optional[bool] = None
     total_sales: Optional[float] = None
-    last_order_date: datetime
+    last_order_date: str
 
 
 class CustomerCreate(BaseModel):

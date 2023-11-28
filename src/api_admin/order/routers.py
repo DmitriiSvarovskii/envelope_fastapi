@@ -61,6 +61,7 @@ async def category_unit_price(store_id: int, current_user: User = Depends(get_cu
     return data
 
 
+# @router.get("/customer/", response_model=List[ReportCustomer])
 @router.get("/customer/", response_model=List[ReportCustomer])
 async def category_unit_price(store_id: int, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
     query = (
@@ -72,9 +73,10 @@ async def category_unit_price(store_id: int, current_user: User = Depends(get_cu
             Customer.is_premium,
             func.sum(OrderDetail.quantity *
                      OrderDetail.unit_price).label("total_sales"),
-            func.max(Order.created_at).label("last_order_date")
+            func.coalesce(func.to_char(func.max(Order.created_at),
+                          'DD.MM.YYYY'), '').label("last_order_date")
         )
-        .outerjoin(Order)  # Изменено на outerjoin для использования LEFT JOIN
+        .outerjoin(Order)
         .join(OrderDetail)
         .select_from(Customer)
         .group_by(
