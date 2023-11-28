@@ -73,21 +73,15 @@ async def category_unit_price(store_id: int, current_user: User = Depends(get_cu
             Customer.last_name,
             Customer.is_premium,
             func.coalesce(func.sum(OrderDetail.quantity *
-                          OrderDetail.unit_price), 0).label("total_sales"),
+                                   OrderDetail.unit_price), 0).label("total_sales"),
             func.coalesce(func.to_char(func.max(Order.created_at),
-                          'DD.MM.YYYY'), '').label("last_order_date")
+                                       'DD.MM.YYYY'), '-').label("last_order_date")
         )
         .outerjoin(Order)
-        .join(OrderDetail)
+        .outerjoin(OrderDetail, OrderDetail.order_id == Order.id)
         .select_from(Customer)
-        .group_by(
-            Customer.id,
-            Customer.tg_user_id,
-            Customer.username,
-            Customer.first_name,
-            Customer.last_name,
-            # Customer.is_premium,
-        ).order_by(desc(Customer.id))
+        .group_by(Customer.id)
+        .order_by(desc(Customer.id))
         .where(Customer.store_id == store_id)
         .execution_options(schema_translate_map={None: str(current_user.id)})
     )
