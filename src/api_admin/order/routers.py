@@ -15,11 +15,11 @@ from ..auth.routers import get_current_user_from_token
 
 
 router = APIRouter(
-    prefix="/api/v1/order",
+    prefix="/api/v1/report",
     tags=["Order (store, admin)"])
 
 
-@router.get("/")
+@router.get("/order/")
 async def get_all_orders(store_id: int, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)) -> List[OrderBase]:
     query = select(Order).where(Order.store_id == store_id).order_by(Order.id.desc()).execution_options(
         schema_translate_map={None: str(current_user.id)})
@@ -27,7 +27,7 @@ async def get_all_orders(store_id: int, current_user: User = Depends(get_current
     return result.scalars().all()
 
 
-@router.get("/detail/")
+@router.get("/order_detail/")
 async def get_all_order_details(store_id: int, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)) -> List[OrderDetailBase]:
     query = select(OrderDetail).where(OrderDetail.store_id == store_id).order_by(OrderDetail.id.desc()).execution_options(
         schema_translate_map={None: str(current_user.id)})
@@ -35,12 +35,12 @@ async def get_all_order_details(store_id: int, current_user: User = Depends(get_
     return result.scalars().all()
 
 
-@router.get("/detail/")
-async def get_all_order_details(store_id: int, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)) -> List[OrderDetailBase]:
-    query = select(OrderDetail).where(OrderDetail.store_id == store_id).order_by(OrderDetail.id.desc()).execution_options(
-        schema_translate_map={None: str(current_user.id)})
-    result = await session.execute(query)
-    return result.scalars().all()
+# @router.get("/detail/")
+# async def get_all_order_details(store_id: int, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)) -> List[OrderDetailBase]:
+#     query = select(OrderDetail).where(OrderDetail.store_id == store_id).order_by(OrderDetail.id.desc()).execution_options(
+#         schema_translate_map={None: str(current_user.id)})
+#     result = await session.execute(query)
+#     return result.scalars().all()
 
 
 @router.get("/total_category/", response_model=List[OrderCategoryTotal])

@@ -10,8 +10,6 @@ class CustomerBase(BaseModel):
     last_name: str
     username: str
     is_premium: bool
-    # query_id: str
-    # hash: str
 
 
 class CustomerCreate(BaseModel):
