@@ -62,7 +62,7 @@ class OrderDetail(Base):
     product_id: Mapped[int] = mapped_column(
         ForeignKey("products.id", ondelete="CASCADE"))
     quantity: Mapped[int]
-    unit_price: Mapped[int]
+    unit_price: Mapped[float]
     created_at: Mapped[created_at]
 
     def __init__(self, schema):

@@ -28,7 +28,6 @@ class Order(OrderBase):
     # customer: "Customer"
 
 
-
 class OrderDetailBase(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -43,9 +42,16 @@ class OrderDetailCreate(OrderDetailBase):
     pass
 
 
-class OrderDetail(OrderDetailBase):
+class OrderDetail1(OrderDetailBase):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
     order_date: datetime
     shop_id: int
+
+
+class OrderCategoryTotal(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    category_name: str
+    total_price: float
