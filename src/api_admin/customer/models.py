@@ -18,6 +18,10 @@ class Customer(Base):
     store_id: Mapped[int | None] = mapped_column(
         ForeignKey("stores.id", ondelete="CASCADE"))
     tg_user_id: Mapped[int] = mapped_column(BIGINT)
+    first_name: Mapped[str | None]
+    last_name: Mapped[str | None]
+    username: Mapped[str | None]
+    is_premium: Mapped[bool] = mapped_column(server_default=text("false"))
     created_at: Mapped[created_at]
 
     def __init__(self, schema):
@@ -36,10 +40,10 @@ class Customer(Base):
 #     store_id: Mapped[int | None] = mapped_column(
 #         ForeignKey("stores.id", ondelete="CASCADE"))
 #     tg_user_id: Mapped[int] = mapped_column(BIGINT)
-#     # first_name: Mapped[str | None]
-#     # last_name: Mapped[str | None]
-#     # username: Mapped[str | None]
-#     # is_premium: Mapped[bool] = mapped_column(server_default=text("false"))
+#     first_name: Mapped[str | None]
+#     last_name: Mapped[str | None]
+#     username: Mapped[str | None]
+#     is_premium: Mapped[bool] = mapped_column(server_default=text("false"))
 #     # query_id: Mapped[str]
 #     # hash: Mapped[str]
 #     created_at: Mapped[created_at]
