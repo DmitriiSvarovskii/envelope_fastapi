@@ -46,7 +46,6 @@ async def get_all_product(schema: str, data: CustomerCreate, session: AsyncSessi
     return products
 
 
-@router.post("/product1234/")
 async def add_tg_user(schema: str, data: CustomerCreate, session: AsyncSession = Depends(get_async_session)):
     query = select(Customer).filter(
         Customer.tg_user_id == data.tg_user_id, Customer.store_id == data.store_id).execution_options(schema_translate_map={None: schema})
