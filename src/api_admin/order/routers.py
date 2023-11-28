@@ -66,6 +66,7 @@ async def category_unit_price(store_id: int, current_user: User = Depends(get_cu
 async def category_unit_price(store_id: int, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
     query = (
         select(
+            Customer.id,
             Customer.tg_user_id,
             Customer.username,
             Customer.first_name,
@@ -80,12 +81,13 @@ async def category_unit_price(store_id: int, current_user: User = Depends(get_cu
         .join(OrderDetail)
         .select_from(Customer)
         .group_by(
+            Customer.id,
             Customer.tg_user_id,
             Customer.username,
             Customer.first_name,
             Customer.last_name,
             Customer.is_premium,
-        )
+        ).order_by(desc(Customer.id))
         .where(Customer.store_id == store_id)
         .execution_options(schema_translate_map={None: str(current_user.id)})
     )
