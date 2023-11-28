@@ -45,16 +45,16 @@ async def get_all_customer(store_id: int, current_user: User = Depends(get_curre
     return result.scalars().all()
 
 
-@router.get("/total_category/", response_model=List[OrderCategoryTotal])
+@router.get("/total_category/", response_model=List[ReportCategoryTotal])
 async def category_unit_price(store_id: int, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
     query = (
         select(
             Category.name.label("category_name"),
-            func.sum(OrderDetail.unit_price).label("total_price"))
+            func.sum(OrderDetail.unit_price).label("total_sales"))
         .join(Product, Product.category_id == Category.id)
         .join(OrderDetail, OrderDetail.product_id == Product.id)
         .where(OrderDetail.store_id == store_id)
-        .group_by(Category.name)).order_by(desc("total_price")).execution_options(
+        .group_by(Category.name)).order_by(desc("total_sales")).execution_options(
         schema_translate_map={None: str(current_user.id)})
     result = await session.execute(query)
     data = result.all()

@@ -50,11 +50,11 @@ class OrderDetail1(OrderDetailBase):
     shop_id: int
 
 
-class OrderCategoryTotal(BaseModel):
+class ReportCategoryTotal(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     category_name: str
-    total_price: float
+    total_sales: float
 
 
 class ReportProductTotal(BaseModel):
