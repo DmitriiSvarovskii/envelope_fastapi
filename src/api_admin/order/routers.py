@@ -74,7 +74,7 @@ async def category_unit_price(store_id: int, current_user: User = Depends(get_cu
                      OrderDetail.unit_price).label("total_sales"),
             func.max(Order.created_at).label("last_order_date")
         )
-        .join(Order)
+        .outerjoin(Order)  # Изменено на outerjoin для использования LEFT JOIN
         .join(OrderDetail)
         .select_from(Customer)
         .group_by(
