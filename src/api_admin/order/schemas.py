@@ -63,3 +63,9 @@ class ReportProductTotal(BaseModel):
     product_name: str
     category_name: str
     total_sales: float
+
+
+class ReportMain(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    total_sales: float

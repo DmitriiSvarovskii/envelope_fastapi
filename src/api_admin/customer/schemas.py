@@ -1,15 +1,28 @@
 from pydantic import BaseModel, ConfigDict
 from typing import Optional
+from datetime import datetime
 
 
 class CustomerBase(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: int
     tg_user_id: int
-    first_name: str
-    last_name: str
-    username: str
-    is_premium: bool
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    username: Optional[str] = None
+    is_premium: Optional[bool] = None
+
+
+class ReportCustomer(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    tg_user_id: int
+    first_name: Optional[str] = None
+    last_name: Optional[str] = None
+    username: Optional[str] = None
+    is_premium: Optional[bool] = None
+    total_sales: Optional[float] = None
+    last_order_date: datetime
 
 
 class CustomerCreate(BaseModel):

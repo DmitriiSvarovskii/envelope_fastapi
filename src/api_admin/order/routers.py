@@ -37,12 +37,12 @@ async def get_all_order_details(store_id: int, current_user: User = Depends(get_
     return result.scalars().all()
 
 
-@router.get("/customer/")
-async def get_all_customer(store_id: int, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)) -> List[CustomerBase]:
-    query = select(Customer).where(Customer.store_id == store_id).order_by(
-        Customer.id.desc()).execution_options(schema_translate_map={None: str(current_user.id)})
-    result = await session.execute(query)
-    return result.scalars().all()
+# @router.get("/customer/")
+# async def get_all_customer(store_id: int, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)) -> List[CustomerBase]:
+#     query = select(Customer).where(Customer.store_id == store_id).order_by(
+#         Customer.id.desc()).execution_options(schema_translate_map={None: str(current_user.id)})
+#     result = await session.execute(query)
+#     return result.scalars().all()
 
 
 @router.get("/total_category/", response_model=List[ReportCategoryTotal])
@@ -56,6 +56,38 @@ async def category_unit_price(store_id: int, current_user: User = Depends(get_cu
         .where(OrderDetail.store_id == store_id)
         .group_by(Category.name)).order_by(desc("total_sales")).execution_options(
         schema_translate_map={None: str(current_user.id)})
+    result = await session.execute(query)
+    data = result.all()
+    return data
+
+
+@router.get("/customer/", response_model=List[ReportCustomer])
+async def category_unit_price(store_id: int, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
+    query = (
+        select(
+            Customer.tg_user_id,
+            Customer.username,
+            Customer.first_name,
+            Customer.last_name,
+            Customer.is_premium,
+            func.sum(OrderDetail.quantity *
+                     OrderDetail.unit_price).label("total_sales"),
+            func.max(Order.created_at).label("last_order_date")
+        )
+        .join(Order)
+        .join(OrderDetail)
+        .select_from(Customer)
+        .group_by(
+            Customer.tg_user_id,
+            Customer.username,
+            Customer.first_name,
+            Customer.last_name,
+            Customer.is_premium,
+        )
+        .where(Customer.store_id == store_id)
+        .execution_options(schema_translate_map={None: str(current_user.id)})
+    )
+
     result = await session.execute(query)
     data = result.all()
     return data
@@ -78,14 +110,14 @@ async def category_unit_price(store_id: int, current_user: User = Depends(get_cu
     return data
 
 
-@router.get("/main/", response_model=List[ReportProductTotal])
+@router.get("/total_report/", response_model=List[ReportMain])
 async def category_unit_price(store_id: int, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
     query = (
         select(
             func.sum(OrderDetail.unit_price).label("total_sales"))
         .where(OrderDetail.store_id == store_id)
-        .group_by(OrderDetail.unit_price)).order_by(desc("total_sales")).execution_options(
-        schema_translate_map={None: str(current_user.id)})
+        .execution_options(
+            schema_translate_map={None: str(current_user.id)}))
     result = await session.execute(query)
     data = result.all()
     return data
