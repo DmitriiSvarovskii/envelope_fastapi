@@ -22,6 +22,10 @@ router = APIRouter(
 
 @router.get("/order/")
 async def get_all_orders(store_id: int, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)) -> List[OrderBase]:
+    # query = select(Order).where(Order.store_id == store_id).order_by(Order.id.desc()).execution_options(
+    #     schema_translate_map={None: str(current_user.id)})
+    # result = await session.execute(query)
+    # return result.scalars().all()
     query = select(Order).where(Order.store_id == store_id).order_by(Order.id.desc()).execution_options(
         schema_translate_map={None: str(current_user.id)})
     result = await session.execute(query)

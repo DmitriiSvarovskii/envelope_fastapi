@@ -20,12 +20,12 @@ class OrderCreate(OrderBase):
     pass
 
 
-class Order(OrderBase):
-    model_config = ConfigDict(from_attributes=True)
+# class Order(OrderBase):
+#     model_config = ConfigDict(from_attributes=True)
 
-    id: int
-    order_date: datetime
-    # customer: "Customer"
+#     id: int
+#     order_date: datetime
+#     # customer: "Customer"
 
 
 class OrderDetailBase(BaseModel):
