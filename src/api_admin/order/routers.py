@@ -71,8 +71,8 @@ async def category_unit_price(store_id: int, current_user: User = Depends(get_cu
             Customer.first_name,
             Customer.last_name,
             Customer.is_premium,
-            func.sum(OrderDetail.quantity *
-                     OrderDetail.unit_price).label("total_sales"),
+            func.coalesce(func.sum(OrderDetail.quantity *
+                          OrderDetail.unit_price), 0).label("total_sales"),
             func.coalesce(func.to_char(func.max(Order.created_at),
                           'DD.MM.YYYY'), '').label("last_order_date")
         )
