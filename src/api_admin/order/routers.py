@@ -16,7 +16,7 @@ from ..auth.routers import get_current_user_from_token
 
 router = APIRouter(
     prefix="/api/v1/report",
-    tags=["Order (store, admin)"])
+    tags=["Report (admin)"])
 
 
 @router.get("/order/")
