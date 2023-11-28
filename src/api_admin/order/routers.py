@@ -86,7 +86,7 @@ async def category_unit_price(store_id: int, current_user: User = Depends(get_cu
             Customer.username,
             Customer.first_name,
             Customer.last_name,
-            Customer.is_premium,
+            # Customer.is_premium,
         ).order_by(desc(Customer.id))
         .where(Customer.store_id == store_id)
         .execution_options(schema_translate_map={None: str(current_user.id)})
