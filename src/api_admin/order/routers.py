@@ -3,7 +3,8 @@ from sqlalchemy.sql import func
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
 from .models import Order, OrderDetail
-from ..models import Cart, Category, Product
+from ..models import Cart, Category, Product, Customer
+from ..customer.schemas import *
 from src.api_admin.product.models import Product
 from .schemas import *
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -35,6 +36,13 @@ async def get_all_order_details(store_id: int, current_user: User = Depends(get_
     return result.scalars().all()
 
 
+@router.get("/customer/")
+async def get_all_customer(store_id: int, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)) -> List[CustomerBase]:
+    query = select(Customer).where(Customer.store_id == store_id).order_by(
+        Customer.id.desc()).execution_options(schema_translate_map={None: str(current_user.id)})
+    result = await session.execute(query)
+    return result.scalars().all()
+
 # @router.get("/detail/")
 # async def get_all_order_details(store_id: int, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)) -> List[OrderDetailBase]:
 #     query = select(OrderDetail).where(OrderDetail.store_id == store_id).order_by(OrderDetail.id.desc()).execution_options(
@@ -47,6 +55,23 @@ async def get_all_order_details(store_id: int, current_user: User = Depends(get_
 async def category_unit_price(store_id: int, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
     query = (
         select(
+            Category.name.label("category_name"),
+            func.sum(OrderDetail.unit_price).label("total_price"))
+        .join(Product, Product.category_id == Category.id)
+        .join(OrderDetail, OrderDetail.product_id == Product.id)
+        .where(OrderDetail.store_id == store_id)
+        .group_by(Category.name)).execution_options(
+        schema_translate_map={None: str(current_user.id)})
+    result = await session.execute(query)
+    data = result.all()
+    return data
+
+
+@router.get("/total_category/", response_model=List[OrderCategoryTotal])
+async def category_unit_price(store_id: int, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
+    query = (
+        select(
+            Product.name.label("product_name"),
             Category.name.label("category_name"),
             func.sum(OrderDetail.unit_price).label("total_price"))
         .join(Product, Product.category_id == Category.id)

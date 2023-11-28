@@ -55,3 +55,11 @@ class OrderCategoryTotal(BaseModel):
 
     category_name: str
     total_price: float
+
+
+class ReportProductTotal(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    product_name: str
+    category_name: str
+    total_price: float
