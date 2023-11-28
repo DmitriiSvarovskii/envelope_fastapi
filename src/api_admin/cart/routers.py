@@ -36,16 +36,16 @@ router = APIRouter(
     tags=["Store (bot)"])
 
 
-@router.post("/product/", response_model=List[ProductListStore])
-async def get_all_product(schema: str, data: CustomerCreate, session: AsyncSession = Depends(get_async_session)):
+@router.get("/product/", response_model=List[ProductListStore])
+async def get_all_product(schema: str, store_id: int, session: AsyncSession = Depends(get_async_session)):
     query = select(Product).where(
-        Product.deleted_flag != True).where(Product.store_id == data.store_id).order_by(Product.popular.desc(), Product.id.desc()).execution_options(schema_translate_map={None: schema})
+        Product.deleted_flag != True).where(Product.store_id == store_id).order_by(Product.popular.desc(), Product.id.desc()).execution_options(schema_translate_map={None: schema})
     result = await session.execute(query)
     products = result.scalars().all()
-    await add_tg_user(schema=schema, data=data, session=session)
     return products
 
 
+@router.post("/add_tg_user/")
 async def add_tg_user(schema: str, data: CustomerCreate, session: AsyncSession = Depends(get_async_session)):
     query = select(Customer).filter(
         Customer.tg_user_id == data.tg_user_id, Customer.store_id == data.store_id).execution_options(schema_translate_map={None: schema})
@@ -56,7 +56,7 @@ async def add_tg_user(schema: str, data: CustomerCreate, session: AsyncSession =
                                        ).execution_options(schema_translate_map={None: schema})
         await session.execute(stmt)
         await session.commit()
-        return {"status": 201, 'tg_user_id': data.tg_user_id}
+        return {"status": 201, "data": data}
 
 
 @router.get("/product/{product_id}/", response_model=Optional[ProductOne])
