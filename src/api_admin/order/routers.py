@@ -108,7 +108,7 @@ async def category_unit_price(store_id: int, current_user: User = Depends(get_cu
     return data
 
 
-@router.get("/total_report/", response_model=List[ReportMain])
+@router.get("/total_report/", response_model=Optional[ReportMain])
 async def category_unit_price(store_id: int, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
     query = (
         select(
@@ -117,5 +117,5 @@ async def category_unit_price(store_id: int, current_user: User = Depends(get_cu
         .execution_options(
             schema_translate_map={None: str(current_user.id)}))
     result = await session.execute(query)
-    data = result.all()
-    return data
+    data = result.scalar()
+    return {"total_sales": data}
