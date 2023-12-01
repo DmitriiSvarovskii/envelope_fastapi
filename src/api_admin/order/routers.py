@@ -121,8 +121,9 @@ async def get_main_data(store_id: int, current_user: User = Depends(get_current_
         .execution_options(
             schema_translate_map={None: str(current_user.id)}))
     result = await session.execute(query)
-    data = result.scalar()
-    return data
+    total_sales = result.scalar()
+    report_data = {"total_sales": total_sales}
+    return report_data
 
 
 # async def get_category_data(store_id: int, current_user: User, session: AsyncSession):
