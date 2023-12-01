@@ -63,7 +63,7 @@ async def get_category_data(store_id: int, current_user: User = Depends(get_curr
         schema_translate_map={None: str(current_user.id)})
     result = await session.execute(query)
     data = result.all()
-    return {"Отчёт по категориям": data}
+    return data
 
 
 @router.get("/customer/", response_model=List[ReportCustomer])
@@ -92,7 +92,7 @@ async def get_customer_data(store_id: int, current_user: User = Depends(get_curr
 
     result = await session.execute(query)
     data = result.all()
-    return {"Отчёт по клиентам": data}
+    return data
 
 
 @router.get("/total_product/", response_model=List[ReportProductTotal])
@@ -109,7 +109,7 @@ async def get_product_data(store_id: int, current_user: User = Depends(get_curre
         schema_translate_map={None: str(current_user.id)})
     result = await session.execute(query)
     data = result.all()
-    return {"Отчёт по продуктам": data}
+    return data
 
 
 @router.get("/total_report/", response_model=Optional[ReportMain])
@@ -122,7 +122,7 @@ async def get_main_data(store_id: int, current_user: User = Depends(get_current_
             schema_translate_map={None: str(current_user.id)}))
     result = await session.execute(query)
     data = result.scalar()
-    return {"Отчёт по общим продажам": data}
+    return data
 
 
 # async def get_category_data(store_id: int, current_user: User, session: AsyncSession):
