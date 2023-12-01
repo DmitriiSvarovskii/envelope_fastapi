@@ -39,7 +39,7 @@ router = APIRouter(
 @router.get("/product/", response_model=List[ProductListStore])
 async def get_all_product(schema: str, store_id: int, session: AsyncSession = Depends(get_async_session)):
     query = select(Product).where(
-        Product.deleted_flag != True).where(Product.store_id == store_id).order_by(Product.popular.desc(), Product.id.desc()).execution_options(schema_translate_map={None: schema})
+        Product.deleted_flag != True, Product.store_id == store_id).order_by(Product.popular.desc(), Product.id.desc()).execution_options(schema_translate_map={None: schema})
     result = await session.execute(query)
     products = result.scalars().all()
     return products

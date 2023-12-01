@@ -55,9 +55,9 @@ class ProductListStore(BaseModel):
     # carbohydrates: Optional[int] = None
     # availability: bool
     # popular: bool
-    # delivery: bool
-    # takeaway: bool
-    # dinein: bool
+    delivery: bool
+    takeaway: bool
+    dinein: bool
     # position
 
 
