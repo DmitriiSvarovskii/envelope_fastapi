@@ -1,3 +1,6 @@
+from sqlalchemy import and_
+from datetime import datetime
+from fastapi import Query
 from fastapi import Depends, APIRouter
 from sqlalchemy import func, desc
 from sqlalchemy.future import select
@@ -42,25 +45,56 @@ async def get_all_order_details(store_id: int, current_user: User = Depends(get_
     return result.scalars().all()
 
 
-@router.get("/customer/")
-async def get_all_customer(store_id: int, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)) -> List[CustomerBase]:
-    query = select(Customer).where(Customer.store_id == store_id).order_by(
-        Customer.id.desc()).execution_options(schema_translate_map={None: str(current_user.id)})
-    result = await session.execute(query)
-    return result.scalars().all()
+# @router.get("/customer/")
+# async def get_all_customer(store_id: int, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)) -> List[CustomerBase]:
+#     query = select(Customer).where(Customer.store_id == store_id).order_by(
+#         Customer.id.desc()).execution_options(schema_translate_map={None: str(current_user.id)})
+#     result = await session.execute(query)
+#     return result.scalars().all()
+
+
+# @router.get("/total_category/", response_model=List[ReportCategoryTotal])
+# async def get_category_data(store_id: int, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
+#     query = (
+#         select(
+#             Category.name.label("category_name"),
+#             func.sum(OrderDetail.unit_price).label("total_sales"))
+#         .join(Product, Product.category_id == Category.id)
+#         .join(OrderDetail, OrderDetail.product_id == Product.id)
+#         .where(OrderDetail.store_id == store_id)
+#         .group_by(Category.name)).order_by(desc("total_sales")).execution_options(
+#         schema_translate_map={None: str(current_user.id)})
+#     result = await session.execute(query)
+#     data = result.all()
+#     return data
 
 
 @router.get("/total_category/", response_model=List[ReportCategoryTotal])
-async def get_category_data(store_id: int, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
+async def get_category_data(
+    store_id: int,
+    start_date: datetime = Query(None),
+    end_date: datetime = Query(None),
+    current_user: User = Depends(get_current_user_from_token),
+    session: AsyncSession = Depends(get_async_session)
+):
+    # Создайте условие для фильтрации по дате
+    date_filter = and_(
+        OrderDetail.created_at >= start_date if start_date else True,
+        OrderDetail.created_at <= end_date if end_date else True
+    )
+
     query = (
         select(
             Category.name.label("category_name"),
             func.sum(OrderDetail.unit_price).label("total_sales"))
         .join(Product, Product.category_id == Category.id)
         .join(OrderDetail, OrderDetail.product_id == Product.id)
-        .where(OrderDetail.store_id == store_id)
-        .group_by(Category.name)).order_by(desc("total_sales")).execution_options(
-        schema_translate_map={None: str(current_user.id)})
+        .where(and_(OrderDetail.store_id == store_id, date_filter))
+        .group_by(Category.name)
+    ).order_by(desc("total_sales")).execution_options(
+        schema_translate_map={None: str(current_user.id)}
+    )
+
     result = await session.execute(query)
     data = result.all()
     return data
