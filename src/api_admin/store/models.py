@@ -2,7 +2,7 @@ from sqlalchemy.orm import relationship, Mapped, mapped_column
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
 from src.database import *
-
+from sqlalchemy import create_engine, Column, func, DateTime, Integer, BIGINT
 from typing import List, TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -21,6 +21,7 @@ class Store(Base):
     token_bot: Mapped[str]
     user_id: Mapped[int] = mapped_column(
         ForeignKey("public.users.id", ondelete="CASCADE"))
+    tg_id_group: Mapped[int | None] = mapped_column(BIGINT)
     created_by: Mapped[int] = mapped_column(
         ForeignKey("public.users.id", ondelete="CASCADE"))
     created_at: Mapped[created_at]

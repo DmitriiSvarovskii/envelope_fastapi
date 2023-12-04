@@ -27,6 +27,7 @@ from ..customer.schemas import CustomerCreate
 from .schemas import TextMail
 from ..customer.schemas import CustomerCreate
 from ..customer.routers import get_all_customer
+from ..store.routers import get_one_store
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.database import get_async_session
 from typing import List, Dict, Optional
@@ -53,7 +54,7 @@ bot = Bot(token=BOT_TOKEN)
 dp: Dispatcher = Dispatcher()
 
 
-photo_url = 'https://storage.yandexcloud.net/envelope-app/13/2/california-rolls.jpeg'
+# photo_url = 'https://storage.yandexcloud.net/envelope-app/13/2/california-rolls.jpeg'
 
 
 @router.post("/send_message/")
@@ -64,7 +65,7 @@ async def send_message(data: TextMail, store_id: int, current_user: User = Depen
             tg_user_id = customer.tg_user_id
             try:
                 if data.photo_url:
-                    await bot.send_photo(chat_id=tg_user_id, photo=photo_url, caption=f"{data.mail_text}", parse_mode=ParseMode.MARKDOWN_V2)
+                    await bot.send_photo(chat_id=tg_user_id, photo=data.photo_url, caption=f"{data.mail_text}", parse_mode=ParseMode.MARKDOWN_V2)
                 else:
                     await bot.send_message(chat_id=tg_user_id, text=f"{data.mail_text}", parse_mode=ParseMode.MARKDOWN_V2)
             except tg_exceptions.TelegramBadRequest as e:
@@ -79,18 +80,15 @@ async def send_message(data: TextMail, store_id: int, current_user: User = Depen
 @router.post("/send_message_group/")
 async def send_message(data: TextMail, store_id: int, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
     try:
-        customers = await get_all_customer(store_id=store_id, current_user=current_user, session=session)
-        for customer in customers:
-            tg_user_id = customer.tg_user_id
-            try:
-                if data.photo_url:
-                    await bot.send_photo(chat_id=tg_user_id, photo=photo_url, caption=f"{data.mail_text}", parse_mode=ParseMode.MARKDOWN_V2)
-                else:
-                    await bot.send_message(chat_id=tg_user_id, text=f"{data.mail_text}", parse_mode=ParseMode.MARKDOWN_V2)
-            except tg_exceptions.TelegramBadRequest as e:
-                print(
-                    f"Ошибка при отправке сообщения пользователю {tg_user_id}: {e}")
+        tg_group = await get_one_store(store_id=store_id, current_user=current_user, session=session)
+        if data.photo_url:
+            await bot.send_photo(chat_id=tg_group, photo=data.photo_url, caption=f"{data.mail_text}", parse_mode=ParseMode.MARKDOWN_V2)
+        else:
+            await bot.send_message(chat_id=tg_group, text=f"{data.mail_text}", parse_mode=ParseMode.MARKDOWN_V2)
         return {"status": "success", "message": "Сообщение успешно отправлено"}
+    except tg_exceptions.TelegramBadRequest as e:
+        print(
+            f"Ошибка при отправке сообщения пользователю {tg_group}: {e}")
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Ошибка при отправке сообщения: {str(e)}")

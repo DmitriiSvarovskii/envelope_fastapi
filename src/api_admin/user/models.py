@@ -41,6 +41,7 @@ class User(Base):
     username: Mapped[str_64] = mapped_column(unique=True)
     hashed_password: Mapped[str] = mapped_column(nullable=False)
     name: Mapped[str_64 | None]
+    user_tg_id: Mapped[int | None] = mapped_column(BIGINT)
     number_phone: Mapped[int] = mapped_column(unique=True, nullable=True)
     employee_id: Mapped[int | None] = mapped_column(
         ForeignKey("public.employees.id", ondelete="CASCADE"))

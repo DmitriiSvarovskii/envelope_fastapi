@@ -19,12 +19,20 @@ async def crud_get_all_stores(schema: str, session: AsyncSession = Depends(get_a
     return stores
 
 
+async def crud_get_one_stores(store_id: int, schema: str, session: AsyncSession = Depends(get_async_session)) -> List[StoreList]:
+    query = select(Store).where(
+        Store.deleted_flag != True, Store.id == store_id).order_by(Store.id.desc()).execution_options(schema_translate_map={None: schema})
+    result = await session.execute(query)
+    stores = result.scalar()
+    return stores
+
+
 async def crud_create_new_store(schema: str, data: StoreCreate, user_id: int, session: AsyncSession = Depends(get_async_session)) -> List[StoreCreate]:
     # store_data = data.dict()
     # Устанавливаем created_by из текущего пользователя
     # store_data["created_by"] = user_id
     stmt = insert(Store).values(**data.dict(), user_id=user_id, created_by=user_id
-                                   ).execution_options(schema_translate_map={None: schema})
+                                ).execution_options(schema_translate_map={None: schema})
     await session.execute(stmt)
     await session.commit()
     return {"status": 201, 'date': data}

@@ -1,8 +1,8 @@
-"""remove_unique_constraint_from_tg_user_id
+"""1 migrations
 
-Revision ID: 7939340c2718
+Revision ID: 23d824750ef8
 Revises: 
-Create Date: 2023-11-27 19:40:45.131678
+Create Date: 2023-12-04 21:21:33.315645
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '7939340c2718'
+revision: str = '23d824750ef8'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -56,6 +56,7 @@ def upgrade() -> None:
     sa.Column('username', sa.String(length=64), nullable=False),
     sa.Column('hashed_password', sa.String(), nullable=False),
     sa.Column('name', sa.String(length=64), nullable=True),
+    sa.Column('user_tg_id', sa.BIGINT(), nullable=True),
     sa.Column('number_phone', sa.Integer(), nullable=True),
     sa.Column('employee_id', sa.Integer(), nullable=True),
     sa.Column('role_id', sa.Integer(), server_default=sa.text('1'), nullable=False),
@@ -77,6 +78,7 @@ def upgrade() -> None:
     sa.Column('name', sa.String(length=64), nullable=False),
     sa.Column('token_bot', sa.String(), nullable=False),
     sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('tg_id_group', sa.BIGINT(), nullable=True),
     sa.Column('created_by', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), server_default=sa.text("TIMEZONE('utc', now())"), nullable=False),
     sa.Column('updated_at', sa.DateTime(), server_default=sa.text("TIMEZONE('utc', now())"), nullable=False),
@@ -123,6 +125,10 @@ def upgrade() -> None:
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('store_id', sa.Integer(), nullable=True),
     sa.Column('tg_user_id', sa.BIGINT(), nullable=False),
+    sa.Column('first_name', sa.String(), nullable=True),
+    sa.Column('last_name', sa.String(), nullable=True),
+    sa.Column('username', sa.String(), nullable=True),
+    sa.Column('is_premium', sa.Boolean(), server_default=sa.text('false'), nullable=False),
     sa.Column('created_at', sa.DateTime(), server_default=sa.text("TIMEZONE('utc', now())"), nullable=False),
     sa.ForeignKeyConstraint(['store_id'], ['stores.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id'),
@@ -220,7 +226,7 @@ def upgrade() -> None:
     sa.Column('order_id', sa.Integer(), nullable=False),
     sa.Column('product_id', sa.Integer(), nullable=False),
     sa.Column('quantity', sa.Integer(), nullable=False),
-    sa.Column('unit_price', sa.Integer(), nullable=False),
+    sa.Column('unit_price', sa.Float(), nullable=False),
     sa.Column('created_at', sa.DateTime(), server_default=sa.text("TIMEZONE('utc', now())"), nullable=False),
     sa.ForeignKeyConstraint(['order_id'], ['orders.id'], ondelete='CASCADE'),
     sa.ForeignKeyConstraint(['product_id'], ['products.id'], ondelete='CASCADE'),
