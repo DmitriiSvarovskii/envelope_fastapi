@@ -102,9 +102,9 @@ async def send_message(data: TextMail, store_id: int, current_user: User = Depen
     try:
         tg_group = await get_one_store(store_id=store_id, current_user=current_user, session=session)
         if data.photo_url:
-            await bot.send_photo(chat_id=tg_group.tg_id_group, photo=data.photo_url, caption=f"{data.mail_text}", reply_markup=keyboard_store, parse_mode=ParseMode.MARKDOWN_V2)
+            await bot.send_photo(chat_id=tg_group.tg_id_group, photo=data.photo_url, caption=f"{data.mail_text}", parse_mode=ParseMode.MARKDOWN_V2, reply_markup=keyboard_store)
         else:
-            await bot.send_message(chat_id=tg_group.tg_id_group, text=f"{data.mail_text}", reply_markup=keyboard_store, parse_mode=ParseMode.MARKDOWN_V2)
+            await bot.send_message(chat_id=tg_group.tg_id_group, text=f"{data.mail_text}", parse_mode=ParseMode.MARKDOWN_V2, reply_markup=keyboard_store)
         return {"status": "success", "message": "Сообщение успешно отправлено"}
     except tg_exceptions.TelegramBadRequest as e:
         print(
