@@ -14,6 +14,12 @@ class StoreBase(BaseModel):
 class StoreList(StoreBase):
     id: int
     name: str
+
+
+class StoreTgGroup(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    tg_id_group: int
     # availability: bool
     # position: int
 

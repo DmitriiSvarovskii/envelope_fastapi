@@ -26,15 +26,16 @@ async def get_all_store(current_user: User = Depends(get_current_user_from_token
             status_code=500, detail=f"An error occurred: {str(e)}")
 
 
+@router.get("/one/", response_model=Optional[StoreTgGroup], status_code=200)
 async def get_one_store(store_id: int, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
     try:
-        categories = await crud_get_one_stores(store_id=store_id, schema=str(current_user.id), session=session)
-        return categories
+        store = await crud_get_one_stores(store_id=store_id, schema=str(current_user.id), session=session)
+        return store
     except Exception as e:
         await session.rollback()
         raise HTTPException(
             status_code=500, detail=f"An error occurred: {str(e)}")
-        
+
 
 @router.post("/", status_code=201)
 async def create_new_store(data: StoreCreate,  current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):

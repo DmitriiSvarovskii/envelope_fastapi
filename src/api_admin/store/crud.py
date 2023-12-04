@@ -19,12 +19,12 @@ async def crud_get_all_stores(schema: str, session: AsyncSession = Depends(get_a
     return stores
 
 
-async def crud_get_one_stores(store_id: int, schema: str, session: AsyncSession = Depends(get_async_session)) -> List[StoreList]:
+async def crud_get_one_stores(store_id: int, schema: str, session: AsyncSession = Depends(get_async_session)) -> List[StoreTgGroup]:
     query = select(Store).where(
         Store.deleted_flag != True, Store.id == store_id).order_by(Store.id.desc()).execution_options(schema_translate_map={None: schema})
     result = await session.execute(query)
-    stores = result.scalar()
-    return stores
+    store = result.scalar()
+    return store
 
 
 async def crud_create_new_store(schema: str, data: StoreCreate, user_id: int, session: AsyncSession = Depends(get_async_session)) -> List[StoreCreate]:
