@@ -9,9 +9,11 @@ from src.api_admin.store.routers import router as router_store
 from src.api_admin.cart.routers import router as router_cart
 from src.api_admin.customer.routers import router as router_customer
 from src.api_admin.order.routers import router as router_order
+from src.api_admin.mail.controller import router as router_mail
 
 
 routers = [
+    router_mail,
     router_auth,
     router_category,
     router_subcategory,
