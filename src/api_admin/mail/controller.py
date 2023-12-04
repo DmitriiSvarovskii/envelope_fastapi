@@ -51,7 +51,7 @@ async def send_message(data: TextMail, store_id: int, current_user: User = Depen
         for customer in customers:
             tg_user_id = customer.tg_user_id
             try:
-                await bot.send_message(tg_user_id, f"{data.mail_text}", parse_mode=ParseMode.HTML)
+                await bot.send_message(tg_user_id, f"{data.mail_text}", parse_mode=ParseMode.MARKDOWN_V2)
             except tg_exceptions.TelegramBadRequest as e:
                 print(
                     f"Ошибка при отправке сообщения пользователю {tg_user_id}: {e}")
