@@ -44,6 +44,26 @@ from src.config import BUCKET_NAME, ENDPOINT_URL
 from PIL import Image
 import io
 import os
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.utils.keyboard import InlineKeyboardBuilder
+from aiogram.types.web_app_info import WebAppInfo
+from aiogram import Bot
+from aiogram.types import BotCommand, MenuButton
+from aiogram.types import MenuButtonWebApp, WebAppInfo
+
+web_app = WebAppInfo(url='https://store.envelope-app.ru/schema=1/store_id=1/')
+
+
+button_store: InlineKeyboardButton = InlineKeyboardButton(
+    text='Онлайн-кафе',
+    web_app=web_app)
+
+
+keyboard_store_builder: InlineKeyboardBuilder = InlineKeyboardBuilder()
+
+keyboard_store_builder.row(button_store)
+keyboard_store = keyboard_store_builder.as_markup()
+
 
 router = APIRouter(
     prefix="/api/v1/mail",
@@ -82,9 +102,9 @@ async def send_message(data: TextMail, store_id: int, current_user: User = Depen
     try:
         tg_group = await get_one_store(store_id=store_id, current_user=current_user, session=session)
         if data.photo_url:
-            await bot.send_photo(chat_id=tg_group.tg_id_group, photo=data.photo_url, caption=f"{data.mail_text}", parse_mode=ParseMode.MARKDOWN_V2)
+            await bot.send_photo(chat_id=tg_group.tg_id_group, photo=data.photo_url, caption=f"{data.mail_text}", reply_markup=keyboard_store, parse_mode=ParseMode.MARKDOWN_V2)
         else:
-            await bot.send_message(chat_id=tg_group.tg_id_group, text=f"{data.mail_text}", parse_mode=ParseMode.MARKDOWN_V2)
+            await bot.send_message(chat_id=tg_group.tg_id_group, text=f"{data.mail_text}", reply_markup=keyboard_store, parse_mode=ParseMode.MARKDOWN_V2)
         return {"status": "success", "message": "Сообщение успешно отправлено"}
     except tg_exceptions.TelegramBadRequest as e:
         print(
