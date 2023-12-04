@@ -1,3 +1,7 @@
+from aiogram import Bot, types
+import io
+import requests
+from aiogram.types import InputFile
 from aiogram import exceptions as tg_exceptions
 from sqlalchemy import select, union_all
 from sqlalchemy.orm import aliased
@@ -8,7 +12,7 @@ from aiogram.types.web_app_info import WebAppInfo
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 from aiogram.enums import ParseMode
-from aiogram import Bot, Dispatcher, types
+from aiogram import Bot, Dispatcher
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy.sql import func
@@ -44,6 +48,9 @@ bot = Bot(token=BOT_TOKEN)
 dp: Dispatcher = Dispatcher()
 
 
+photo_url = 'https://storage.yandexcloud.net/envelope-app/13/2/california-rolls.jpeg'
+
+
 @router.post("/send_message/")
 async def send_message(data: TextMail, store_id: int, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
     try:
@@ -51,7 +58,10 @@ async def send_message(data: TextMail, store_id: int, current_user: User = Depen
         for customer in customers:
             tg_user_id = customer.tg_user_id
             try:
-                await bot.send_message(tg_user_id, f"{data.mail_text}", parse_mode=ParseMode.MARKDOWN_V2)
+                if data.photo_url:
+                    await bot.send_photo(chat_id=tg_user_id, photo=photo_url, caption=f"{data.mail_text}", parse_mode=ParseMode.MARKDOWN_V2)
+                else:
+                    await bot.send_message(chat_id=tg_user_id, text=f"{data.mail_text}", parse_mode=ParseMode.MARKDOWN_V2)
             except tg_exceptions.TelegramBadRequest as e:
                 print(
                     f"Ошибка при отправке сообщения пользователю {tg_user_id}: {e}")
