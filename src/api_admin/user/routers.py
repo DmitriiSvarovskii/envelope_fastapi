@@ -22,6 +22,12 @@ async def get_all_users_list(current_user: User = Depends(get_current_user_from_
     return users
 
 
+@router.get("/one/", status_code=201)
+async def get_one_user(current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)) -> Optional[UserTgId]:
+    users = await crud_get_one_user(user_id=current_user.id, session=session)
+    return users
+
+
 @router.post("/register/", status_code=201)
 async def register_new_user(response: Response, user_data: UserCreate, session: AsyncSession = Depends(get_async_session)):
     await check_duplication(user_data=user_data, session=session)

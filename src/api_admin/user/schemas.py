@@ -18,6 +18,11 @@ class UserList(UserBase):
     role_id: int
     id: int
 
+
+class UserTgId(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    user_tg_id: Optional[int] = None
+
     # class Config:
     #     from_attributes = True
 

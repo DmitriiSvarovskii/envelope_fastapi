@@ -16,6 +16,13 @@ async def crud_get_all_users(session: AsyncSession = Depends(get_async_session))
     return users
 
 
+async def crud_get_one_user(user_id: int, session: AsyncSession = Depends(get_async_session)) -> Optional[UserTgId]:
+    query = select(User).where(User.id == user_id).order_by(User.id.desc())
+    result = await session.execute(query)
+    users = result.scalar()
+    return users
+
+
 async def crud_register_new_user(user_data: UserCreate, session: AsyncSession = Depends(get_async_session)):
     stmt = insert(User).values([{'username': user_data.username,
                                  'hashed_password': pwd_context.hash(user_data.hashed_password)}]

@@ -27,6 +27,7 @@ from ..customer.schemas import CustomerCreate
 from .schemas import TextMail
 from ..customer.schemas import CustomerCreate
 from ..customer.routers import get_all_customer
+from ..user.routers import get_one_user
 from ..store.routers import get_one_store
 from sqlalchemy.ext.asyncio import AsyncSession
 from src.database import get_async_session
@@ -92,6 +93,23 @@ async def send_message(data: TextMail, store_id: int, current_user: User = Depen
                 print(
                     f"Ошибка при отправке сообщения пользователю {tg_user_id}: {e}")
         return {"status": "success", "message": "Сообщение успешно отправлено"}
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Ошибка при отправке сообщения: {str(e)}")
+
+
+@router.post("/send_message_me/")
+async def send_message(data: TextMail, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
+    try:
+        tg_id = await get_one_user(current_user=current_user, session=session)
+        if data.photo_url:
+            await bot.send_photo(chat_id=tg_id.user_tg_id, photo=data.photo_url, caption=f"{data.mail_text}", parse_mode=ParseMode.MARKDOWN_V2)
+        else:
+            await bot.send_message(chat_id=tg_id.user_tg_id, text=f"{data.mail_text}", parse_mode=ParseMode.MARKDOWN_V2)
+        return {"status": "success", "message": "Сообщение успешно отправлено"}
+    except tg_exceptions.TelegramBadRequest as e:
+        print(
+            f"Ошибка при отправке сообщения в чат {tg_id.user_tg_id}: {e}")
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Ошибка при отправке сообщения: {str(e)}")
