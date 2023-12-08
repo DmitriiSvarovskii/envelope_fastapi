@@ -24,6 +24,7 @@ async def get_async_session() -> AsyncGenerator[AsyncSession, None]:
 
 str_64 = Annotated[str, 64]
 str_256 = Annotated[str, 256]
+str_4048 = Annotated[str, 4048]
 
 
 class Base(DeclarativeBase):
@@ -31,6 +32,7 @@ class Base(DeclarativeBase):
         dict[str, Any]: JSON,
         str_64: String(64),
         str_256: String(256),
+        str_4048: String(4048),
 
     }
 

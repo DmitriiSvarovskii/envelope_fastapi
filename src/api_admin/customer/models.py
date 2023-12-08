@@ -21,8 +21,10 @@ class Customer(Base):
     first_name: Mapped[str | None]
     last_name: Mapped[str | None]
     username: Mapped[str | None]
+    resourse: Mapped[str | None]
     is_premium: Mapped[bool] = mapped_column(server_default=text("false"))
     created_at: Mapped[created_at]
+    is_active: Mapped[bool] = mapped_column(server_default=text("true"))
 
     def __init__(self, schema):
         super().__init__()

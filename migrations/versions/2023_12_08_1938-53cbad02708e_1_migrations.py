@@ -1,8 +1,8 @@
 """1 migrations
 
-Revision ID: 23d824750ef8
+Revision ID: 53cbad02708e
 Revises: 
-Create Date: 2023-12-04 21:21:33.315645
+Create Date: 2023-12-08 19:38:28.893564
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '23d824750ef8'
+revision: str = '53cbad02708e'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -73,12 +73,53 @@ def upgrade() -> None:
     schema='public'
     )
     op.create_index(op.f('ix_public_users_id'), 'users', ['id'], unique=False, schema='public')
+    op.create_table('mails',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('title', sa.String(length=256), nullable=False),
+    sa.Column('mail_text', sa.String(length=4048), nullable=False),
+    sa.Column('image', sa.String(), nullable=True),
+    sa.Column('created_by', sa.Integer(), nullable=False),
+    sa.Column('created_at', sa.DateTime(), server_default=sa.text("TIMEZONE('utc', now())"), nullable=False),
+    sa.Column('deleted_flag', sa.Boolean(), server_default=sa.text('false'), nullable=False),
+    sa.Column('deleted_at', sa.DateTime(), server_default=sa.text('null'), nullable=True),
+    sa.Column('deleted_by', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['created_by'], ['public.users.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['deleted_by'], ['public.users.id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_mails_id'), 'mails', ['id'], unique=False)
+    op.create_table('bot_tokens',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('token_bot', sa.String(), nullable=False),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('store_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['user_id'], ['public.users.id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id'),
+    schema='public'
+    )
+    op.create_index(op.f('ix_public_bot_tokens_id'), 'bot_tokens', ['id'], unique=False, schema='public')
+    op.create_index(op.f('ix_public_bot_tokens_token_bot'), 'bot_tokens', ['token_bot'], unique=True, schema='public')
     op.create_table('stores',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=64), nullable=False),
-    sa.Column('token_bot', sa.String(), nullable=False),
+    sa.Column('region', sa.String(length=64), nullable=True),
+    sa.Column('city', sa.String(length=64), nullable=True),
+    sa.Column('street', sa.String(length=256), nullable=True),
+    sa.Column('number_phone', sa.BIGINT(), nullable=True),
+    sa.Column('mobile_phone', sa.BIGINT(), nullable=True),
+    sa.Column('coordinates_1', sa.BIGINT(), nullable=True),
+    sa.Column('coordinates_2', sa.BIGINT(), nullable=True),
+    sa.Column('link_bot', sa.String(length=256), nullable=True),
+    sa.Column('delivery', sa.Boolean(), nullable=True),
+    sa.Column('takeaway', sa.Boolean(), nullable=True),
+    sa.Column('dinein', sa.Boolean(), nullable=True),
+    sa.Column('time_zone', sa.String(length=64), nullable=True),
+    sa.Column('open_hours', sa.DateTime(), nullable=True),
+    sa.Column('close_hours', sa.DateTime(), nullable=True),
+    sa.Column('is_active', sa.Boolean(), nullable=True),
+    sa.Column('subscription_start_date', sa.DateTime(), nullable=True),
+    sa.Column('subscription_duration_months', sa.Integer(), nullable=True),
     sa.Column('user_id', sa.Integer(), nullable=False),
-    sa.Column('tg_id_group', sa.BIGINT(), nullable=True),
     sa.Column('created_by', sa.Integer(), nullable=False),
     sa.Column('created_at', sa.DateTime(), server_default=sa.text("TIMEZONE('utc', now())"), nullable=False),
     sa.Column('updated_at', sa.DateTime(), server_default=sa.text("TIMEZONE('utc', now())"), nullable=False),
@@ -128,13 +169,59 @@ def upgrade() -> None:
     sa.Column('first_name', sa.String(), nullable=True),
     sa.Column('last_name', sa.String(), nullable=True),
     sa.Column('username', sa.String(), nullable=True),
+    sa.Column('resourse', sa.String(), nullable=True),
     sa.Column('is_premium', sa.Boolean(), server_default=sa.text('false'), nullable=False),
     sa.Column('created_at', sa.DateTime(), server_default=sa.text("TIMEZONE('utc', now())"), nullable=False),
+    sa.Column('is_active', sa.Boolean(), server_default=sa.text('true'), nullable=False),
     sa.ForeignKeyConstraint(['store_id'], ['stores.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('store_id', 'tg_user_id', name='uq_store_tg_user')
     )
     op.create_index(op.f('ix_customers_id'), 'customers', ['id'], unique=False)
+    op.create_table('legal_informations',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('full_organization_name', sa.String(length=4048), nullable=True),
+    sa.Column('legal_address', sa.String(), nullable=True),
+    sa.Column('legal_phone', sa.BIGINT(), nullable=True),
+    sa.Column('inn', sa.BIGINT(), nullable=True),
+    sa.Column('ogrn', sa.BIGINT(), nullable=True),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('store_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['store_id'], ['stores.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['user_id'], ['public.users.id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_legal_informations_id'), 'legal_informations', ['id'], unique=False)
+    op.create_table('payment_and_deliverys',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('cash', sa.Boolean(), nullable=False),
+    sa.Column('card', sa.Boolean(), nullable=False),
+    sa.Column('sbp', sa.Boolean(), nullable=False),
+    sa.Column('min_order_amount_for_free_delivery', sa.Integer(), nullable=True),
+    sa.Column('min_delivery_amount', sa.Integer(), nullable=True),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('store_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['store_id'], ['stores.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['user_id'], ['public.users.id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_payment_and_deliverys_id'), 'payment_and_deliverys', ['id'], unique=False)
+    op.create_table('service_chats',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('welcome_message_bot', sa.String(length=4048), nullable=True),
+    sa.Column('welcome_image', sa.String(), nullable=True),
+    sa.Column('tg_id_group', sa.BIGINT(), nullable=True),
+    sa.Column('delivery_chat', sa.BIGINT(), nullable=True),
+    sa.Column('order_chat', sa.BIGINT(), nullable=True),
+    sa.Column('completed_orders_chat', sa.BIGINT(), nullable=True),
+    sa.Column('canceled_orders_chat', sa.BIGINT(), nullable=True),
+    sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('store_id', sa.Integer(), nullable=False),
+    sa.ForeignKeyConstraint(['store_id'], ['stores.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['user_id'], ['public.users.id'], ondelete='CASCADE'),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_index(op.f('ix_service_chats_id'), 'service_chats', ['id'], unique=False)
     op.create_table('orders',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('store_id', sa.Integer(), nullable=False),
@@ -249,6 +336,12 @@ def downgrade() -> None:
     op.drop_table('subcategories')
     op.drop_index(op.f('ix_orders_id'), table_name='orders')
     op.drop_table('orders')
+    op.drop_index(op.f('ix_service_chats_id'), table_name='service_chats')
+    op.drop_table('service_chats')
+    op.drop_index(op.f('ix_payment_and_deliverys_id'), table_name='payment_and_deliverys')
+    op.drop_table('payment_and_deliverys')
+    op.drop_index(op.f('ix_legal_informations_id'), table_name='legal_informations')
+    op.drop_table('legal_informations')
     op.drop_index(op.f('ix_customers_id'), table_name='customers')
     op.drop_table('customers')
     op.drop_index(op.f('ix_categories_id'), table_name='categories')
@@ -258,6 +351,11 @@ def downgrade() -> None:
     op.drop_table('tokens')
     op.drop_index(op.f('ix_stores_id'), table_name='stores')
     op.drop_table('stores')
+    op.drop_index(op.f('ix_public_bot_tokens_token_bot'), table_name='bot_tokens', schema='public')
+    op.drop_index(op.f('ix_public_bot_tokens_id'), table_name='bot_tokens', schema='public')
+    op.drop_table('bot_tokens', schema='public')
+    op.drop_index(op.f('ix_mails_id'), table_name='mails')
+    op.drop_table('mails')
     op.drop_index(op.f('ix_public_users_id'), table_name='users', schema='public')
     op.drop_table('users', schema='public')
     op.drop_index(op.f('ix_units_id'), table_name='units')

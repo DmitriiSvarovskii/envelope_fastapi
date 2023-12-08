@@ -5,7 +5,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import get_async_session
-from .models import Store
+from .models import Store, BotToken
 from .schemas import *
 from typing import List
 from datetime import datetime
@@ -27,15 +27,48 @@ async def crud_get_one_stores(store_id: int, schema: str, session: AsyncSession 
     return store
 
 
-async def crud_create_new_store(schema: str, data: StoreCreate, user_id: int, session: AsyncSession = Depends(get_async_session)) -> List[StoreCreate]:
-    # store_data = data.dict()
-    # Устанавливаем created_by из текущего пользователя
-    # store_data["created_by"] = user_id
+async def crud_create_new_store(schema: str, data: StoreCreate, user_id: int, session: AsyncSession = Depends(get_async_session)):
     stmt = insert(Store).values(**data.dict(), user_id=user_id, created_by=user_id
-                                ).execution_options(schema_translate_map={None: schema})
-    await session.execute(stmt)
+                                ).execution_options(schema_translate_map={None: schema}).returning(Store.id)
+    result = await session.execute(stmt)
+    new_store_id = result.scalar()
     await session.commit()
-    return {"status": 201, 'date': data}
+    return {"status": 201, "id": new_store_id, 'date': data}
+
+
+async def crud_create_new_store_and_bot(schema: str, data: StoreCreate, token_bot: BotTokenCreate, user_id: int, session: AsyncSession = Depends(get_async_session)):
+    # Создаем магазин
+    store_result = await crud_create_new_store(schema=schema, data=data, user_id=user_id, session=session)
+    store_id = store_result.get("id")
+
+    # Вставляем в "bot_tokens" после получения store_id
+    stmt_token = insert(BotToken).values(
+        **token_bot.dict(), user_id=user_id, store_id=store_id)
+
+    # Ожидаем выполнения вставки в "bot_tokens"
+    await session.execute(stmt_token)
+    await session.commit()
+
+    return {"status": 201}
+# async def crud_create_new_store(schema: str, data: StoreCreate, user_id: int, session: AsyncSession = Depends(get_async_session)) -> List[StoreCreate]:
+#     stmt = insert(Store).values(**data.dict(), user_id=user_id, created_by=user_id
+#                                 ).execution_options(schema_translate_map={None: schema}).returning(Store.id)
+#     result = await session.execute(stmt)
+#     new_store_id = result.scalar()
+#     await session.commit()
+#     return {"status": 201, "id": new_store_id, 'date': data}
+
+
+# async def crud_create_new_store_and_bot(schema: str, data: StoreCreate, token_bot: BotTokenCreate, user_id: int, session: AsyncSession = Depends(get_async_session)):
+#     store_result = await crud_create_new_store(schema=schema, data=data, user_id=user_id, session=session)
+#     store_id = store_result.get("id")
+#     print(store_id)
+
+#     stmt_token = insert(BotToken).values(
+#         **token_bot.dict(), user_id=user_id, store_id=store_id)
+#     await session.execute(stmt_token)
+#     await session.commit()
+#     return {"status": 201}
 
 
 async def crud_update_store(schema: str, user_id: int, store_id: int, data: StoreUpdate, session: AsyncSession = Depends(get_async_session)) -> List[StoreUpdate]:

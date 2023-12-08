@@ -9,6 +9,7 @@ from .auth import Token
 from .cart import Cart
 from .order import Order, OrderDetail
 from .customer import Customer
+from .mail import Mail
 
 
 all = (
@@ -21,5 +22,10 @@ all = (
     'Unit',
     'Product',
     'Token',
+    'Cart',
+    'Order',
+    'OrderDetail',
+    'Customer',
+    'Mail',
 
 )

@@ -68,7 +68,7 @@ keyboard_store = keyboard_store_builder.as_markup()
 
 router = APIRouter(
     prefix="/api/v1/mail",
-    tags=["Mail (bot)"])
+    tags=["Mail (admin)"])
 
 
 bot = Bot(token=BOT_TOKEN)
@@ -92,6 +92,8 @@ async def send_message(data: TextMail, store_id: int, current_user: User = Depen
             except tg_exceptions.TelegramBadRequest as e:
                 print(
                     f"Ошибка при отправке сообщения пользователю {tg_user_id}: {e}")
+                # customer.is_active = True
+                # session.commit()
         return {"status": "success", "message": "Сообщение успешно отправлено"}
     except Exception as e:
         raise HTTPException(
