@@ -37,18 +37,18 @@ async def get_one_store(store_id: int, current_user: User = Depends(get_current_
             status_code=500, detail=f"An error occurred: {str(e)}")
 
 
+# @router.post("/", status_code=201)
+# async def create_new_store(data: StoreCreate,  current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
+#     try:
+#         new_store = await crud_create_new_store(schema=str(current_user.id), data=data, user_id=current_user.id, session=session)
+#         return new_store
+#     except Exception as e:
+#         await session.rollback()
+#         raise HTTPException(
+#             status_code=500, detail=f"An error occurred: {str(e)}")
+
+
 @router.post("/", status_code=201)
-async def create_new_store(data: StoreCreate,  current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
-    try:
-        new_store = await crud_create_new_store(schema=str(current_user.id), data=data, user_id=current_user.id, session=session)
-        return new_store
-    except Exception as e:
-        await session.rollback()
-        raise HTTPException(
-            status_code=500, detail=f"An error occurred: {str(e)}")
-
-
-@router.post("/test/", status_code=201)
 async def create_new_store(data: StoreCreate, token_bot: BotTokenCreate,  current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
     try:
         new_store = await crud_create_new_store_and_bot(schema=str(current_user.id), data=data, token_bot=token_bot, user_id=current_user.id, session=session)
