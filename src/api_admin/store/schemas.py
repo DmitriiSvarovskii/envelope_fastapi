@@ -263,6 +263,13 @@ class OneStore(BaseModel):
     association: List[StoreOrderType]
 
 
+class GetBotToken(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    token_bot: str
+    user_id: int
+    store_id: int
+
+
 class TypeOrderName(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     name: str

@@ -44,6 +44,13 @@ async def crud_get_one_stores(store_id: int, schema: str, session: AsyncSession 
     return store
 
 
+async def crud_get_info_store_token(bot_token: str, session: AsyncSession = Depends(get_async_session)):
+    query = select(BotToken).where(BotToken.token_bot == bot_token)
+    result = await session.execute(query)
+    store = result.scalar()
+    return store
+
+
 async def read_test_many_to_many(session: AsyncSession = Depends(get_async_session)):
     query = (
         select(StoreOrderTypeAssociation).

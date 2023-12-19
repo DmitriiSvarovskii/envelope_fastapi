@@ -39,6 +39,17 @@ async def get_one_store(store_id: int, current_user: User = Depends(get_current_
             status_code=500, detail=f"An error occurred: {str(e)}")
 
 
+@router.get("/store_token_bot/", status_code=200, response_model=Optional[GetBotToken])
+async def get_info_store_token(bot_token: str, session: AsyncSession = Depends(get_async_session)):
+    try:
+        info_store_token = await crud_get_info_store_token(bot_token=bot_token, session=session)
+        return info_store_token
+    except Exception as e:
+        await session.rollback()
+        raise HTTPException(
+            status_code=500, detail=f"An error occurred: {str(e)}")
+
+
 @router.post("/", status_code=201)
 async def create_new_store(data: StoreCreate, token_bot: BotTokenCreate,  current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
     try:
@@ -92,7 +103,6 @@ async def update_store_activity(store_id: int, current_user: User = Depends(get_
         await session.rollback()
         raise HTTPException(
             status_code=500, detail=f"An error occurred: {str(e)}")
-
 
 
 @router.get("/order_type/", response_model=List[ListOrderType], status_code=200)
