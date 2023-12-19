@@ -20,4 +20,4 @@ class Role(Base):
     id: Mapped[intpk]
     name: Mapped[str_64]
 
-    user_role: Mapped[List['User']] = relationship(back_populates="role")
+    users: Mapped[List['User']] = relationship(back_populates="role")

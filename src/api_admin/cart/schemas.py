@@ -62,7 +62,12 @@ class CreateOrder(BaseModel):
 
     tg_user_id: int
     store_id: int
+    order_type_id: int
     # cart_items: List[CartItemsOrder]
+
+
+class CreateCustomerInfo(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
     delivery_city: Optional[str] = None
     delivery_address: Optional[str] = None
     customer_name: Optional[str] = None

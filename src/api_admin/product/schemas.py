@@ -73,7 +73,7 @@ class ProductOne(BaseModel):
     wt: int
     kilocalories: int
     proteins: int
-    fats: int
+    # fats: int
     carbohydrates: int
     unit: Optional[UnitBase]
     # availability: bool

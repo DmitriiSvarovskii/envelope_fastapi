@@ -15,5 +15,5 @@ class Token(Base):
     user_id: Mapped[int | None] = mapped_column(
         ForeignKey("public.users.id", ondelete="CASCADE"))
 
-    token_user: Mapped['User'] = relationship(
-        back_populates="token")
+    user: Mapped['User'] = relationship(back_populates="token")  # One-to-One
+

@@ -1,8 +1,11 @@
-from datetime import datetime
 from sqlalchemy import BIGINT, ForeignKey, ForeignKeyConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.database import *
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ..models import *
 
 
 class Cart(Base):
@@ -17,6 +20,11 @@ class Cart(Base):
         ForeignKey("products.id", ondelete="CASCADE"))
     quantity: Mapped[int]
 
+    store: Mapped['Store'] = relationship(
+        back_populates="carts")
+    product: Mapped['Product'] = relationship(
+        back_populates="carts")
+
     def __init__(self, schema):
         super().__init__()
         self.__table_args__ = {'schema': schema}
@@ -25,9 +33,3 @@ class Cart(Base):
         ForeignKeyConstraint(['store_id', 'tg_user_id'], [
                              'customers.store_id', 'customers.tg_user_id'], ondelete="CASCADE"),
     )
-    # def __init__(self, schema, product_id, quantity, tg_user_id):
-    #         super().__init__()
-    #         self.__table_args__ = {'schema': schema}
-    #         self.product_id = product_id
-    #         self.quantity = quantity
-    #         self.tg_user_id = tg_user_id

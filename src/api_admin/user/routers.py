@@ -34,7 +34,7 @@ async def register_new_user(response: Response, user_data: UserCreate, session: 
     create_user = await crud_register_new_user(user_data=user_data, session=session)
     await create_new_schema_and_table(user_data=str(create_user['user_id']), session=session)
     # await create_new_schema_and_table(user_data=create_user[1], session=session)
-    await create_new_unit(schema=str(create_user['user_id']), session=session)
+    # await create_new_unit(schema=str(create_user['user_id']), session=session)
     token_data = {"sub": create_user}
     jwt_token = create_jwt_token(token_data)
     response.set_cookie(key="access_token", value=jwt_token, expires=3600)
@@ -46,7 +46,7 @@ async def update_user_data(user_id: int, new_date: UserUpdateData, current_user:
     pass
 
 
-@router.put("/update_password/", summary="Обновление пароля")
+@router.patch("/update_password/", summary="Обновление пароля")
 async def update_user_password(user_id: int, password_data: UserUpdatePassword, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
     pass
 

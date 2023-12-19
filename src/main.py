@@ -1,11 +1,10 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
-# from aiogram import Bot, Dispatcher
-# from aiogram.types import Update, Message
-
 from src.api_admin.routers import routers
-# from src.config import BOT_TOKEN, URL_NGROK
-# from src.bot.main import bot, dp
+from aiogram import Bot, Dispatcher, types
+from aiogram.filters import Command
+
+TOKEN = '5895760296:AAF2hSRl3TAIrZGHD6M5sSDdtdYkQPr9sUc'
 
 
 app = FastAPI(
@@ -15,8 +14,9 @@ app = FastAPI(
     docs_url="/api/v1/docs",
     redoc_url=None,
 )
-# WEBHOOK_PATH = f'/bot{BOT_TOKEN}'
-# WEBHOOK_URL = f'{URL_NGROK}{WEBHOOK_PATH}'
+
+bot = Bot(token=TOKEN)
+dp = Dispatcher()
 
 
 ORIGINS = [
@@ -39,29 +39,19 @@ app.add_middleware(
 )
 
 
-# @app.on_event("startup")
-# async def on_startup():
-#     webhook_info = await bot.get_webhook_info()
-#     print(webhook_info)
-#     if webhook_info != WEBHOOK_URL:
-#         await bot.set_webhook(
-#             url=WEBHOOK_URL
-#         )
-
-
-# @app.post("/")
-# async def start(message: Message):
-#     await message.answer(text='Работает')
-# # async def bot_webook(update: dict):
-# #     telegram_update = Update(**update)
-# #     print(telegram_update)
-# #     await dp.feed_update(bot=bot, update=telegram_update)
-
-
 for router in routers:
     app.include_router(router)
 
 
-# @app.on_event("shutdown")
-# async def on_shutdown():
-#     await bot.session.close()
+@app.post('/api/v1/webhook')
+async def receive_update(request: Request):
+    # Десериализация обновления Telegram
+    update = await request.json()
+    # Обновление диспетчера
+    await dp.process_update(types.Update.to_object(update))
+    return {'ok': True}
+
+
+@dp.message(Command(commands=['/start']))
+async def start(message: types.Message):
+    await bot.send_message(message.chat.id, "Привет! Я ваш бот.")

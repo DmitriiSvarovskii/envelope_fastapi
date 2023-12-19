@@ -1,6 +1,6 @@
 from .models import *
 __all__ = [
-    'Role',
+    # 'Role',
     'User',
     'UserData',
     'Employee',

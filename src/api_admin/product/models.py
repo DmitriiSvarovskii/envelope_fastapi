@@ -16,24 +16,18 @@ import enum
 
 from typing import List, TYPE_CHECKING
 if TYPE_CHECKING:
-    from ..category import Category
-    from ..subcategory import Subcategory
-    from ..user import User
+    from ..models import *
 
 
 class Unit(Base):
     __tablename__ = "units"
-    __table_args__ = {'schema': None}
+    __table_args__ = {'schema': 'public'}
 
     id: Mapped[intpk]
     name: Mapped[str_64] = mapped_column(unique=True)
 
-    product_unit: Mapped[List['Product']
-                         ] = relationship(back_populates="unit")
-
-    def __init__(self, schema):
-        super().__init__()
-        self.__table_args__ = {'schema': schema}
+    products: Mapped[List['Product']
+                     ] = relationship(back_populates="unit")
 
 
 class Product(Base):
@@ -53,7 +47,7 @@ class Product(Base):
     price: Mapped[float]
     wt: Mapped[int | None]
     unit_id: Mapped[int] = mapped_column(
-        ForeignKey("units.id", ondelete="CASCADE"))
+        ForeignKey("public.units.id", ondelete="CASCADE"))
     kilocalories: Mapped[int | None]
     proteins: Mapped[int | None]
     fats: Mapped[int | None]
@@ -75,12 +69,15 @@ class Product(Base):
     deleted_by: Mapped[int | None] = mapped_column(
         ForeignKey("public.users.id", ondelete="CASCADE"))
 
-    unit: Mapped['Unit'] = relationship(
-        back_populates="product_unit")
-    category: Mapped['Category'] = relationship(
-        back_populates="product_category")
+    category: Mapped['Category'] = relationship(back_populates="products")
     subcategory: Mapped['Subcategory'] = relationship(
-        back_populates="product_subcategory")
+        back_populates="products")
+    store: Mapped['Store'] = relationship(back_populates="products")
+    unit: Mapped['Unit'] = relationship(back_populates="products")
+    carts: Mapped['Cart'] = relationship(
+        back_populates="product")
+    order_details: Mapped['OrderDetail'] = relationship(back_populates="product")
+
     # user_product: Mapped[List['User']] = relationship(
     #     back_populates="product")
 

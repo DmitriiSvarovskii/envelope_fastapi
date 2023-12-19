@@ -164,7 +164,7 @@ async def get_current_user_from_token(token: str = Depends(oauth2_scheme), sessi
     return user_response
 
 
-@router.get("/test/",)
+@router.get("/logit/test/",)
 async def read_items(current_user: User = Depends(get_current_user_from_token)):
     return {"token": current_user}
 

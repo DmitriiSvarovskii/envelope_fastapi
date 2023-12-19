@@ -10,27 +10,7 @@ import sqlalchemy
 from typing import List, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from ..category import Category
-    from ..subcategory import Subcategory
-    from ..user import User
-    from ..role import Role
-
-    from ..auth import Token
-    from ..employee import Employee
-
-
-# class Role(Base):
-#     __tablename__ = "roles"
-#     __table_args__ = {'schema': 'public'}
-
-#     id: Mapped[intpk]
-#     name: Mapped[str_64]
-
-#     user_role: Mapped[List['User']] = relationship(back_populates="role")
-
-#     # def __init__(self, schema):
-#     #     super().__init__()
-#     #     self.__table_args__ = {'schema': schema}
+    from ..models import *
 
 
 class User(Base):
@@ -53,11 +33,13 @@ class User(Base):
     deleted_flag: Mapped[deleted_flag]
     deleted_at: Mapped[deleted_at]
 
-    role: Mapped['Role'] = relationship(back_populates="user_role")
-    employee: Mapped['Employee'] = relationship(back_populates="user_employee")
-    token: Mapped['Token'] = relationship(back_populates="token_user")
-    # product: Mapped[List['Product']] = relationship(
-    #     back_populates="user_product")
+    role: Mapped['Role'] = relationship(back_populates="users")
+    token: Mapped['Token'] = relationship(back_populates="user")
+    bot_token: Mapped['BotToken'] = relationship(
+        back_populates="user")
+    # store: Mapped['Store'] = relationship(
+    #     back_populates="user")
+    # back_populates="user_product")
 
     # def __init__(self, schema):
     #     super().__init__()

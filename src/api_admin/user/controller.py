@@ -1,3 +1,5 @@
+from sqlalchemy import Table
+from sqlalchemy.ext.declarative import DeclarativeMeta
 from fastapi import Depends, HTTPException
 from sqlalchemy import insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -8,11 +10,12 @@ from src.database import get_async_session
 from src.api_admin.models import *
 from .schemas import *
 from .crud import *
+from ..models import model_for_new_schema
 
 
 tables_to_create = [Store.__table__, Category.__table__,
-                    Subcategory.__table__, Unit.__table__, Product.__table__, 
-                    Customer.__table__,Cart.__table__, Order.__table__, 
+                    Subcategory.__table__, Product.__table__,
+                    Customer.__table__, Cart.__table__, Order.__table__,
                     OrderDetail.__table__,]
 
 
@@ -39,7 +42,7 @@ async def check_duplication(user_data: UserCreate, session: AsyncSession = Depen
 # async def create_new_schema_and_table(user_data: UserCreate, session: AsyncSession = Depends(get_async_session)):
 async def create_new_schema_and_table(user_data: str, session: AsyncSession = Depends(get_async_session)):
     await session.execute(CreateSchema(user_data))
-    for table in tables_to_create:
+    for table in model_for_new_schema:
         await session.execute(
             CreateTable(table).execution_options(schema_translate_map={None: user_data}))
     await session.commit()

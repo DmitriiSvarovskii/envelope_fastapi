@@ -6,7 +6,7 @@ from logging.config import fileConfig
 
 from alembic import context
 from sqlalchemy import engine_from_config, pool
-from src.api_admin.models import Role, Employee, User
+from src.api_admin.models import *
 
 sys.path.append(os.path.join(sys.path[0], 'src'))
 

@@ -9,7 +9,7 @@ from typing import List
 from typing import List, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from ..category import Category, Subcategory
+    from ..category import Category
     from ..user import User
     from ..product import Product
 
@@ -29,8 +29,8 @@ class Employee(Base):
     deleted_flag: Mapped[deleted_flag]
     deleted_at: Mapped[deleted_at]
 
-    user_employee: Mapped[List['User']] = relationship(
-        back_populates="employee")
+    # user_employee: Mapped[List['User']] = relationship(
+    #     back_populates="employee")
 
     # def __init__(self, schema):
     #     super().__init__()

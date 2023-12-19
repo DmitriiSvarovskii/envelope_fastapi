@@ -24,7 +24,7 @@ from ..user import User
 
 from ..auth.routers import get_current_user_from_token
 from ..customer.schemas import CustomerCreate
-from .schemas import TextMail
+from .schemas import TextMail, Test
 from ..customer.schemas import CustomerCreate
 from ..customer.routers import get_all_customer
 from ..user.routers import get_one_user

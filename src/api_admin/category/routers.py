@@ -17,6 +17,9 @@ router = APIRouter(
 
 @router.get("/", response_model=List[CategoryList], status_code=200)
 async def get_all_category(store_id: int, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
+    """
+    Ожидается jwt-token
+    """
     try:
         categories = await crud_get_all_categories(schema=str(current_user.id), store_id=store_id, session=session)
         return categories
@@ -28,6 +31,9 @@ async def get_all_category(store_id: int, current_user: User = Depends(get_curre
 
 @router.post("/", status_code=201)
 async def create_new_category(store_id: int, data: CategoryCreate,  current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
+    """
+    Ожидается jwt-token
+    """
     try:
         new_category = await crud_create_new_category(schema=current_user.store_id, store_id=store_id,  data=data, user_id=current_user.id, session=session)
         return new_category
@@ -39,6 +45,9 @@ async def create_new_category(store_id: int, data: CategoryCreate,  current_user
 
 @router.put("/", status_code=200)
 async def update_category(category_id: int, data: CategoryUpdate,  current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
+    """
+    Ожидается jwt-token
+    """
     try:
         up_category = await crud_update_category(schema=str(current_user.id), category_id=category_id, data=data, user_id=current_user.id, session=session)
         return up_category
@@ -48,8 +57,11 @@ async def update_category(category_id: int, data: CategoryUpdate,  current_user:
             status_code=500, detail=f"An error occurred: {str(e)}")
 
 
-@router.put("/delete/")
+@router.patch("/delete/")
 async def change_delete_flag_category(category_id: int, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
+    """
+    Ожидается jwt-token
+    """
     try:
         change_category = await crud_change_delete_flag_category(schema=str(current_user.id), user_id=current_user.id, category_id=category_id, session=session)
         return change_category
@@ -59,12 +71,11 @@ async def change_delete_flag_category(category_id: int, current_user: User = Dep
             status_code=500, detail=f"An error occurred: {str(e)}")
 
 
-@router.put("/checkbox/",)
+@router.patch("/checkbox/",)
 async def update_category_field(category_id: int, checkbox: str, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
     """
-    Параметры:
+    Ожидается jwt-token;
 
-    - `category_id`: идентификатор категории.
     - `checkbox`: имя поля, которое требуется изменить. Для категории доступно только: `availability`.
    """
     try:
@@ -78,6 +89,9 @@ async def update_category_field(category_id: int, checkbox: str, current_user: U
 
 @router.delete("/")
 async def delete_category(category_id: int, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
+    """
+    Ожидается jwt-token
+    """
     try:
         change_category = await crud_delete_category(schema=str(current_user.id), category_id=category_id, session=session)
         return change_category

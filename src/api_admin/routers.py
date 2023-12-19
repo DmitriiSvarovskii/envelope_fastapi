@@ -10,9 +10,11 @@ from src.api_admin.cart.routers import router as router_cart
 from src.api_admin.customer.routers import router as router_customer
 from src.api_admin.order.routers import router as router_order
 from src.api_admin.mail.controller import router as router_mail
+from src.api_admin.test.routers import router as router_test
 
 
-routers = [
+routers = (
+    router_test,
     router_mail,
     router_auth,
     router_category,
@@ -25,4 +27,4 @@ routers = [
     router_order,
     router_customer,
     router_cart,
-]
+)

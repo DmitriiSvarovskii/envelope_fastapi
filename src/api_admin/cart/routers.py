@@ -2,6 +2,7 @@ from sqlalchemy import select, union_all
 from sqlalchemy.orm import aliased
 from aiohttp import web
 import yookassa
+
 from datetime import datetime, timedelta
 from aiogram.types.web_app_info import WebAppInfo
 from aiogram.utils.keyboard import InlineKeyboardBuilder
@@ -16,7 +17,7 @@ from aiogram.types import Message
 
 from sqlalchemy import insert, select, label, join, update, delete
 from .models import Cart
-from ..models import Product, Order, OrderDetail, Customer
+from ..models import Product, Order, OrderDetail, Customer, OrderCustomerInfo
 from .schemas import *
 from ..customer.schemas import CustomerCreate
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -224,7 +225,7 @@ async def delete_cart_items_by_tg_user_id(schema: str, store_id: int, tg_user_id
 
 
 @router.post("/create_order/")
-async def create_order(schema: str, data: CreateOrder, session: AsyncSession = Depends(get_async_session)):
+async def create_order(schema: str, data_order: CreateOrder, date_customer_info: CreateCustomerInfo = None, session: AsyncSession = Depends(get_async_session)):
     cart_query = (select(Cart.product_id,
                          Cart.quantity,
                          Product.name.label("product_name"),
@@ -232,8 +233,8 @@ async def create_order(schema: str, data: CreateOrder, session: AsyncSession = D
                          func.sum(Cart.quantity * Product.price).over().label("total_price")).
                   join(Cart, Cart.product_id == Product.id).
                   filter(
-        Cart.tg_user_id == data.tg_user_id,
-        Cart.store_id == data.store_id
+        Cart.tg_user_id == data_order.tg_user_id,
+        Cart.store_id == data_order.store_id
     ).execution_options(
         schema_translate_map={None: schema}))
     cart_items = await session.execute(cart_query)
@@ -243,34 +244,24 @@ async def create_order(schema: str, data: CreateOrder, session: AsyncSession = D
         raise HTTPException(status_code=400, detail="Cart is empty")
 
     stmt_order = insert(Order).values(
-        store_id=data.store_id,
-        tg_user_id=data.tg_user_id,
-        delivery_city=data.delivery_city,
-        delivery_address=data.delivery_address,
-        customer_name=data.customer_name,
-        customer_phone=data.customer_phone,
-        customer_comment=data.customer_comment
+        **data_order.dict(),
+        # delivery_city=data_order.delivery_city,
+        # delivery_address=data_order.delivery_address,
+        # customer_name=data_order.customer_name,
+        # customer_phone=data_order.customer_phone,
+        # customer_comment=data_order.customer_comment
     ).returning(Order.id).execution_options(schema_translate_map={None: schema})
 
     result = await session.execute(stmt_order)
     order_id = result.scalar()
 
-    # values_list = [
-    #     {
-    #         "store_id": data.store_id,
-    #         "order_id": order_id,
-    #         "product_id": cart_item.product_id,
-    #         "quantity": cart_item.quantity,
-    #         "unit_price": cart_item.unit_price
-    #     }
-    #     for cart_item in cart_items
-    # ]
     values_list = []
     order_text = ""
     order_sum = cart_items[0][4]
+
     for cart_item in cart_items:
         values_list.append({
-            "store_id": data.store_id,
+            "store_id": data_order.store_id,
             "order_id": order_id,
             "product_id": cart_item.product_id,
             "quantity": cart_item.quantity,
@@ -283,7 +274,7 @@ async def create_order(schema: str, data: CreateOrder, session: AsyncSession = D
     new_datetime = datetime.now() + timedelta(minutes=45)
     order_time = new_datetime.strftime('%d.%m.%Y %H:%M')
     text = f"Заказ №{order_id} от {datetime.now().strftime('%d.%m.%Y')} в {datetime.now().strftime('%H:%M')}\n" \
-        f"Код клиента: {data.tg_user_id}\n" \
+        f"Код клиента: {data_order.tg_user_id}\n" \
         "--------------------\n" \
         f"Адрес заведения: г. Томск, ул. Вадима Саратова 69\n" \
         f"Телефон заведения: +7969-069-69-69\n" \
@@ -296,11 +287,16 @@ async def create_order(schema: str, data: CreateOrder, session: AsyncSession = D
         f"Дата и время выдачи: {order_time}\n"
 
     url, payment_id = await create_pay(total_price=order_sum, order_id=order_id)
-    await send_message(chat_id=data.tg_user_id, text=text, url=url)
+    await send_message(chat_id=data_order.tg_user_id, text=text, url=url)
     stmt_order_detail = insert(OrderDetail).values(
         values_list).execution_options(schema_translate_map={None: schema})
     await session.execute(stmt_order_detail)
-    stmt = delete(Cart).where(Cart.tg_user_id == data.tg_user_id, Cart.store_id == data.store_id).execution_options(
+    if date_customer_info:
+        stmt_customer_infol = insert(OrderCustomerInfo).values(
+            **date_customer_info.dict(), store_id=data_order.store_id,
+            tg_user_id=data_order.tg_user_id, order_id=order_id).execution_options(schema_translate_map={None: schema})
+        await session.execute(stmt_customer_infol)
+    stmt = delete(Cart).where(Cart.tg_user_id == data_order.tg_user_id, Cart.store_id == data_order.store_id).execution_options(
         schema_translate_map={None: schema})
     await session.execute(stmt)
     await session.commit()

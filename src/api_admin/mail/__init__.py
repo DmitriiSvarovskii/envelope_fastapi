@@ -1,6 +1,7 @@
-from .models import Mail
+from .models import Mail, MailImage
 
 
 all = [
     Mail,
+    MailImage,
 ]

@@ -137,7 +137,7 @@ async def update_product(product_id: int, data: ProductUpdate,  current_user: Us
             status_code=500, detail=f"An error occurred: {str(e)}")
 
 
-@router.put("/checkbox/",)
+@router.patch("/checkbox/",)
 async def update_product_field(product_id: int, checkbox: str, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
     """
     Параметры:
@@ -154,7 +154,7 @@ async def update_product_field(product_id: int, checkbox: str, current_user: Use
             status_code=500, detail=f"An error occurred: {str(e)}")
 
 
-@router.put("/delete/")
+@router.patch("/delete/")
 async def change_delete_flag_product(product_id: int, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
     try:
         change_product = await crud_change_delete_flag_product(schema=str(current_user.id), user_id=current_user.id, product_id=product_id, session=session)

@@ -48,7 +48,7 @@ async def update_subcategory(subcategory_id: int, data: SubcategoryUpdate,  curr
             status_code=500, detail=f"An error occurred: {str(e)}")
 
 
-@router.put("/delete/")
+@router.patch("/delete/")
 async def change_delete_flag_subcategory(subcategory_id: int, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
     try:
         change_subcategory = await crud_change_delete_flag_subcategory(schema=str(current_user.id), user_id=current_user.id, subcategory_id=subcategory_id, session=session)
@@ -59,7 +59,7 @@ async def change_delete_flag_subcategory(subcategory_id: int, current_user: User
             status_code=500, detail=f"An error occurred: {str(e)}")
 
 
-@router.put("/checkbox/", summary="Изменение поля категории")
+@router.patch("/checkbox/", summary="Изменение поля категории")
 async def update_subcategory_field(subcategory_id: int, checkbox: str, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
     """
     Параметры:
