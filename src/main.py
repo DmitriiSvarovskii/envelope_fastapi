@@ -4,7 +4,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from src.api_admin.routers import routers
 from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
-
+from aiogram.types import (
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    MenuButtonWebApp,
+    Message,
+    WebAppInfo,
+)
 TOKEN = '5895760296:AAF2hSRl3TAIrZGHD6M5sSDdtdYkQPr9sUc'
 
 
@@ -49,7 +55,13 @@ async def on_shutdown():
 
 @dp.message(Command(commands=['start']))
 async def start(message: types.Message):
-    await bot.send_message(chat_id=message.chat.id, text="Привет! Я ваш бот.")
+    await bot.set_chat_menu_button(
+        chat_id=message.chat.id,
+        menu_button=MenuButtonWebApp(text="Онлайн кафе", web_app=WebAppInfo(
+            url='https://store.envelope-app.ru/schema=1/store_id=1/')),
+    )
+
+    await bot.send_message(chat_id=message.chat.id, text=f"Привет! Я ваш бот. Мой токен {message.bot.token}")
 
 
 ORIGINS = [
