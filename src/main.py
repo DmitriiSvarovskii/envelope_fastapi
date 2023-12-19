@@ -6,9 +6,9 @@ from aiogram import Bot, Dispatcher, types
 from aiogram.filters import Command
 from src.database import get_async_session
 from src.api_admin.store.routers import crud_get_info_store_token
+from src.config import BOT_TOKEN
 
-
-TOKEN = '5895760296:AAF2hSRl3TAIrZGHD6M5sSDdtdYkQPr9sUc'
+TOKEN = BOT_TOKEN
 
 
 app = FastAPI(
