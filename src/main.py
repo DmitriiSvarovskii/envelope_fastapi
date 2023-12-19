@@ -57,7 +57,7 @@ async def on_shutdown():
 async def start(message: types.Message):
     await bot.set_chat_menu_button(
         chat_id=message.chat.id,
-        menu_button=MenuButtonWebApp(text="Онлайн кафе", web_app=WebAppInfo(
+        menu_button=MenuButtonWebApp(text="Store", web_app=WebAppInfo(
             url='https://store.envelope-app.ru/schema=1/store_id=1/')),
     )
 
