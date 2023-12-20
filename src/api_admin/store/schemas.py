@@ -269,6 +269,11 @@ class GetBotToken(BaseModel):
     store_id: int
 
 
+class GetAllBotToken(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    token_bot: str
+
+
 class TypeOrderName(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     name: str
