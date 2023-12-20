@@ -48,16 +48,31 @@ async def get_all_product(schema: str, store_id: int, session: AsyncSession = De
 
 @router.post("/add_tg_user/")
 async def add_tg_user(schema: str, data: CustomerCreate, session: AsyncSession = Depends(get_async_session)):
+    if data.is_premium is None:
+        data.is_premium = False
     query = select(Customer).filter(
-        Customer.tg_user_id == data.tg_user_id, Customer.store_id == data.store_id).execution_options(schema_translate_map={None: schema})
+        Customer.tg_user_id == data.tg_user_id,
+        Customer.store_id == data.store_id
+    ).execution_options(schema_translate_map={None: schema})
     result = await session.execute(query)
     customer = result.scalar()
-    if customer is None:
-        stmt = insert(Customer).values(**data.dict()
-                                       ).execution_options(schema_translate_map={None: schema})
+
+    if customer:
+        update_data = data.dict(exclude_unset=True)
+        await session.execute(
+            update(Customer).where(
+                Customer.tg_user_id == data.tg_user_id,
+                Customer.store_id == data.store_id
+            ).values(**update_data).execution_options(schema_translate_map={None: schema})
+        )
+        await session.commit()
+        return {"status": 200, "message": "User updated", "data": update_data}
+    else:
+        stmt = insert(Customer).values(
+            **data.dict()).execution_options(schema_translate_map={None: schema})
         await session.execute(stmt)
         await session.commit()
-        return {"status": 201, "data": data}
+        return {"status": 201, "message": "User created", "data": data}
 
 
 @router.get("/product/{product_id}/", response_model=Optional[ProductOne])

@@ -51,6 +51,13 @@ async def crud_get_info_store_token(bot_token: str, session: AsyncSession = Depe
     return store
 
 
+async def crud_get_info_store_token_all(session: AsyncSession = Depends(get_async_session)):
+    query = select(BotToken)
+    result = await session.execute(query)
+    store = result.scalars().all()
+    return store
+
+
 async def read_test_many_to_many(session: AsyncSession = Depends(get_async_session)):
     query = (
         select(StoreOrderTypeAssociation).

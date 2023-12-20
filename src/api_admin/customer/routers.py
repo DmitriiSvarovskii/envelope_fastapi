@@ -33,6 +33,15 @@ async def create_new_customer(schema: str, new_customer: CustomerCreate, session
     return {"status": "success"}
 
 
+# @router.post("/")
+# async def create_new_customer(schema: str, new_customer: CustomerCreate, session: AsyncSession = Depends(get_async_session)):
+#     stmt = insert(Customer).values(**new_customer.dict()
+#                                    ).execution_options(schema_translate_map={None: schema})
+#     await session.execute(stmt)
+#     await session.commit()
+#     return {"status": "success"}
+
+
 @router.put("/")
 async def update_customer(schema: str, customer_id: int, new_date: CustomerUpdate, session: AsyncSession = Depends(get_async_session)):
     stmt = update(Customer).where(
