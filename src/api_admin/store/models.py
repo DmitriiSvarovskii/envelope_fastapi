@@ -33,17 +33,10 @@ class Store(Base):
     deleted_by: Mapped[int | None] = mapped_column(
         ForeignKey("public.users.id", ondelete="CASCADE"))
 
-    # order_typed: Mapped[List['OrderType']] = relationship(
-    #     back_populates='store_order_types',
-    #     secondary='store_order_types_association'
-    # )
     association: Mapped[List['StoreOrderTypeAssociation']
                         ] = relationship(back_populates="store")
     subcategories: Mapped['Subcategory'] = relationship(back_populates="store")
-    # user: Mapped['User'] = relationship(
-    #     back_populates="store",
-    #     foreign_keys=['user_id', 'created_by', 'updated_by', 'deleted_by']
-    # )
+
     carts: Mapped[List['Cart']] = relationship(
         back_populates="store")
     categories: Mapped[List['Category']] = relationship(
@@ -81,9 +74,18 @@ class Store(Base):
         back_populates="store", uselist=False)
     delivery_district: Mapped['DeliveryDistrict'] = relationship(
         back_populates="store", uselist=False)
-    # association: Mapped[List['StoreOrderTypeAssociation']
-    #                     ] = relationship(back_populates="store")
 
+
+    # order_typed: Mapped[List['OrderType']] = relationship(
+    #     back_populates='store_order_types',
+    #     secondary='store_order_types_association'
+    # )
+    
+        # user: Mapped['User'] = relationship(
+    #     back_populates="store",
+    #     foreign_keys=['user_id', 'created_by', 'updated_by', 'deleted_by']
+    # )
+    
     def __init__(self, schema):
         super().__init__()
         self.__table_args__ = {'schema': schema}

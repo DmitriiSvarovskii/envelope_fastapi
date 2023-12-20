@@ -251,7 +251,6 @@ class StoreOrderType(BaseModel):
     order_type_id: int
     is_active: bool
     order_type: Optional[InfoStoreOrderType]
-    # name: Optional[str] = None
 
 
 class OneStore(BaseModel):
