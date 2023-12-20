@@ -13,8 +13,9 @@ SECRET_KEY_JWT = os.environ.get("SECRET_KEY_JWT")
 ALGORITHM = os.environ.get("ALGORITHM")
 
 BOT_TOKEN = os.environ.get("BOT_TOKEN")
+WEBHOOK_HOST = os.environ.get("WEBHOOK_HOST")
+WEBHOOK_PATH = os.environ.get("WEBHOOK_PATH")
 
-URL_NGROK = os.environ.get("URL_NGROK")
 
 BUCKET_NAME = os.environ.get("BUCKET_NAME")
 ENDPOINT_URL = os.environ.get("ENDPOINT_URL")

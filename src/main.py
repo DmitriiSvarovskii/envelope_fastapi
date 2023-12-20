@@ -8,7 +8,7 @@ from src.database import get_async_session
 from src.api_admin.store.routers import crud_get_info_store_token
 from src.api_admin.cart.routers import add_tg_user
 from src.api_admin.customer.schemas import CustomerCreate
-from src.config import BOT_TOKEN
+from src.config import BOT_TOKEN, WEBHOOK_PATH, WEBHOOK_HOST
 
 
 TOKEN = BOT_TOKEN
@@ -25,9 +25,8 @@ app = FastAPI(
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
-WEBHOOK_HOST = 'https://envelope-app.ru'
-# WEBHOOK_HOST = 'https://60d9-103-157-162-242.ngrok-free.app'
-WEBHOOK_PATH = '/api/v1/webhook'
+WEBHOOK_HOST = WEBHOOK_HOST
+WEBHOOK_PATH = WEBHOOK_PATH
 WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
 
 
@@ -43,7 +42,6 @@ async def on_startup():
 @app.post(WEBHOOK_PATH)
 async def bot_webhook(request: Request):
     update_data = await request.json()
-    # print("Полученные данные обновления:", update_data)
     update = Update(**update_data)
     await dp.feed_update(bot, update)
 
