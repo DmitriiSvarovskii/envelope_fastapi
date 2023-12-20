@@ -25,8 +25,8 @@ app = FastAPI(
 bot = Bot(token=TOKEN)
 dp = Dispatcher()
 
-# WEBHOOK_HOST = 'https://envelope-app.ru'
-WEBHOOK_HOST = 'https://60d9-103-157-162-242.ngrok-free.app'
+WEBHOOK_HOST = 'https://envelope-app.ru'
+# WEBHOOK_HOST = 'https://60d9-103-157-162-242.ngrok-free.app'
 WEBHOOK_PATH = '/api/v1/webhook'
 WEBHOOK_URL = f"{WEBHOOK_HOST}{WEBHOOK_PATH}"
 
