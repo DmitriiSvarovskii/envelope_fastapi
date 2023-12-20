@@ -12,6 +12,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from src.bot.bot_management import add_new_bot
 from src.database import get_async_session
 from .models import *
 from .schemas import *
@@ -84,6 +85,7 @@ async def crud_create_new_store(schema: str, user_id: int, session: AsyncSession
 async def crud_create_new_store_and_bot(schema: str, data: StoreCreate, token_bot: BotTokenCreate, user_id: int, session: AsyncSession = Depends(get_async_session)):
     store_result = await crud_create_new_store(schema=schema, user_id=user_id, session=session)
     store_id = store_result.get("id")
+    await add_new_bot(token_bot.token_bot)
     await session.execute(insert(BotToken).values(**token_bot.dict(), user_id=user_id, store_id=store_id))
     await session.execute(insert(StoreInfo).values(**data.dict(), store_id=store_id
                                                    ).execution_options(schema_translate_map={None: schema}))

@@ -51,7 +51,7 @@ async def get_info_store_token(bot_token: str, session: AsyncSession = Depends(g
 
 
 @router.get("/store_token_bot_all/", status_code=200, response_model=List[GetAllBotToken])
-async def get_info_store_token(session: AsyncSession = Depends(get_async_session)):
+async def get_info_store_token_all(session: AsyncSession = Depends(get_async_session)):
     try:
         info_store_token = await crud_get_info_store_token_all(session=session)
         return info_store_token

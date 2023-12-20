@@ -1,16 +1,17 @@
-from aiogram import types
+from aiogram import types, Bot
 from aiogram.filters import Command
+
 from src.database import get_async_session
-from src.api_admin.store.routers import crud_get_info_store_token
+from src.bot.bot_get_info import get_info_store_token
 from src.api_admin.cart.routers import add_tg_user
 from src.api_admin.customer.schemas import CustomerCreate
-# from src.main import dp, bot
-from aiogram import Bot
 
 # @dp.message(Command(commands=['start']))
+
+
 async def start(message: types.Message, bot: Bot):
     async for session in get_async_session():
-        bot_token_obj = await crud_get_info_store_token(bot_token=message.bot.token, session=session)
+        bot_token_obj = await get_info_store_token(bot_token=message.bot.token, session=session)
         if bot_token_obj:
             user_id = bot_token_obj.user_id
             store_id = bot_token_obj.store_id
