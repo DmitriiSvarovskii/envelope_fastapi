@@ -50,7 +50,7 @@ async def create_new_store(data: StoreCreate, token_bot: BotTokenCreate,  curren
             status_code=500, detail=f"An error occurred: {str(e)}")
 
 
-@router.put("/", status_code=200)
+# @router.put("/", status_code=200)
 async def update_store(store_id: int, data: StoreUpdate,  current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
     try:
         up_store = await crud_update_store(schema=str(current_user.id), store_id=store_id, data=data, user_id=current_user.id, session=session)
