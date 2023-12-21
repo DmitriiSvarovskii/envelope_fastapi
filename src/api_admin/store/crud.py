@@ -158,6 +158,14 @@ async def crud_get_legal_informations(store_id: int, schema: str, session: Async
     return store
 
 
+async def crud_update_store_info(schema: str, user_id: int, store_id: int, data: UpdateStoreInfo, session: AsyncSession = Depends(get_async_session)) -> List[UpdateStoreInfo]:
+    stmt = update(StoreInfo).where(
+        StoreInfo.store_id == store_id).values(**data.dict()).execution_options(schema_translate_map={None: schema})
+    await session.execute(stmt)
+    await session.commit()
+    return {"status": "success", 'date': data}
+
+
 async def crud_update_store_legal_informations(schema: str, user_id: int, store_id: int, data: UpdateLegalInformation, session: AsyncSession = Depends(get_async_session)) -> List[UpdateLegalInformation]:
     stmt = update(LegalInformation).where(
         LegalInformation.store_id == store_id).values(**data.dict()).execution_options(schema_translate_map={None: schema})
