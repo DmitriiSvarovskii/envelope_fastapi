@@ -1,18 +1,13 @@
-from sqlalchemy.orm import relationship, Mapped, mapped_column
-from sqlalchemy import ForeignKey
-from sqlalchemy.orm import relationship
-from src.database import *
-from sqlalchemy import BIGINT
-from typing import List, TYPE_CHECKING
-from sqlalchemy import Time
-
 import datetime
+
+from sqlalchemy.orm import relationship, Mapped, mapped_column
+from sqlalchemy import ForeignKey, BIGINT, Time
+
+from src.database import *
+
+from typing import List, TYPE_CHECKING
 if TYPE_CHECKING:
     from ..models import *
-    # from ..category import Category
-    # from ..user import User
-    # from ..product import Product
-from sqlalchemy.ext.associationproxy import association_proxy
 
 
 class Store(Base):
@@ -35,7 +30,15 @@ class Store(Base):
 
     association: Mapped[List['StoreOrderTypeAssociation']
                         ] = relationship(back_populates="store")
+
     subcategories: Mapped['Subcategory'] = relationship(back_populates="store")
+
+    delivery_distance: Mapped['DeliveryDistance'] = relationship(
+        back_populates="store", uselist=False)
+    delivery_fix: Mapped['DeliveryFix'] = relationship(
+        back_populates="store", uselist=False)
+    delivery_district: Mapped['DeliveryDistrict'] = relationship(
+        back_populates="store", uselist=False)
 
     carts: Mapped[List['Cart']] = relationship(
         back_populates="store")
@@ -56,7 +59,7 @@ class Store(Base):
         back_populates="store")
     subscriptions: Mapped['StoreSubscription'] = relationship(
         back_populates="store")
-    payments: Mapped[List['StorePayment']] = relationship(
+    payments: Mapped['StorePayment'] = relationship(
         back_populates="store")
     info: Mapped['StoreInfo'] = relationship(
         back_populates="store")
@@ -75,17 +78,16 @@ class Store(Base):
     delivery_district: Mapped['DeliveryDistrict'] = relationship(
         back_populates="store", uselist=False)
 
-
     # order_typed: Mapped[List['OrderType']] = relationship(
     #     back_populates='store_order_types',
     #     secondary='store_order_types_association'
     # )
-    
-        # user: Mapped['User'] = relationship(
+
+    # user: Mapped['User'] = relationship(
     #     back_populates="store",
     #     foreign_keys=['user_id', 'created_by', 'updated_by', 'deleted_by']
     # )
-    
+
     def __init__(self, schema):
         super().__init__()
         self.__table_args__ = {'schema': schema}
@@ -222,16 +224,15 @@ class DayOfWeek(Base):
     id: Mapped[intpk]
     day_of_week: Mapped[str_64] = mapped_column(unique=True, index=True)
     number_day: Mapped[int] = mapped_column(unique=True, index=True)
-    # one_working_days: Mapped['WorkingDay'] = relationship(
-    #     back_populates='days_of_week',
-    # )
+    working_days: Mapped['WorkingDay'] = relationship(
+        back_populates='days_of_week',
+    )
 
 
 class WorkingDay(Base):
     __tablename__ = 'working_days'
     __table_args__ = {'schema': None}
 
-    # id: Mapped[intpk]
     store_id: Mapped[int] = mapped_column(
         ForeignKey("stores.id", ondelete="CASCADE"), primary_key=True)
     day_of_week_id: Mapped[int] = mapped_column(
@@ -240,8 +241,8 @@ class WorkingDay(Base):
     closing_time: Mapped[datetime.time | None]
     is_working: Mapped[bool] = mapped_column(server_default=text("false"))
     store: Mapped['Store'] = relationship(back_populates="working_days")
-    # day_of_week: Mapped['DayOfWeek'] = relationship(
-    #     back_populates="working_days")
+    days_of_week: Mapped['DayOfWeek'] = relationship(
+        back_populates="working_days")
 
     def __init__(self, schema):
         super().__init__()
@@ -298,11 +299,8 @@ class LegalInformation(Base):
 
     id: Mapped[intpk]
     full_organization_name: Mapped[str | None]
-    legal_country: Mapped[str_64 | None]
-    legal_region: Mapped[str_64 | None]
-    legal_city: Mapped[str_64 | None]
-    legal_street: Mapped[str | None]
-    legal_number_phone: Mapped[int | None] = mapped_column(BIGINT)
+    legal_adress: Mapped[str | None]
+    legal_number_phone: Mapped[str | None]
     inn: Mapped[int | None] = mapped_column(BIGINT)
     ogrn: Mapped[int | None] = mapped_column(BIGINT)
     postal_code: Mapped[int | None] = mapped_column(BIGINT)
@@ -361,21 +359,6 @@ class DeliveryDistrict(Base):
         ForeignKey("stores.id", ondelete="CASCADE"))
 
     store: Mapped['Store'] = relationship(back_populates="delivery_district")
-
-    def __init__(self, schema):
-        super().__init__()
-        self.__table_args__ = {'schema': schema}
-
-
-class PaymentYookassa(Base):
-    __tablename__ = 'payments_yookassa'
-    __table_args__ = {'schema': None}
-
-    id: Mapped[intpk]
-    api_id: Mapped[int] = mapped_column(BIGINT)
-    api_key: Mapped[str]
-    store_id: Mapped[int] = mapped_column(
-        ForeignKey("stores.id", ondelete="CASCADE"))
 
     def __init__(self, schema):
         super().__init__()

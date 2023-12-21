@@ -10,11 +10,9 @@ from .models import (
     StorePayment,
     ServiceTextAndChat,
     LegalInformation,
-
     DeliveryDistance,
     DeliveryFix,
     DeliveryDistrict,
-    PaymentYookassa,
 )
 
 all = [
@@ -29,9 +27,7 @@ all = [
     StorePayment,
     ServiceTextAndChat,
     LegalInformation,
-
     DeliveryDistance,
     DeliveryFix,
     DeliveryDistrict,
-    PaymentYookassa,
 ]

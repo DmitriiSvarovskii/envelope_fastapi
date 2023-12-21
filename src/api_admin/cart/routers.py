@@ -241,31 +241,32 @@ async def delete_cart_items_by_tg_user_id(schema: str, store_id: int, tg_user_id
 
 @router.post("/create_order/")
 async def create_order(schema: str, data_order: CreateOrder, date_customer_info: CreateCustomerInfo = None, session: AsyncSession = Depends(get_async_session)):
-    cart_query = (select(Cart.product_id,
-                         Cart.quantity,
-                         Product.name.label("product_name"),
-                         (Product.price * Cart.quantity).label("unit_price"),
-                         func.sum(Cart.quantity * Product.price).over().label("total_price")).
-                  join(Cart, Cart.product_id == Product.id).
-                  filter(
-        Cart.tg_user_id == data_order.tg_user_id,
-        Cart.store_id == data_order.store_id
-    ).execution_options(
-        schema_translate_map={None: schema}))
+    cart_query = (
+        select(Cart.product_id,
+               Cart.quantity,
+               Product.name.label("product_name"),
+               (Product.price * Cart.quantity).label("unit_price"),
+               func.sum(Cart.quantity * Product.price).over().label("total_price")).
+        join(Cart, Cart.product_id == Product.id).
+        filter(
+            Cart.tg_user_id == data_order.tg_user_id,
+            Cart.store_id == data_order.store_id
+        ).execution_options(
+            schema_translate_map={None: schema})
+    )
+
     cart_items = await session.execute(cart_query)
     cart_items = cart_items.all()
 
     if not cart_items:
         raise HTTPException(status_code=400, detail="Cart is empty")
 
-    stmt_order = insert(Order).values(
-        **data_order.dict(),
-        # delivery_city=data_order.delivery_city,
-        # delivery_address=data_order.delivery_address,
-        # customer_name=data_order.customer_name,
-        # customer_phone=data_order.customer_phone,
-        # customer_comment=data_order.customer_comment
-    ).returning(Order.id).execution_options(schema_translate_map={None: schema})
+    stmt_order = (
+        insert(Order).
+        values(**data_order.dict()).
+        returning(Order.id).
+        execution_options(schema_translate_map={None: schema})
+    )
 
     result = await session.execute(stmt_order)
     order_id = result.scalar()
@@ -302,14 +303,28 @@ async def create_order(schema: str, data_order: CreateOrder, date_customer_info:
         f"Дата и время выдачи: {order_time}\n"
 
     url, payment_id = await create_pay(total_price=order_sum, order_id=order_id)
+
     await send_message(chat_id=data_order.tg_user_id, text=text, url=url)
-    stmt_order_detail = insert(OrderDetail).values(
-        values_list).execution_options(schema_translate_map={None: schema})
+
+    stmt_order_detail = (
+        insert(OrderDetail).
+        values(values_list).
+        execution_options(schema_translate_map={None: schema})
+    )
+
     await session.execute(stmt_order_detail)
+
     if date_customer_info:
-        stmt_customer_infol = insert(OrderCustomerInfo).values(
-            **date_customer_info.dict(), store_id=data_order.store_id,
-            tg_user_id=data_order.tg_user_id, order_id=order_id).execution_options(schema_translate_map={None: schema})
+        stmt_customer_infol = (
+            insert(OrderCustomerInfo).
+            values(
+                **date_customer_info.dict(),
+                store_id=data_order.store_id,
+                tg_user_id=data_order.tg_user_id,
+                order_id=order_id
+            ).
+            execution_options(schema_translate_map={None: schema})
+        )
         await session.execute(stmt_customer_infol)
     stmt = delete(Cart).where(Cart.tg_user_id == data_order.tg_user_id, Cart.store_id == data_order.store_id).execution_options(
         schema_translate_map={None: schema})

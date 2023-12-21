@@ -9,6 +9,7 @@ from .cart import Cart
 from .order import Order, OrderDetail, OrderCustomerInfo, OrderStatus
 from .mail import Mail, MailImage
 from .customer import Customer
+from .payment import PaymentYookassa
 from .store import (
     Store,
     BotToken,
@@ -24,8 +25,7 @@ from .store import (
 
     DeliveryDistance,
     DeliveryFix,
-    DeliveryDistrict,
-    PaymentYookassa,
+    DeliveryDistrict
 )
 
 

@@ -30,7 +30,8 @@ async def crud_get_all_stores(schema: str, session: AsyncSession = Depends(get_a
     return stores
 
 
-async def crud_get_one_stores(store_id: int, schema: str, session: AsyncSession = Depends(get_async_session)):
+# async def crud_get_one_stores(store_id: int, schema: str, session: AsyncSession = Depends(get_async_session)):
+async def crud_get_one_stores(store_id: int, schema: str, session: AsyncSession = Depends(get_async_session)) -> Optional[OneStore]:
     query = (
         select(Store).
         where(Store.id == store_id).
@@ -38,7 +39,15 @@ async def crud_get_one_stores(store_id: int, schema: str, session: AsyncSession 
             joinedload(Store.info),
             joinedload(Store.subscriptions),
             joinedload(Store.association).
-            options(joinedload(StoreOrderTypeAssociation.order_type)))
+            options(joinedload(StoreOrderTypeAssociation.order_type)),
+            joinedload(Store.working_days).
+            options(joinedload(WorkingDay.days_of_week)),
+            joinedload(Store.payments),
+            joinedload(Store.service_text_and_chats),
+            joinedload(Store.legal_information),
+            joinedload(Store.delivery_distance),
+            joinedload(Store.delivery_fix),
+            joinedload(Store.delivery_district))
     ).execution_options(schema_translate_map={None: schema})
     result = await session.execute(query)
     store = result.scalar()
@@ -97,12 +106,13 @@ async def crud_create_new_store_and_bot(schema: str, data: StoreCreate, token_bo
                                                             ).execution_options(schema_translate_map={None: schema}))
     await session.execute(insert(LegalInformation).values(store_id=store_id
                                                           ).execution_options(schema_translate_map={None: schema}))
+    order_type_values = [{'store_id': store_id, 'order_type_id': order_type_id,
+                          'is_active': False} for order_type_id in range(1, 4)]
+    working_day_values = [{'store_id': store_id, 'day_of_week_id': day_of_week_id,
+                           'is_working': False} for day_of_week_id in range(1, 8)]
 
-    await session.execute(insert(StoreOrderTypeAssociation).values([
-        {'store_id': store_id, 'order_type_id': 1, 'is_active': False},
-        {'store_id': store_id, 'order_type_id': 2, 'is_active': False},
-        {'store_id': store_id, 'order_type_id': 3, 'is_active': False}
-    ]).execution_options(schema_translate_map={None: schema}))
+    await session.execute(insert(StoreOrderTypeAssociation).values(order_type_values).execution_options(schema_translate_map={None: schema}))
+    await session.execute(insert(WorkingDay).values(working_day_values).execution_options(schema_translate_map={None: schema}))
     await session.commit()
     return {"status": 201}
 #     except IntegrityError as e:
@@ -131,8 +141,86 @@ async def crud_create_new_store_and_bot(schema: str, data: StoreCreate, token_bo
 
 
 async def crud_update_store(schema: str, user_id: int, store_id: int, data: StoreUpdate, session: AsyncSession = Depends(get_async_session)) -> List[StoreUpdate]:
-    stmt = update(Store).where(
-        Store.id == store_id).values(**data.dict(), updated_by=user_id).execution_options(schema_translate_map={None: schema})
+    stmt = update(StoreInfo).where(
+        StoreInfo.store_id == store_id).values(**data.dict()).execution_options(schema_translate_map={None: schema})
+    await session.execute(stmt)
+    await session.commit()
+    return {"status": "success", 'date': data}
+
+
+async def crud_get_legal_informations(store_id: int, schema: str, session: AsyncSession = Depends(get_async_session)):
+    query = (
+        select(LegalInformation).
+        where(LegalInformation.store_id == store_id)
+    ).execution_options(schema_translate_map={None: schema})
+    result = await session.execute(query)
+    store = result.scalar()
+    return store
+
+
+async def crud_update_store_legal_informations(schema: str, user_id: int, store_id: int, data: UpdateLegalInformation, session: AsyncSession = Depends(get_async_session)) -> List[UpdateLegalInformation]:
+    stmt = update(LegalInformation).where(
+        LegalInformation.store_id == store_id).values(**data.dict()).execution_options(schema_translate_map={None: schema})
+    await session.execute(stmt)
+    await session.commit()
+    return {"status": "success", 'date': data}
+
+
+async def crud_update_store_delivery_distance(schema: str, user_id: int, store_id: int, data: UpdateDeliveryDistance, session: AsyncSession = Depends(get_async_session)) -> List[UpdateDeliveryDistance]:
+    stmt = update(DeliveryDistance).where(
+        DeliveryDistance.store_id == store_id).values(**data.dict()).execution_options(schema_translate_map={None: schema})
+    await session.execute(stmt)
+    await session.commit()
+    return {"status": "success", 'date': data}
+
+
+async def crud_update_store_delivery_fix(schema: str, user_id: int, store_id: int, data: UpdateDeliveryFix, session: AsyncSession = Depends(get_async_session)) -> List[UpdateDeliveryFix]:
+    stmt = update(DeliveryFix).where(
+        DeliveryFix.store_id == store_id).values(**data.dict()).execution_options(schema_translate_map={None: schema})
+    await session.execute(stmt)
+    await session.commit()
+    return {"status": "success", 'date': data}
+
+
+async def crud_update_store_delivery_district(schema: str, user_id: int, store_id: int, delivery_id: int, data: UpdateDeliveryDistrict, session: AsyncSession = Depends(get_async_session)) -> List[UpdateDeliveryDistrict]:
+    stmt = update(DeliveryDistrict).where(
+        DeliveryDistrict.id == delivery_id).values(**data.dict()).execution_options(schema_translate_map={None: schema})
+    await session.execute(stmt)
+    await session.commit()
+    return {"status": "success", 'date': data}
+
+
+async def crud_get_service_text_and_chats(store_id: int, schema: str, session: AsyncSession = Depends(get_async_session)):
+    query = (
+        select(ServiceTextAndChat).
+        where(ServiceTextAndChat.store_id == store_id)
+    ).execution_options(schema_translate_map={None: schema})
+    result = await session.execute(query)
+    store = result.scalar()
+    return store
+
+
+async def crud_update_service_text_and_chats(schema: str, user_id: int, store_id: int, data: UpdateServiceTextAndChat, session: AsyncSession = Depends(get_async_session)) -> List[UpdateServiceTextAndChat]:
+    stmt = update(ServiceTextAndChat).where(
+        ServiceTextAndChat.store_id == store_id).values(**data.dict()).execution_options(schema_translate_map={None: schema})
+    await session.execute(stmt)
+    await session.commit()
+    return {"status": "success", 'date': data}
+
+
+async def crud_get_store_payments(store_id: int, schema: str, session: AsyncSession = Depends(get_async_session)):
+    query = (
+        select(StorePayment).
+        where(StorePayment.store_id == store_id)
+    ).execution_options(schema_translate_map={None: schema})
+    result = await session.execute(query)
+    store = result.scalar()
+    return store
+
+
+async def crud_update_store_payments(schema: str, user_id: int, store_id: int, data: UpdateStorePayment, session: AsyncSession = Depends(get_async_session)) -> List[UpdateStorePayment]:
+    stmt = update(StorePayment).where(
+        StorePayment.store_id == store_id).values(**data.dict()).execution_options(schema_translate_map={None: schema})
     await session.execute(stmt)
     await session.commit()
     return {"status": "success", 'date': data}
@@ -174,9 +262,33 @@ async def crud_delete_store(schema: str, store_id: int, session: Session = Depen
             status_code=500, detail=f"An error occurred: {str(e)}")
 
 
+async def crud_delete_delivery_district(schema: str, store_id: int, delivery_id: int, session: Session = Depends(get_async_session)):
+    try:
+        stmt = delete(DeliveryDistrict).where(DeliveryDistrict.store_id == store_id, DeliveryDistrict.id == delivery_id).execution_options(
+            schema_translate_map={None: schema})
+        await session.execute(stmt)
+        await session.commit()
+        return {"status": "success", "message": f"Район доставки, c id {store_id}, успешно удален."}
+    except IntegrityError as e:
+        raise HTTPException(
+            status_code=400, detail="Удаление этого района доставки невозможно, так как на него ссылаются отчёты.")
+    except Exception as e:
+        await session.rollback()
+        raise HTTPException(
+            status_code=500, detail=f"An error occurred: {str(e)}")
+
+
 async def crud_update_store_activity(schema: str, store_id: int, session: Session = Depends(get_async_session)):
     stmt = update(StoreSubscription).where(StoreSubscription.store_id == store_id).values(
         is_active=~StoreSubscription.is_active).execution_options(schema_translate_map={None: schema})
+    await session.execute(stmt)
+    await session.commit()
+    return {"message": f"Изменён статус активности"}
+
+
+async def crud_update_order_type(schema: str, store_id: int, order_type_id: int,  session: Session = Depends(get_async_session)):
+    stmt = update(StoreOrderTypeAssociation).where(StoreOrderTypeAssociation.store_id == store_id, StoreOrderTypeAssociation.order_type_id == order_type_id).values(
+        is_active=~StoreOrderTypeAssociation.is_active).execution_options(schema_translate_map={None: schema})
     await session.execute(stmt)
     await session.commit()
     return {"message": f"Изменён статус активности"}
@@ -191,11 +303,40 @@ async def crud_create_new_order_type(data: CreateOrderType, session: AsyncSessio
     return {"status": 201, "data": data}
 
 
+async def crud_update_day_of_week(schema: str, store_id: int, day_of_week_id: int,  session: Session = Depends(get_async_session)):
+    stmt = update(WorkingDay).where(WorkingDay.store_id == store_id, WorkingDay.day_of_week_id == day_of_week_id).values(
+        is_active=~WorkingDay.is_working).execution_options(schema_translate_map={None: schema})
+    await session.execute(stmt)
+    await session.commit()
+    return {"message": f"Изменён статус активности"}
+
+
 async def crud_get_all_order_types(session: AsyncSession = Depends(get_async_session)) -> List[ListOrderType]:
     query = select(OrderType).order_by(OrderType.id.desc())
     result = await session.execute(query)
     stores = result.scalars().all()
     return stores
+
+
+async def crud_update_day_of_week(schema: str, store_id: int, day_of_week_id: int,  session: Session = Depends(get_async_session)):
+    stmt = update(WorkingDay).where(WorkingDay.store_id == store_id, WorkingDay.day_of_week_id == day_of_week_id).values(
+        is_active=~WorkingDay.is_working).execution_options(schema_translate_map={None: schema})
+    await session.execute(stmt)
+    await session.commit()
+    return {"message": f"Изменён статус активности"}
+
+
+async def crud_update_checkbox_payments(schema: str, store_id: int, checkbox: str,  session: Session = Depends(get_async_session)):
+    field_to_update = getattr(StorePayment, checkbox, None)
+    if field_to_update is not None:
+        field_name = field_to_update.key
+        stmt = update(StorePayment).where(StorePayment.store_id == store_id).values(
+            **{field_name: ~field_to_update}).execution_options(schema_translate_map={None: schema})
+        await session.execute(stmt)
+        await session.commit()
+        return {"message": f"Статус для {checkbox} изменен"}
+    else:
+        raise ValueError(f"Недопустимое значение checkbox: {checkbox}")
 
 
 async def crud_create_new_store_order_types_association(schema: str, data: BaseStoreOrderTypeAssociation, session: AsyncSession = Depends(get_async_session)):
@@ -207,9 +348,9 @@ async def crud_create_new_store_order_types_association(schema: str, data: BaseS
     return {"status": 201, "data": data}
 
 
-async def crud_create_new_day_of_week(data: TestDayOfWeek, session: AsyncSession = Depends(get_async_session)):
-    stmt = insert(WorkingDay).values(
-        **data.dict()).execution_options(schema_translate_map={None: '1'})
+async def crud_update_new_day_of_week(schema: str, user_id: int, store_id: str, day_of_week_id: int, data: UpdaneDayOfWeek, session: AsyncSession = Depends(get_async_session)):
+    stmt = update(WorkingDay).where(WorkingDay.store_id == store_id, WorkingDay.day_of_week_id == day_of_week_id).values(
+        **data.dict()).execution_options(schema_translate_map={None: schema})
     await session.execute(stmt)
     await session.commit()
 
@@ -255,12 +396,3 @@ async def crud_test_many_to_many(store_id: int, schema: str, session: AsyncSessi
     result = await session.execute(query)
     store = result.scalar()
     return store
-
-
-# @router.get("/test_one/", response_model=Optional[GetStoreInfo])
-# async def get_all_product(schema: str, store_id: int, product_id: int, session: AsyncSession = Depends(get_async_session)):
-#     query = select(Product).options(selectinload(Product.unit)).where(
-#         Product.deleted_flag != True).where(Product.store_id == store_id).where(Product.id == product_id).execution_options(schema_translate_map={None: schema})
-#     result = await session.execute(query)
-#     products = result.scalar()
-#     return products

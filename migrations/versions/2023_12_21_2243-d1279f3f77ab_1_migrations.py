@@ -1,8 +1,8 @@
 """1 migrations
 
-Revision ID: bc47c2c4c5ff
+Revision ID: d1279f3f77ab
 Revises: 
-Create Date: 2023-12-20 18:58:41.175323
+Create Date: 2023-12-21 22:43:35.048006
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'bc47c2c4c5ff'
+revision: str = 'd1279f3f77ab'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -206,11 +206,8 @@ def upgrade() -> None:
     op.create_table('legal_informations',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('full_organization_name', sa.String(), nullable=True),
-    sa.Column('legal_country', sa.String(length=64), nullable=True),
-    sa.Column('legal_region', sa.String(length=64), nullable=True),
-    sa.Column('legal_city', sa.String(length=64), nullable=True),
-    sa.Column('legal_street', sa.String(), nullable=True),
-    sa.Column('legal_number_phone', sa.BIGINT(), nullable=True),
+    sa.Column('legal_adress', sa.String(), nullable=True),
+    sa.Column('legal_number_phone', sa.String(), nullable=True),
     sa.Column('inn', sa.BIGINT(), nullable=True),
     sa.Column('ogrn', sa.BIGINT(), nullable=True),
     sa.Column('postal_code', sa.BIGINT(), nullable=True),

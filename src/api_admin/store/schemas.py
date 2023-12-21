@@ -64,7 +64,116 @@ class StoreDeleted(BaseModel):
 
 class StoreUpdate(BaseModel):
     name: str
-    # availability: bool
+    adress: Optional[str] = None
+    number_phone: Optional[str] = None
+    mobile_phone: Optional[str] = None
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
+    link_bot: Optional[str] = None
+    time_zone: Optional[str] = None
+
+
+class BaseLegalInformation(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    full_organization_name: Optional[str] = None
+    legal_adress: Optional[str] = None
+    legal_number_phone: Optional[str] = None
+    inn: Optional[int] = None
+    ogrn: Optional[int] = None
+    postal_code: Optional[int] = None
+
+
+class UpdateLegalInformation(BaseLegalInformation):
+    pass
+
+
+class GetLegalInformation(BaseLegalInformation):
+    store_id: int
+
+
+class BaseServiceTextAndChat(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    email: Optional[str] = None
+    welcome_message_bot: Optional[str] = None
+    welcome_image: Optional[str] = None
+    tg_id_group: Optional[int] = None
+    delivery_chat: Optional[int] = None
+    order_chat: Optional[int] = None
+    completed_orders_chat: Optional[int] = None
+    canceled_orders_chat: Optional[int] = None
+
+
+class UpdateServiceTextAndChat(BaseServiceTextAndChat):
+    pass
+
+
+class GetServiceTextAndChat(BaseServiceTextAndChat):
+    store_id: int
+
+
+class BaseStorePayment(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    cash: bool
+    card: bool
+    min_delivery_amount: Optional[str] = None
+    min_order_amount_for_free_delivery: Optional[int] = None
+
+
+class UpdateStorePayment(BaseStorePayment):
+    pass
+
+
+class GetStorePayment(BaseStorePayment):
+    store_id: int
+
+
+class BaseDeliveryDistance(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    start_price: Optional[int] = None
+    price_per_km: Optional[int] = None
+    min_price: Optional[int] = None
+
+
+class UpdateDeliveryDistance(BaseDeliveryDistance):
+    pass
+
+
+class GetDeliveryDistance(BaseDeliveryDistance):
+    store_id: Optional[int] = None
+
+
+class BaseDeliveryFix(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    price: Optional[int] = None
+
+
+class UpdateDeliveryFix(BaseDeliveryFix):
+    pass
+
+
+class GetDeliveryFix(BaseDeliveryFix):
+    store_id: Optional[int] = None
+
+
+class BaseDeliveryDistrict(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    name: Optional[str] = None
+    price: Optional[int] = None
+
+
+class UpdateDeliveryDistrict(BaseDeliveryDistrict):
+    pass
+
+
+class GetDeliveryDistrict(BaseDeliveryDistrict):
+    id: int
+    store_id: Optional[int] = None
 
 
 class StoreModel(StoreBase):
@@ -188,14 +297,21 @@ class TestTest(BaseModel):
     is_active: Optional[bool] = None
 
 
-class TestDayOfWeek(BaseModel):
+class BaseDayOfWeek(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
+    opening_time: Optional[time] = None
+    closing_time: Optional[time] = None
+    is_working: bool
+
+
+class UpdaneDayOfWeek(BaseDayOfWeek):
+    pass
+
+
+class GetDayOfWeek(BaseDayOfWeek):
     store_id: int
     day_of_week_id: int
-    opening_time: time
-    closing_time: time
-    is_working: bool
 
 
 class WorkingHours(BaseModel):
@@ -203,8 +319,8 @@ class WorkingHours(BaseModel):
     store_id: int
     day_of_week_id: int
     day_of_week: str
-    opening_time: Optional[time]
-    closing_time: Optional[time]
+    opening_time: Optional[time] = None
+    closing_time: Optional[time] = None
     is_working: bool
 
 
@@ -215,7 +331,6 @@ class WorkingHoursList(BaseModel):
 
 class OneStoreInfo(BaseModel):
     model_config = ConfigDict(from_attributes=True)
-
     name: str
     adress: Optional[str] = None
     number_phone: Optional[str] = None
@@ -253,6 +368,23 @@ class StoreOrderType(BaseModel):
     order_type: Optional[InfoStoreOrderType]
 
 
+class InfoStoreDayOfWeek(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    day_of_week: str
+    number_day: int
+
+
+class StoreWorkingDay(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    store_id: int
+    day_of_week_id: int
+    opening_time: Optional[time] = None
+    closing_time: Optional[time] = None
+    is_working: bool
+    days_of_week: Optional[InfoStoreDayOfWeek]
+
+
 class OneStore(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -260,6 +392,13 @@ class OneStore(BaseModel):
     info: Optional[OneStoreInfo]
     subscriptions: Optional[InfoStoreSubscription]
     association: List[StoreOrderType]
+    working_days: List[StoreWorkingDay]
+    payments: Optional[GetStorePayment]
+    delivery_distance: Optional[GetDeliveryDistance] = None
+    delivery_fix: Optional[GetDeliveryFix] = None
+    delivery_district: Optional[GetDeliveryDistrict] = None
+    service_text_and_chats: Optional[GetServiceTextAndChat]
+    legal_information: Optional[GetLegalInformation]
 
 
 class GetBotToken(BaseModel):

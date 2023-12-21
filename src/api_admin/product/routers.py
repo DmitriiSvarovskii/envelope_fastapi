@@ -140,10 +140,10 @@ async def update_product(product_id: int, data: ProductUpdate,  current_user: Us
 @router.patch("/checkbox/",)
 async def update_product_field(product_id: int, checkbox: str, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
     """
-    Параметры:
+    # Параметры:
     #     - `product_id`: идентификатор продукта.
     #     - `checkbox`: имя поля, которое требуется изменить.
-    #     Для продуктов доступны следующие значения: `availability`, `popular`, `delivery`, `takeaway`, `dinein`
+    #     Для продуктов доступны следующие значения: `availability`, `popular`
     """
     try:
         change_product = await crud_update_product_field(schema=str(current_user.id), user_id=current_user.id, product_id=product_id, checkbox=checkbox, session=session)

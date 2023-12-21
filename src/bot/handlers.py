@@ -19,14 +19,17 @@ async def start(message: types.Message, bot: Bot):
                 resourse = None
             else:
                 resourse = message.text.replace("/start", "").strip()
-            new_customer_data = CustomerCreate(
-                store_id=store_id,
-                tg_user_id=message.from_user.id,
-                resourse=resourse,
-                first_name=message.from_user.first_name,
-                last_name=message.from_user.last_name,
-                username=message.from_user.username,
-                is_premium=message.from_user.is_premium,
+
+            new_customer_data = (
+                CustomerCreate(
+                    store_id=store_id,
+                    tg_user_id=message.from_user.id,
+                    resourse=resourse,
+                    first_name=message.from_user.first_name,
+                    last_name=message.from_user.last_name,
+                    username=message.from_user.username,
+                    is_premium=message.from_user.is_premium,
+                )
             )
             await add_tg_user(schema=str(user_id), data=new_customer_data, session=session)
             url = f"https://store.envelope-app.ru/schema={user_id}/store_id={store_id}/"

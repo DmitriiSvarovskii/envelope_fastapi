@@ -34,4 +34,4 @@ app.add_middleware(
 for router in routers:
     app.include_router(router)
 
-app.include_router(bot_router)
+# app.include_router(bot_router)

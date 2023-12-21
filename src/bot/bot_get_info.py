@@ -16,8 +16,8 @@ async def get_info_store_token_all(session: AsyncSession = Depends(get_async_ses
         await session.rollback()
         raise HTTPException(
             status_code=500, detail=f"An error occurred: {str(e)}")
-        
-        
+
+
 async def get_info_store_token(bot_token: str, session: AsyncSession = Depends(get_async_session)):
     try:
         query = select(BotToken).where(BotToken.token_bot == bot_token)
