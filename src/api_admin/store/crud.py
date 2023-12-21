@@ -30,8 +30,7 @@ async def crud_get_all_stores(schema: str, session: AsyncSession = Depends(get_a
     return stores
 
 
-# async def crud_get_one_stores(store_id: int, schema: str, session: AsyncSession = Depends(get_async_session)):
-async def crud_get_one_stores(store_id: int, schema: str, session: AsyncSession = Depends(get_async_session)) -> Optional[OneStore]:
+async def crud_get_one_stores(store_id: int, schema: str, session: AsyncSession = Depends(get_async_session)):# -> Optional[OneStore]:
     query = (
         select(Store).
         where(Store.id == store_id).
@@ -51,7 +50,10 @@ async def crud_get_one_stores(store_id: int, schema: str, session: AsyncSession 
     ).execution_options(schema_translate_map={None: schema})
     result = await session.execute(query)
     store = result.scalar()
-    return store
+    bot_token_query= select(BotToken).where(BotToken.store_id == store_id)
+    bot_token_result = await session.execute(bot_token_query)
+    bot_token = bot_token_result.scalar()
+    return store, bot_token
 
 
 async def crud_get_info_store_token(bot_token: str, session: AsyncSession = Depends(get_async_session)):
