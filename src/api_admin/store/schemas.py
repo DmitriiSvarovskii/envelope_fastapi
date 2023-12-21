@@ -118,7 +118,7 @@ class BaseStorePayment(BaseModel):
 
     cash: bool
     card: bool
-    min_delivery_amount: Optional[str] = None
+    min_delivery_amount: Optional[int] = None
     min_order_amount_for_free_delivery: Optional[int] = None
 
 
