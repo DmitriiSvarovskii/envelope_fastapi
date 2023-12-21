@@ -337,7 +337,7 @@ class DeliveryFix(Base):
     __table_args__ = {'schema': None}
 
     id: Mapped[intpk]
-    price: Mapped[str]
+    price: Mapped[int]
     store_id: Mapped[int] = mapped_column(
         ForeignKey("stores.id", ondelete="CASCADE"))
 
