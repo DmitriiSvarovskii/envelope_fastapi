@@ -371,6 +371,35 @@ async def crud_update_checkbox_payments(schema: str, store_id: int, checkbox: st
         raise ValueError(f"Недопустимое значение checkbox: {checkbox}")
 
 
+async def crud_update_checkbox_store_info(schema: str, store_id: int, checkbox: str, session: Session = Depends(get_async_session)):
+    # Определяем поля, которые нужно обновить
+    checkboxes = ["format_unified", "format_24_7", "format_custom"]
+    if checkbox not in checkboxes:
+        raise ValueError(f"Недопустимое значение checkbox: {checkbox}")
+
+    # Получаем поле, которое нужно изменить
+    field_to_update = getattr(StoreInfo, checkbox, None)
+    if field_to_update is not None:
+        # Получаем названия остальных полей
+        other_fields = [field for field in checkboxes if field != checkbox]
+        other_fields_to_update = [
+            getattr(StoreInfo, field) for field in other_fields]
+
+        # Подготавливаем значения для обновления: изменяем выбранное поле и инвертируем остальные
+        values_to_update = {field_to_update.key: ~field_to_update}
+        values_to_update.update(
+            {field.key: ~field for field in other_fields_to_update})
+
+        # Выполняем обновление
+        stmt = update(StoreInfo).where(StoreInfo.store_id == store_id).values(
+            **values_to_update).execution_options(schema_translate_map={None: schema})
+        await session.execute(stmt)
+        await session.commit()
+        return {"message": f"Статус для {checkbox} изменен"}
+    else:
+        raise ValueError(f"Недопустимое значение checkbox: {checkbox}")
+
+
 async def crud_create_new_store_order_types_association(schema: str, data: BaseStoreOrderTypeAssociation, session: AsyncSession = Depends(get_async_session)):
     stmt = insert(StoreOrderTypeAssociation).values(
         **data.dict()).execution_options(schema_translate_map={None: schema})

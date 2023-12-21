@@ -83,13 +83,27 @@ async def change_delete_flag_store(store_id: int, current_user: User = Depends(g
             status_code=500, detail=f"An error occurred: {str(e)}")
 
 
-
-
 @router.put("/store_info/", status_code=200)
 async def update_store_info(store_id: int, data: UpdateStoreInfo,  current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
     try:
         up_store = await crud_update_store_info(schema=str(current_user.id), store_id=store_id, data=data, user_id=current_user.id, session=session)
         return up_store
+    except Exception as e:
+        await session.rollback()
+        raise HTTPException(
+            status_code=500, detail=f"An error occurred: {str(e)}")
+
+@router.patch("/store_info/")
+async def update_checkbox_store_info(store_id: int, checkbox: str, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
+    """
+    # Параметры:
+    #     - `store_id`: идентификатор магазина.
+    #     - `checkbox`: имя поля, которое требуется изменить.
+    #     Для типа оплаты доступны следующие значения: `format_unified`, `format_24_7`, `format_custom`
+    """
+    try:
+        result = await crud_update_checkbox_store_info(schema=str(current_user.id), store_id=store_id, checkbox=checkbox, session=session)
+        return result
     except Exception as e:
         await session.rollback()
         raise HTTPException(
