@@ -399,7 +399,10 @@ class StoreWorkingDay(BaseModel):
     is_working: bool
     days_of_week: Optional[InfoStoreDayOfWeek]
 
-
+class GetOneBotToken(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    token_bot: str
+    
 class OneStore(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
@@ -414,6 +417,7 @@ class OneStore(BaseModel):
     delivery_district: Optional[GetDeliveryDistrict] = None
     service_text_and_chats: Optional[GetServiceTextAndChat]
     legal_information: Optional[GetLegalInformation]
+    bot_tokens: Optional[GetOneBotToken]
 
 
 class GetBotToken(BaseModel):
