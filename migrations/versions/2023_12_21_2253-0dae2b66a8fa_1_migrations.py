@@ -25,7 +25,7 @@ def upgrade():
     schemas = [row[0] for row in result]
 
     for schema in schemas:
-        if schema not in ['information_schema', 'pg_catalog', 'public', 'другие системные схемы']:
+        if schema not in ['information_schema', 'pg_catalog']:
             op.execute(
                 f"ALTER TABLE {schema}.delivery_fix ALTER COLUMN price TYPE INTEGER USING price::integer")
 
