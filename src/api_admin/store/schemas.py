@@ -133,9 +133,9 @@ class GetStorePayment(BaseStorePayment):
 class BaseDeliveryDistance(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
-    start_price: Optional[int] = None
-    price_per_km: Optional[int] = None
-    min_price: Optional[int] = None
+    start_price: Optional[int]
+    price_per_km: Optional[int]
+    min_price: Optional[int]
 
 
 class UpdateDeliveryDistance(BaseDeliveryDistance):
@@ -143,7 +143,7 @@ class UpdateDeliveryDistance(BaseDeliveryDistance):
 
 
 class GetDeliveryDistance(BaseDeliveryDistance):
-    store_id: Optional[int] = None
+    store_id: Optional[int]
 
 
 class BaseDeliveryFix(BaseModel):
