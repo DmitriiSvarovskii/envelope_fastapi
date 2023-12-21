@@ -356,8 +356,10 @@ class OneStoreInfo(BaseModel):
     open_hours_default: Optional[time] = None
     close_hours_default: Optional[time] = None
 
-class UpdateStoreInfo(BaseModel):
+
+class UpdateStoreInfo(OneStoreInfo):
     pass
+
 
 class InfoStoreSubscription(BaseModel):
     model_config = ConfigDict(from_attributes=True)
