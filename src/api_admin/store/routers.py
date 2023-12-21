@@ -155,6 +155,17 @@ async def update_checkbox_payments(store_id: int, checkbox: str, current_user: U
             status_code=500, detail=f"An error occurred: {str(e)}")
 
 
+@router.post("/delivery_distance/", status_code=200)
+async def create_store_delivery_distance(data: PostDeliveryDistance,  current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
+    try:
+        up_store = await crud_create_store_delivery_distance(schema=str(current_user.id), data=data, user_id=current_user.id, session=session)
+        return up_store
+    except Exception as e:
+        await session.rollback()
+        raise HTTPException(
+            status_code=500, detail=f"An error occurred: {str(e)}")
+
+
 @router.put("/delivery_distance/", status_code=200)
 async def update_store_delivery_distance(store_id: int, data: UpdateDeliveryDistance,  current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
     try:
@@ -166,10 +177,32 @@ async def update_store_delivery_distance(store_id: int, data: UpdateDeliveryDist
             status_code=500, detail=f"An error occurred: {str(e)}")
 
 
+@router.post("/delivery_fix/", status_code=200)
+async def create_store_delivery_fix(data: PostDeliveryFix,  current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
+    try:
+        up_store = await crud_create_store_delivery_fix(schema=str(current_user.id), data=data, user_id=current_user.id, session=session)
+        return up_store
+    except Exception as e:
+        await session.rollback()
+        raise HTTPException(
+            status_code=500, detail=f"An error occurred: {str(e)}")
+
+
 @router.put("/delivery_fix/", status_code=200)
 async def update_store_delivery_fix(store_id: int, data: UpdateDeliveryFix,  current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
     try:
         up_store = await crud_update_store_delivery_fix(schema=str(current_user.id), store_id=store_id, data=data, user_id=current_user.id, session=session)
+        return up_store
+    except Exception as e:
+        await session.rollback()
+        raise HTTPException(
+            status_code=500, detail=f"An error occurred: {str(e)}")
+
+
+@router.post("/delivery_district/", status_code=200)
+async def create_store_delivery_district(store_id: int, data: PostDeliveryDistrict,  current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
+    try:
+        up_store = await crud_create_store_delivery_district(schema=str(current_user.id), data=data, user_id=current_user.id, session=session)
         return up_store
     except Exception as e:
         await session.rollback()

@@ -166,6 +166,14 @@ async def crud_update_store_legal_informations(schema: str, user_id: int, store_
     return {"status": "success", 'date': data}
 
 
+async def crud_create_store_delivery_distance(schema: str, user_id: int, data: PostDeliveryDistance, session: AsyncSession = Depends(get_async_session)) -> List[PostDeliveryDistance]:
+    stmt = insert(DeliveryDistance).values(
+        **data.dict()).execution_options(schema_translate_map={None: schema})
+    await session.execute(stmt)
+    await session.commit()
+    return {"status": "success", 'date': data}
+
+
 async def crud_update_store_delivery_distance(schema: str, user_id: int, store_id: int, data: UpdateDeliveryDistance, session: AsyncSession = Depends(get_async_session)) -> List[UpdateDeliveryDistance]:
     stmt = update(DeliveryDistance).where(
         DeliveryDistance.store_id == store_id).values(**data.dict()).execution_options(schema_translate_map={None: schema})
@@ -174,9 +182,25 @@ async def crud_update_store_delivery_distance(schema: str, user_id: int, store_i
     return {"status": "success", 'date': data}
 
 
+async def crud_create_store_delivery_fix(schema: str, user_id: int, data: PostDeliveryFix, session: AsyncSession = Depends(get_async_session)) -> List[PostDeliveryFix]:
+    stmt = insert(DeliveryFix).values(
+        **data.dict()).execution_options(schema_translate_map={None: schema})
+    await session.execute(stmt)
+    await session.commit()
+    return {"status": "success", 'date': data}
+
+
 async def crud_update_store_delivery_fix(schema: str, user_id: int, store_id: int, data: UpdateDeliveryFix, session: AsyncSession = Depends(get_async_session)) -> List[UpdateDeliveryFix]:
     stmt = update(DeliveryFix).where(
         DeliveryFix.store_id == store_id).values(**data.dict()).execution_options(schema_translate_map={None: schema})
+    await session.execute(stmt)
+    await session.commit()
+    return {"status": "success", 'date': data}
+
+
+async def crud_create_store_delivery_district(schema: str, user_id: int, data: PostDeliveryDistrict, session: AsyncSession = Depends(get_async_session)) -> List[PostDeliveryDistrict]:
+    stmt = insert(DeliveryDistrict).values(
+        **data.dict()).execution_options(schema_translate_map={None: schema})
     await session.execute(stmt)
     await session.commit()
     return {"status": "success", 'date': data}
