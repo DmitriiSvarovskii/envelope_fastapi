@@ -33,6 +33,11 @@ class CreateUnitList(BaseModel):
     name: str
 
 
+class DeliveryTypeList(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    delivery_name: str
+
+
 class CreateOrderTypeList(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     name: str
@@ -56,6 +61,15 @@ class CreateUnit(BaseModel):
         {'name': 'порц'},
         {'name': 'мл'},
         {'name': 'л'}
+    ]
+
+
+class DeliveryTypeCreate(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    data_delivery_type: List[DeliveryTypeList] = [
+        {'delivery_name': 'фиксированная цена'},
+        {'delivery_name': 'по районам'},
+        {'delivery_name': 'по км'},
     ]
 
 

@@ -1,6 +1,6 @@
 from datetime import datetime, time
 from pydantic import BaseModel, ConfigDict
-from typing import List, Optional
+from typing import List, Optional, Union
 
 
 class StoreBase(BaseModel):
@@ -340,7 +340,12 @@ class WorkingHoursList(BaseModel):
     working_hours_list: List[WorkingHours]
 
 
-class OneStoreInfo(BaseModel):
+class GetDeliveryType(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    delivery_name: str
+
+
+class UpdateStoreInfo(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     name: str
     adress: Optional[str] = None
@@ -355,10 +360,11 @@ class OneStoreInfo(BaseModel):
     format_custom: bool
     open_hours_default: Optional[time] = None
     close_hours_default: Optional[time] = None
+    type_delivery_id: Optional[int] = None
 
 
-class UpdateStoreInfo(OneStoreInfo):
-    pass
+class OneStoreInfo(UpdateStoreInfo):
+    types_delivery: Optional[GetDeliveryType] = None
 
 
 class InfoStoreSubscription(BaseModel):
@@ -399,25 +405,51 @@ class StoreWorkingDay(BaseModel):
     is_working: bool
     days_of_week: Optional[InfoStoreDayOfWeek]
 
+
 class GetOneBotToken(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     token_bot: str
-    
+
+
+class GetDeliveryFix(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    price: int
+
+
+class GetDeliveryDistrict(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    name: str
+    price: int
+
+
+class GetDeliveryDistance(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+    id: int
+    start_price: int
+    price_per_km: int
+    min_price: int
+
+
 class OneStore(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
     info: Optional[OneStoreInfo]
+    delivery_info: Optional[Union[GetDeliveryFix,
+                                  List[GetDeliveryDistrict], GetDeliveryDistance]] = None
     subscriptions: Optional[InfoStoreSubscription]
     association: List[StoreOrderType]
     working_days: List[StoreWorkingDay]
     payments: Optional[GetStorePayment]
-    delivery_distance: Optional[GetDeliveryDistance] = None
-    delivery_fix: Optional[GetDeliveryFix] = None
-    delivery_district: Optional[GetDeliveryDistrict] = None
     service_text_and_chats: Optional[GetServiceTextAndChat]
     legal_information: Optional[GetLegalInformation]
     bot_tokens: Optional[GetOneBotToken]
+
+    # delivery_distance: Optional[GetDeliveryDistance] = None
+    # delivery_fix: Optional[GetDeliveryFix] = None
+    # delivery_district: Optional[GetDeliveryDistrict] = None
 
 
 class GetBotToken(BaseModel):

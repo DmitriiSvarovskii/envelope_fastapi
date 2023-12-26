@@ -1,8 +1,8 @@
 """1 migrations
 
-Revision ID: d1279f3f77ab
+Revision ID: 93c4127f3299
 Revises: 
-Create Date: 2023-12-21 22:43:35.048006
+Create Date: 2023-12-22 18:16:53.275294
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = 'd1279f3f77ab'
+revision: str = '93c4127f3299'
 down_revision: Union[str, None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -69,6 +69,13 @@ def upgrade() -> None:
     schema='public'
     )
     op.create_index(op.f('ix_public_roles_id'), 'roles', ['id'], unique=False, schema='public')
+    op.create_table('types_delivery',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('delivery_name', sa.String(length=64), nullable=False),
+    sa.PrimaryKeyConstraint('id'),
+    schema='public'
+    )
+    op.create_index(op.f('ix_public_types_delivery_id'), 'types_delivery', ['id'], unique=False, schema='public')
     op.create_table('units',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('name', sa.String(length=64), nullable=False),
@@ -197,7 +204,7 @@ def upgrade() -> None:
     op.create_index(op.f('ix_delivery_distance_id'), 'delivery_distance', ['id'], unique=False)
     op.create_table('delivery_fix',
     sa.Column('id', sa.Integer(), nullable=False),
-    sa.Column('price', sa.String(), nullable=False),
+    sa.Column('price', sa.Integer(), nullable=False),
     sa.Column('store_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['store_id'], ['stores.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
@@ -313,8 +320,10 @@ def upgrade() -> None:
     sa.Column('format_custom', sa.Boolean(), server_default=sa.text('false'), nullable=False),
     sa.Column('open_hours_default', sa.Time(), nullable=True),
     sa.Column('close_hours_default', sa.Time(), nullable=True),
+    sa.Column('type_delivery_id', sa.Integer(), nullable=True),
     sa.Column('store_id', sa.Integer(), nullable=False),
     sa.ForeignKeyConstraint(['store_id'], ['stores.id'], ondelete='CASCADE'),
+    sa.ForeignKeyConstraint(['type_delivery_id'], ['public.types_delivery.id'], ondelete='CASCADE'),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_index(op.f('ix_stores_info_id'), 'stores_info', ['id'], unique=False)
@@ -514,6 +523,8 @@ def downgrade() -> None:
     op.drop_table('users', schema='public')
     op.drop_index(op.f('ix_public_units_id'), table_name='units', schema='public')
     op.drop_table('units', schema='public')
+    op.drop_index(op.f('ix_public_types_delivery_id'), table_name='types_delivery', schema='public')
+    op.drop_table('types_delivery', schema='public')
     op.drop_index(op.f('ix_public_roles_id'), table_name='roles', schema='public')
     op.drop_table('roles', schema='public')
     op.drop_index(op.f('ix_public_order_types_id'), table_name='order_types', schema='public')

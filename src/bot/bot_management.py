@@ -2,7 +2,7 @@ from aiogram import Bot, Dispatcher
 from typing import List, Dict, Tuple
 from aiogram.filters import Command
 
-from src.bot.handlers import start
+from src.bot.handler_start import start
 from src.config import WEBHOOK_PATH, WEBHOOK_HOST
 
 

@@ -9,13 +9,14 @@ from typing import List, Annotated
 from src.secure import pwd_context
 
 
-async def crud_create_new_role(role: RolesCreate, order_status: CreateOrderStatus, unit: CreateUnit, day_of_week: CreateDayOfWeek, order_type: CreateOrderType,  session: AsyncSession = Depends(get_async_session)):
+async def crud_create_new_role(delivery_type: DeliveryTypeCreate, role: RolesCreate, order_status: CreateOrderStatus, unit: CreateUnit, day_of_week: CreateDayOfWeek, order_type: CreateOrderType,  session: AsyncSession = Depends(get_async_session)):
     stmt = insert(Role).values(role.dict())
     await session.execute(stmt)
     unit_list_data = unit.dict().get('data_unit', [])
     order_type_list_data = order_type.dict().get('data_order_type', [])
     day_of_week_list_data = day_of_week.dict().get('data_day_of_week', [])
     order_status_list_data = order_status.dict().get('data_order_status', [])
+    delivery_type_list_data = delivery_type.dict().get('data_delivery_type', [])
     for item in day_of_week_list_data:
         stmt = insert(DayOfWeek).values(item)
         await session.execute(stmt)
@@ -27,7 +28,9 @@ async def crud_create_new_role(role: RolesCreate, order_status: CreateOrderStatu
         await session.execute(stmt)
     for item in order_status_list_data:
         stmt = insert(OrderStatus).values(item)
-        print(stmt)
+        await session.execute(stmt)
+    for item in delivery_type_list_data:
+        stmt = insert(TypeDelivery).values(item)
         await session.execute(stmt)
     await session.commit()
     return {"status": 201}

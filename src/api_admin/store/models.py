@@ -33,13 +33,6 @@ class Store(Base):
 
     subcategories: Mapped['Subcategory'] = relationship(back_populates="store")
 
-    delivery_distance: Mapped['DeliveryDistance'] = relationship(
-        back_populates="store", uselist=False)
-    delivery_fix: Mapped['DeliveryFix'] = relationship(
-        back_populates="store", uselist=False)
-    delivery_district: Mapped['DeliveryDistrict'] = relationship(
-        back_populates="store", uselist=False)
-
     carts: Mapped[List['Cart']] = relationship(
         back_populates="store")
     categories: Mapped[List['Category']] = relationship(
@@ -72,11 +65,11 @@ class Store(Base):
     legal_information: Mapped['LegalInformation'] = relationship(
         back_populates="store", uselist=False)
     delivery_distance: Mapped['DeliveryDistance'] = relationship(
-        back_populates="store", uselist=False)
+        back_populates="store")
     delivery_fix: Mapped['DeliveryFix'] = relationship(
-        back_populates="store", uselist=False)
-    delivery_district: Mapped['DeliveryDistrict'] = relationship(
-        back_populates="store", uselist=False)
+        back_populates="store")
+    delivery_district: Mapped[List['DeliveryDistrict']] = relationship(
+        back_populates="store")
 
     # order_typed: Mapped[List['OrderType']] = relationship(
     #     back_populates='store_order_types',
@@ -118,10 +111,6 @@ class OrderType(Base):
     orders: Mapped['Order'] = relationship(back_populates="order_type")
     association: Mapped[List['StoreOrderTypeAssociation']
                         ] = relationship(back_populates="order_type")
-    # store_order_types: Mapped[List['Store']] = relationship(
-    #     back_populates='order_typed',
-    #     secondary='store_order_types_association'
-    # )
 
 
 class StoreOrderTypeAssociation(Base):
@@ -164,11 +153,16 @@ class StoreInfo(Base):
     format_custom: Mapped[bool] = mapped_column(server_default=text("false"))
     open_hours_default: Mapped[datetime.time | None]
     close_hours_default: Mapped[datetime.time | None]
+    type_delivery_id: Mapped[int | None] = mapped_column(
+        ForeignKey("public.types_delivery.id", ondelete="CASCADE"))
 
     store_id: Mapped[int] = mapped_column(
         ForeignKey("stores.id", ondelete="CASCADE"))
+
     store: Mapped['Store'] = relationship(
         back_populates="info")
+    types_delivery: Mapped['TypeDelivery'] = relationship(
+        back_populates="store_info", uselist=False)
 
     def __init__(self, schema):
         super().__init__()
@@ -363,3 +357,17 @@ class DeliveryDistrict(Base):
     def __init__(self, schema):
         super().__init__()
         self.__table_args__ = {'schema': schema}
+
+
+class TypeDelivery(Base):
+    __tablename__ = 'types_delivery'
+    __table_args__ = {'schema': 'public'}
+
+    id: Mapped[intpk]
+    delivery_name: Mapped[str_64]
+    store_info: Mapped['StoreInfo'] = relationship(
+        back_populates="types_delivery")
+
+    # def __init__(self, schema):
+    #     super().__init__()
+    #     self.__table_args__ = {'schema': schema}

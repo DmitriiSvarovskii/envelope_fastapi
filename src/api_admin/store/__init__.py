@@ -13,6 +13,7 @@ from .models import (
     DeliveryDistance,
     DeliveryFix,
     DeliveryDistrict,
+    TypeDelivery
 )
 
 all = [
@@ -30,4 +31,5 @@ all = [
     DeliveryDistance,
     DeliveryFix,
     DeliveryDistrict,
+    TypeDelivery
 ]

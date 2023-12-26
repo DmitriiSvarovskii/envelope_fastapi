@@ -1,35 +1,27 @@
-from sqlalchemy import select, union_all
-from sqlalchemy.orm import aliased
-from aiohttp import web
 import yookassa
-
+from aiohttp import web
 from datetime import datetime, timedelta
-from aiogram.types.web_app_info import WebAppInfo
-from aiogram.utils.keyboard import InlineKeyboardBuilder
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-from aiogram.enums import ParseMode
-from aiogram import Bot, Dispatcher, types
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-from sqlalchemy.sql import func
-from typing import Dict, List, Union
-from aiogram.types import Message
 
-from sqlalchemy import insert, select, label, join, update, delete
-from .models import Cart
-from ..models import Product, Order, OrderDetail, Customer, OrderCustomerInfo
-from .schemas import *
-from ..customer.schemas import CustomerCreate
+from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import insert, select, update, delete
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.database import get_async_session
-from typing import List, Dict, Optional
+from sqlalchemy.orm import Session, selectinload
+from sqlalchemy.sql import func
+
+from aiogram import Bot
+from aiogram.types import InlineKeyboardButton
+from aiogram.utils.keyboard import InlineKeyboardBuilder
+from aiogram.enums import ParseMode
+from typing import List
+
+from ..models import *
+from .schemas import *
 from src.api_admin.product.schemas import *
 from src.api_admin.product.crud import *
 from src.api_admin.category.schemas import *
 from src.api_admin.category.crud import *
-from sqlalchemy import select
-from sqlalchemy.orm import selectinload
-from src.config import BOT_TOKEN
+from ..customer.schemas import CustomerCreate
+from src.database import get_async_session
 
 
 router = APIRouter(
@@ -44,35 +36,6 @@ async def get_all_product(schema: str, store_id: int, session: AsyncSession = De
     result = await session.execute(query)
     products = result.scalars().all()
     return products
-
-
-@router.post("/add_tg_user/")
-async def add_tg_user(schema: str, data: CustomerCreate, session: AsyncSession = Depends(get_async_session)):
-    if data.is_premium is None:
-        data.is_premium = False
-    query = select(Customer).filter(
-        Customer.tg_user_id == data.tg_user_id,
-        Customer.store_id == data.store_id
-    ).execution_options(schema_translate_map={None: schema})
-    result = await session.execute(query)
-    customer = result.scalar()
-
-    if customer:
-        update_data = data.dict(exclude_unset=True)
-        await session.execute(
-            update(Customer).where(
-                Customer.tg_user_id == data.tg_user_id,
-                Customer.store_id == data.store_id
-            ).values(**update_data).execution_options(schema_translate_map={None: schema})
-        )
-        await session.commit()
-        return {"status": 200, "message": "User updated", "data": update_data}
-    else:
-        stmt = insert(Customer).values(
-            **data.dict()).execution_options(schema_translate_map={None: schema})
-        await session.execute(stmt)
-        await session.commit()
-        return {"status": 201, "message": "User created", "data": data}
 
 
 @router.get("/product/{product_id}/", response_model=Optional[ProductOne])
@@ -95,8 +58,7 @@ async def get_all_category(schema: str, store_id: int, session: AsyncSession = D
             status_code=500, detail=f"An error occurred: {str(e)}")
 
 
-# @router.get("/cart/", response_model=Dict[str, Union[List[CartItem], int]])
-@router.get("/cart/", response_model=CartResponse)
+@router.get("/cart/", response_model=Optional[CartResponse])
 async def read_cart_items_and_totals(schema: str, store_id: int, tg_user_id: int, session: AsyncSession = Depends(get_async_session)):
     query = (
         select(
@@ -118,13 +80,14 @@ async def read_cart_items_and_totals(schema: str, store_id: int, tg_user_id: int
     cart_items = []
     total_price = 0
     for row in result:
-        cart_items.append({
-            "id": row[0],
-            "name": row[1],
-            "image": row[2],
-            "quantity": row[3],
-            "unit_price": row[4],
-        })
+        cart_item = CartItem(
+            id=row[0],
+            name=row[1],
+            image=row[2],
+            quantity=row[3],
+            unit_price=row[4]
+        )
+        cart_items.append(cart_item)
         total_price = row[5]
     response_data = {
         "cart_items": cart_items,
@@ -175,15 +138,6 @@ async def read_cart_items_and_totals(schema: str, store_id: int, tg_user_id: int
 #     ]
 #     return response_data
 
-# Укажите токен своего бота
-
-bot = Bot(token=BOT_TOKEN)
-dp: Dispatcher = Dispatcher()
-
-
-web_app = WebAppInfo(url='https://store.envelope-app.ru/schema=10/store_id=1/')
-
-
 @router.post("/cart/add/")
 async def add_to_cart(schema: str, data: CartCreate, session: AsyncSession = Depends(get_async_session)):
     query = select(Cart).where(Cart.tg_user_id == data.tg_user_id, Cart.product_id ==
@@ -216,7 +170,6 @@ async def decrease_cart_item(schema: str, data: CartCreate, session: AsyncSessio
         else:
             stmt = delete(Cart).where(Cart.tg_user_id == data.tg_user_id, Cart.product_id ==
                                       data.product_id).execution_options(schema_translate_map={None: schema})
-
         await session.execute(stmt)
     else:
         return {"status": "error", "message": "Товар не найден в корзине"}
@@ -241,6 +194,8 @@ async def delete_cart_items_by_tg_user_id(schema: str, store_id: int, tg_user_id
 
 @router.post("/create_order/")
 async def create_order(schema: str, data_order: CreateOrder, date_customer_info: CreateCustomerInfo = None, session: AsyncSession = Depends(get_async_session)):
+    store_id = data_order.store_id
+    tg_user_id = data_order.tg_user_id
     cart_query = (
         select(Cart.product_id,
                Cart.quantity,
@@ -249,8 +204,8 @@ async def create_order(schema: str, data_order: CreateOrder, date_customer_info:
                func.sum(Cart.quantity * Product.price).over().label("total_price")).
         join(Cart, Cart.product_id == Product.id).
         filter(
-            Cart.tg_user_id == data_order.tg_user_id,
-            Cart.store_id == data_order.store_id
+            Cart.tg_user_id == tg_user_id,
+            Cart.store_id == store_id
         ).execution_options(
             schema_translate_map={None: schema})
     )
@@ -277,7 +232,7 @@ async def create_order(schema: str, data_order: CreateOrder, date_customer_info:
 
     for cart_item in cart_items:
         values_list.append({
-            "store_id": data_order.store_id,
+            "store_id": store_id,
             "order_id": order_id,
             "product_id": cart_item.product_id,
             "quantity": cart_item.quantity,
@@ -287,24 +242,34 @@ async def create_order(schema: str, data_order: CreateOrder, date_customer_info:
         quantity = cart_item[1]
         order_text += f"{product_name} x {quantity}\n"
 
-    new_datetime = datetime.now() + timedelta(minutes=45)
-    order_time = new_datetime.strftime('%d.%m.%Y %H:%M')
-    text = f"Заказ №{order_id} от {datetime.now().strftime('%d.%m.%Y')} в {datetime.now().strftime('%H:%M')}\n" \
-        f"Код клиента: {data_order.tg_user_id}\n" \
-        "--------------------\n" \
-        f"Адрес заведения: г. Томск, ул. Вадима Саратова 69\n" \
-        f"Телефон заведения: +7969-069-69-69\n" \
-        "--------------------\n" \
-        "Ваш выбор:\n\n" \
-        f"{order_text}" \
-        f"\nСумма: {order_sum} руб.\n" \
-        "--------------------\n" \
-        f"Статус: Новый\n" \
-        f"Дата и время выдачи: {order_time}\n"
+    query_store_info = (
+        select(StoreInfo).
+        where(StoreInfo.store_id == store_id).
+        execution_options(schema_translate_map={None: schema}))
+    result = await session.execute(query_store_info)
+    store_info = result.scalar()
+
+    text = await new_order_mess_text_customer(
+        order_id=order_id,
+        tg_user_id=tg_user_id,
+        order_text=order_text,
+        order_sum=order_sum,
+        adress=store_info.adress,
+        number_phone=store_info.number_phone
+    )
+
+    query_token_bot = (
+        select(BotToken).
+        where(BotToken.user_id == int(schema),
+              BotToken.store_id == store_id)
+    )
+    result = await session.execute(query_token_bot)
+    token_bot = result.scalar()
 
     url, payment_id = await create_pay(total_price=order_sum, order_id=order_id)
 
-    await send_message(chat_id=data_order.tg_user_id, text=text, url=url)
+    await send_message(token_bot=token_bot.token_bot, chat_id=tg_user_id, text=text, url=url)
+    await send_message(token_bot=token_bot.token_bot, chat_id=-1001519347936, text=text)
 
     stmt_order_detail = (
         insert(OrderDetail).
@@ -319,26 +284,56 @@ async def create_order(schema: str, data_order: CreateOrder, date_customer_info:
             insert(OrderCustomerInfo).
             values(
                 **date_customer_info.dict(),
-                store_id=data_order.store_id,
-                tg_user_id=data_order.tg_user_id,
+                store_id=store_id,
+                tg_user_id=tg_user_id,
                 order_id=order_id
             ).
             execution_options(schema_translate_map={None: schema})
         )
         await session.execute(stmt_customer_infol)
-    stmt = delete(Cart).where(Cart.tg_user_id == data_order.tg_user_id, Cart.store_id == data_order.store_id).execution_options(
+    stmt = delete(Cart).where(Cart.tg_user_id == tg_user_id, Cart.store_id == store_id).execution_options(
         schema_translate_map={None: schema})
     await session.execute(stmt)
     await session.commit()
     return {"status": "Order created successfully"}
 
 
-@router.post("/send_message/{chat_id}")
-async def send_message(chat_id: int, text: str, url: str):
+async def send_message(chat_id: int, text: str, url: str, token_bot: str, reply_markup=None):
     try:
-        # Отправка сообщения с использованием aiogram
-        await bot.send_message(chat_id, f"{text}", reply_markup=create_keyboard(url=url), parse_mode=ParseMode.MARKDOWN)
+        bot = Bot(token=token_bot)
+        keyboard = create_keyboard(
+            url=url) if reply_markup is not None else None
+        await bot.send_message(
+            chat_id,
+            text,
+            reply_markup=keyboard,
+            parse_mode=ParseMode.MARKDOWN
+        )
         return {"status": "success", "message": "Сообщение успешно отправлено"}
+    except Exception as e:
+        raise HTTPException(
+            status_code=500, detail=f"Ошибка при отправке сообщения: {str(e)}")
+
+
+async def new_order_mess_text_customer(order_id: int, tg_user_id: int, order_text: str, order_sum: int, adress: str, number_phone: str):
+    try:
+        current_time = datetime.now()
+        coocking_time = timedelta(minutes=45)
+        order_time = current_time + coocking_time
+
+        text = f"Заказ №{order_id} от {current_time.strftime('%d.%m.%Y')} в {current_time.strftime('%H:%M')}\n" \
+            f"Код клиента: {tg_user_id}\n" \
+            "--------------------\n" \
+            "Ваш выбор:\n\n" \
+            f"{order_text}" \
+            f"\nСумма: {order_sum} руб.\n" \
+            "--------------------\n" \
+            f"Статус: Новый\n" \
+            f"Дата и время выдачи: {order_time.strftime('%d.%m.%Y %H:%M')}\n" \
+            "--------------------\n" \
+            f"Адрес заведения: {adress}\n" \
+            f"Телефон заведения: {number_phone}\n"
+        return text
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Ошибка при отправке сообщения: {str(e)}")
@@ -377,14 +372,14 @@ async def payment_callback(request):
 
 
 def create_keyboard(url: int):
-    # button_store: InlineKeyboardButton = InlineKeyboardButton(
-    #     text='Оплата наличными',
-    #     callback_data=payment_id)
+    button_store: InlineKeyboardButton = InlineKeyboardButton(
+        text='Оплата наличными',
+        callback_data='payment_cash')
     button_store2: InlineKeyboardButton = InlineKeyboardButton(
         text='Оплата картой',
         url=url)
     keyboard_store_builder: InlineKeyboardBuilder = InlineKeyboardBuilder()
 
-    keyboard_store_builder.row(button_store2, width=1)
+    keyboard_store_builder.row(button_store2, button_store, width=1)
     keyboard_store = keyboard_store_builder.as_markup()
     return keyboard_store

@@ -35,7 +35,8 @@ async def crud_get_one_stores(store_id: int, schema: str, session: AsyncSession 
         select(Store).
         where(Store.id == store_id).
         options(
-            joinedload(Store.info),
+            joinedload(Store.info).
+            options(joinedload(StoreInfo.types_delivery)),
             joinedload(Store.subscriptions),
             joinedload(Store.association).
             options(joinedload(StoreOrderTypeAssociation.order_type)),
@@ -43,18 +44,41 @@ async def crud_get_one_stores(store_id: int, schema: str, session: AsyncSession 
             options(joinedload(WorkingDay.days_of_week)),
             joinedload(Store.payments),
             joinedload(Store.service_text_and_chats),
-            joinedload(Store.legal_information),
-            joinedload(Store.delivery_distance),
-            joinedload(Store.delivery_fix),
-            joinedload(Store.delivery_district))
+            joinedload(Store.legal_information))
     ).execution_options(schema_translate_map={None: schema})
     result = await session.execute(query)
     store = result.scalar()
+    type_delivery_id = store.info.type_delivery_id
+
+    if type_delivery_id:
+        delivery_info = await get_delyvery_type_info(type_delivery_id=type_delivery_id, store_id=store_id, schema=schema, session=session)
+        store.delivery_info = delivery_info
+
     bot_token_query = select(BotToken).where(BotToken.store_id == store_id)
     bot_token_result = await session.execute(bot_token_query)
     bot_token = bot_token_result.scalar()
+
     store.bot_tokens = bot_token
+
     return store
+
+
+async def get_delyvery_type_info(type_delivery_id: int, store_id: int, schema: str, session: AsyncSession = Depends(get_async_session)):
+    model_mapping = {
+        1: DeliveryFix,
+        2: DeliveryDistrict,
+        3: DeliveryDistance
+    }
+    selected_model = model_mapping.get(type_delivery_id)
+    if not selected_model:
+        return None
+    query = select(selected_model).where(selected_model.store_id ==
+                                         store_id).execution_options(schema_translate_map={None: schema})
+    result = await session.execute(query)
+    if type_delivery_id == 2:
+        return result.scalars().all()
+    else:
+        return result.scalar()
 
 
 async def crud_get_info_store_token(bot_token: str, session: AsyncSession = Depends(get_async_session)):

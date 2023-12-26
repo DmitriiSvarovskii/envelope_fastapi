@@ -16,8 +16,8 @@ router = APIRouter(
 
 
 @router.post("/create_role_and_user/", status_code=201)
-async def create_new_role(role: RolesCreate, order_status: CreateOrderStatus, unit: CreateUnit, order_type: CreateOrderType, day_of_week: CreateDayOfWeek, response: Response, user_data: UserCreate, session: AsyncSession = Depends(get_async_session)):
-    await crud_create_new_role(role=role, unit=unit, order_status=order_status, order_type=order_type, day_of_week=day_of_week, session=session)
+async def create_new_role(delivery_type: DeliveryTypeCreate, role: RolesCreate, order_status: CreateOrderStatus, unit: CreateUnit, order_type: CreateOrderType, day_of_week: CreateDayOfWeek, response: Response, user_data: UserCreate, session: AsyncSession = Depends(get_async_session)):
+    await crud_create_new_role(delivery_type=delivery_type, role=role, unit=unit, order_status=order_status, order_type=order_type, day_of_week=day_of_week, session=session)
     await register_new_user(response=response, user_data=user_data, session=session)
     return {"status": 'ok'}
 

@@ -25,7 +25,8 @@ from .store import (
 
     DeliveryDistance,
     DeliveryFix,
-    DeliveryDistrict
+    DeliveryDistrict,
+    TypeDelivery
 )
 
 
@@ -60,6 +61,7 @@ all = (
     'DeliveryDistance',
     'DeliveryFix',
     'DeliveryDistrict',
+    'TypeDelivery',
     'PaymentYookassa',
 )
 
@@ -72,6 +74,7 @@ model_for_public = [
     OrderType,
     DayOfWeek,
     Employee,
+    TypeDelivery,
 
 ]
 
