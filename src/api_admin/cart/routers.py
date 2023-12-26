@@ -269,7 +269,7 @@ async def create_order(schema: str, data_order: CreateOrder, date_customer_info:
     url, payment_id = await create_pay(total_price=order_sum, order_id=order_id)
 
     await send_message(token_bot=token_bot.token_bot, chat_id=tg_user_id, text=text, url=url)
-    await send_message(token_bot=token_bot.token_bot, chat_id=-1001519347936, text=text)
+    await send_message(token_bot=token_bot.token_bot, chat_id=-1001519347936, text=text, url=None)
 
     stmt_order_detail = (
         insert(OrderDetail).
@@ -309,7 +309,9 @@ async def send_message(chat_id: int, text: str, url: str, token_bot: str, reply_
             reply_markup=keyboard,
             parse_mode=ParseMode.MARKDOWN
         )
+        await bot.session.close()
         return {"status": "success", "message": "Сообщение успешно отправлено"}
+
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Ошибка при отправке сообщения: {str(e)}")
