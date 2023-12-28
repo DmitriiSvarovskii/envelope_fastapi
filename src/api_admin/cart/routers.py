@@ -1,6 +1,5 @@
 import yookassa
 from aiohttp import web
-from datetime import datetime, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import insert, select, update, delete
@@ -22,6 +21,8 @@ from src.api_admin.category.schemas import *
 from src.api_admin.category.crud import *
 from ..customer.schemas import CustomerCreate
 from src.database import get_async_session
+from src.bot.massage_handlers import *
+from src.bot.keyboards import create_keyboard_order_admin_chat
 
 
 router = APIRouter(
@@ -196,6 +197,7 @@ async def delete_cart_items_by_tg_user_id(schema: str, store_id: int, tg_user_id
 async def create_order(schema: str, data_order: CreateOrder, date_customer_info: CreateCustomerInfo = None, session: AsyncSession = Depends(get_async_session)):
     store_id = data_order.store_id
     tg_user_id = data_order.tg_user_id
+    customer_comment = date_customer_info.customer_comment
     cart_query = (
         select(Cart.product_id,
                Cart.quantity,
@@ -249,13 +251,27 @@ async def create_order(schema: str, data_order: CreateOrder, date_customer_info:
     result = await session.execute(query_store_info)
     store_info = result.scalar()
 
-    text = await new_order_mess_text_customer(
+    customer_text = await new_order_mess_text_customer(
         order_id=order_id,
         tg_user_id=tg_user_id,
         order_text=order_text,
         order_sum=order_sum,
         adress=store_info.adress,
-        number_phone=store_info.number_phone
+        number_phone=store_info.number_phone,
+        customer_comment=customer_comment
+    )
+
+    order_chat_text = await new_order_mess_text_order_chat(
+        order_id=order_id,
+        tg_user_id=tg_user_id,
+        order_text=order_text,
+        order_sum=order_sum,
+        delivery_address=date_customer_info.delivery_address,
+        customer_phone=date_customer_info.customer_phone,
+        customer_comment=customer_comment,
+        customer_name=date_customer_info.customer_name,
+        tg_user_name=date_customer_info.tg_user_name,
+        table_number=date_customer_info.table_number
     )
 
     query_token_bot = (
@@ -266,10 +282,14 @@ async def create_order(schema: str, data_order: CreateOrder, date_customer_info:
     result = await session.execute(query_token_bot)
     token_bot = result.scalar()
 
+    new_order_keyboard = create_keyboard_order_admin_chat(order_id=order_id,
+                                                            user_id=tg_user_id,
+                                                          status='Новый')
+
     url, payment_id = await create_pay(total_price=order_sum, order_id=order_id)
 
-    await send_message(token_bot=token_bot.token_bot, chat_id=tg_user_id, text=text, url=url)
-    await send_message(token_bot=token_bot.token_bot, chat_id=-1001519347936, text=text, url=None)
+    await send_message(token_bot=token_bot.token_bot, chat_id=tg_user_id, text=customer_text, url=url)
+    await send_message(token_bot=token_bot.token_bot, chat_id=-1002144078281, text=order_chat_text, reply_markup=new_order_keyboard)
 
     stmt_order_detail = (
         insert(OrderDetail).
@@ -291,22 +311,23 @@ async def create_order(schema: str, data_order: CreateOrder, date_customer_info:
             execution_options(schema_translate_map={None: schema})
         )
         await session.execute(stmt_customer_infol)
-    stmt = delete(Cart).where(Cart.tg_user_id == tg_user_id, Cart.store_id == store_id).execution_options(
-        schema_translate_map={None: schema})
+    stmt = delete(Cart).where(Cart.tg_user_id == tg_user_id, Cart.store_id ==
+                              store_id).execution_options(schema_translate_map={None: schema})
     await session.execute(stmt)
     await session.commit()
     return {"status": "Order created successfully"}
 
 
-async def send_message(chat_id: int, text: str, url: str, token_bot: str, reply_markup=None):
+async def send_message(chat_id: int, text: str,  token_bot: str, url=None, reply_markup=None):
     try:
         bot = Bot(token=token_bot)
-        keyboard = create_keyboard(
-            url=url) if reply_markup is not None else None
+        if url:
+            reply_markup = create_keyboard(
+                url=url)
         await bot.send_message(
             chat_id,
             text,
-            reply_markup=keyboard,
+            reply_markup=reply_markup,
             parse_mode=ParseMode.MARKDOWN
         )
         await bot.session.close()
@@ -317,35 +338,13 @@ async def send_message(chat_id: int, text: str, url: str, token_bot: str, reply_
             status_code=500, detail=f"Ошибка при отправке сообщения: {str(e)}")
 
 
-async def new_order_mess_text_customer(order_id: int, tg_user_id: int, order_text: str, order_sum: int, adress: str, number_phone: str):
-    try:
-        current_time = datetime.now()
-        coocking_time = timedelta(minutes=45)
-        order_time = current_time + coocking_time
-
-        text = f"Заказ №{order_id} от {current_time.strftime('%d.%m.%Y')} в {current_time.strftime('%H:%M')}\n" \
-            f"Код клиента: {tg_user_id}\n" \
-            "--------------------\n" \
-            "Ваш выбор:\n\n" \
-            f"{order_text}" \
-            f"\nСумма: {order_sum} руб.\n" \
-            "--------------------\n" \
-            f"Статус: Новый\n" \
-            f"Дата и время выдачи: {order_time.strftime('%d.%m.%Y %H:%M')}\n" \
-            "--------------------\n" \
-            f"Адрес заведения: {adress}\n" \
-            f"Телефон заведения: {number_phone}\n"
-        return text
-    except Exception as e:
-        raise HTTPException(
-            status_code=500, detail=f"Ошибка при отправке сообщения: {str(e)}")
-
-
 api_id = '278535'
 api_key = 'test_W5YF4StOK5ZheXJWyIodZUAUJdhU7fYMm5DFRLQI7Ww'
 
 
 async def create_pay(total_price: int, order_id: int):
+    print("Получен обратный вызов от YooKassa:")
+
     yookassa.Configuration.account_id = api_id
     yookassa.Configuration.secret_key = api_key
 

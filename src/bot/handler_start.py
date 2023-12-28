@@ -12,7 +12,7 @@ from src.api_admin.models import *
 async def start(message: types.Message, bot: Bot):
     async for session in get_async_session():
         bot_token_obj = await get_info_store_token(bot_token=message.bot.token, session=session)
-        welcome_message_text = 'text'
+        welcome_message_text = 'У магазина не заполнен текст'
         if bot_token_obj:
             user_id = bot_token_obj.user_id
             store_id = bot_token_obj.store_id
@@ -20,16 +20,17 @@ async def start(message: types.Message, bot: Bot):
                 resourse = None
             else:
                 resourse = message.text.replace("/start", "").strip()
-            query = select(ServiceTextAndChat.welcome_message_bot).where(
-                ServiceTextAndChat.store_id == store_id).execution_options(schema_translate_map={None: str(store_id)})
-            result = await session.execute(query)
-            welcome_message_text = result.scalar()
-            query = select(StoreInfo).where(
-                StoreInfo.store_id == store_id).execution_options(schema_translate_map={None: str(store_id)})
-            result = await session.execute(query)
-            locations = result.scalar()
-            latitude = locations.latitude
-            longitude = locations.longitude
+            # query = select(ServiceTextAndChat.welcome_message_bot).where(
+            #     ServiceTextAndChat.store_id == store_id).execution_options(schema_translate_map={None: str(store_id)})
+            # result = await session.execute(query)
+            # if result:
+            #     welcome_message_text = result.scalar()
+            # query = select(StoreInfo).where(
+            #     StoreInfo.store_id == store_id).execution_options(schema_translate_map={None: str(store_id)})
+            # result = await session.execute(query)
+            # locations = result.scalar()
+            # latitude = locations.latitude
+            # longitude = locations.longitude
             new_customer_data = (
                 CustomerCreate(
                     store_id=store_id,
@@ -51,8 +52,8 @@ async def start(message: types.Message, bot: Bot):
         break
 
     await bot.send_message(chat_id=message.chat.id, text=welcome_message_text)
-    if latitude and longitude:
-        await bot.send_location(chat_id=message.chat.id, latitude=latitude, longitude=longitude)
+    # if latitude and longitude:
+    #     await bot.send_location(chat_id=message.chat.id, latitude=latitude, longitude=longitude)
 
 
 def compare_customer_data(customer: Customer, data: CustomerCreate) -> bool:

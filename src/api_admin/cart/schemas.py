@@ -68,8 +68,8 @@ class CreateOrder(BaseModel):
 
 class CreateCustomerInfo(BaseModel):
     model_config = ConfigDict(from_attributes=True)
+    tg_user_name: Optional[str] = None
     table_number: Optional[str] = None
-    delivery_city: Optional[str] = None
     delivery_address: Optional[str] = None
     customer_name: Optional[str] = None
     customer_phone: Optional[str] = None

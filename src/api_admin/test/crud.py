@@ -9,7 +9,7 @@ from typing import List, Annotated
 from src.secure import pwd_context
 
 
-async def crud_create_new_role(delivery_type: DeliveryTypeCreate, role: RolesCreate, order_status: CreateOrderStatus, unit: CreateUnit, day_of_week: CreateDayOfWeek, order_type: CreateOrderType,  session: AsyncSession = Depends(get_async_session)):
+async def crud_create_new_role(role: RolesCreate, order_status: CreateOrderStatus, unit: CreateUnit, day_of_week: CreateDayOfWeek, order_type: CreateOrderType, delivery_type: DeliveryTypeCreate, session: AsyncSession = Depends(get_async_session)):
     stmt = insert(Role).values(role.dict())
     await session.execute(stmt)
     unit_list_data = unit.dict().get('data_unit', [])

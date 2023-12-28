@@ -116,7 +116,7 @@ class ProductUpdate(BaseModel):
     fats: int | None
     carbohydrates: int | None
     unit_id: int
-    popular: bool
+    # popular: bool
     delivery: bool
     takeaway: bool
     dinein: bool

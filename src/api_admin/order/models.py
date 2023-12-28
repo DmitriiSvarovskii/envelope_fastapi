@@ -85,6 +85,7 @@ class OrderCustomerInfo(Base):
     store_id: Mapped[int] = mapped_column(
         ForeignKey("stores.id", ondelete="CASCADE"))
     tg_user_id: Mapped[int] = mapped_column(BIGINT)
+    tg_user_name: Mapped[str | None]
     table_number: Mapped[str | None]
     delivery_city: Mapped[str | None]
     delivery_address: Mapped[str | None]
