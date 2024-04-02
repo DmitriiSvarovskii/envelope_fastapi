@@ -3,6 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from src.api_admin.routers import routers
 from src.bot.bot import router as bot_router
 
+
 app = FastAPI(
     title="Envelope-app",
     version="1.0.0a",
@@ -10,6 +11,7 @@ app = FastAPI(
     docs_url="/api/v1/docs",
     redoc_url=None,
 )
+
 
 ORIGINS = [
     "http://localhost",
