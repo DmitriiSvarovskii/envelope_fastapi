@@ -1,11 +1,11 @@
 from sqlalchemy import BIGINT, ForeignKey, ForeignKeyConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.database import *
+from src.database import Base, intpk
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from ..models import *
+    from ..models import Store, Product
 
 
 class Cart(Base):
@@ -30,6 +30,9 @@ class Cart(Base):
         self.__table_args__ = {'schema': schema}
 
     __table_args__ = (
-        ForeignKeyConstraint(['store_id', 'tg_user_id'], [
-                             'customers.store_id', 'customers.tg_user_id'], ondelete="CASCADE"),
+        ForeignKeyConstraint(
+            ['store_id', 'tg_user_id'],
+            ['customers.store_id', 'customers.tg_user_id'],
+            ondelete="CASCADE"
+        ),
     )

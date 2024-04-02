@@ -1,56 +1,24 @@
-from aiogram import Bot, types
 import io
-import requests
-from aiogram.types import InputFile
-from aiogram import exceptions as tg_exceptions
-from sqlalchemy import select, union_all
-from sqlalchemy.orm import aliased
-from aiohttp import web
-import yookassa
-from datetime import datetime, timedelta
+from datetime import datetime
+from PIL import Image
+from fastapi import APIRouter, Depends, HTTPException, UploadFile
+from sqlalchemy.ext.asyncio import AsyncSession
+from aiogram import Bot, Dispatcher, exceptions as tg_exceptions
 from aiogram.types.web_app_info import WebAppInfo
 from aiogram.utils.keyboard import InlineKeyboardBuilder
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.types import InlineKeyboardButton
 from aiogram.enums import ParseMode
-from aiogram import Bot, Dispatcher
-from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
-from sqlalchemy.sql import func
-from typing import Dict, List, Union
-from aiogram.types import Message
 
-from sqlalchemy import insert, select, label, join, update, delete
+from src.database import get_async_session
+from src.config import settings
+from .schemas import TextMail
 from ..user import User
-
 from ..auth.routers import get_current_user_from_token
-from ..customer.schemas import CustomerCreate
-from .schemas import TextMail, Test
-from ..customer.schemas import CustomerCreate
 from ..customer.routers import get_all_customer
 from ..user.routers import get_one_user
 from ..store.routers import get_one_store
-from sqlalchemy.ext.asyncio import AsyncSession
-from src.database import get_async_session
-from typing import List, Dict, Optional
-from src.api_admin.product.schemas import *
-from src.api_admin.product.crud import *
-from src.api_admin.category.schemas import *
-from src.api_admin.category.crud import *
-from sqlalchemy import select
-from sqlalchemy.orm import selectinload
-from src.config import BOT_TOKEN
 from ..product.controller import s3
-from ..auth.routers import get_current_user_from_token
-from src.config import BUCKET_NAME, ENDPOINT_URL
-from PIL import Image
-import io
-import os
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-from aiogram.utils.keyboard import InlineKeyboardBuilder
-from aiogram.types.web_app_info import WebAppInfo
-from aiogram import Bot
-from aiogram.types import BotCommand, MenuButton
-from aiogram.types import MenuButtonWebApp, WebAppInfo
+
 
 web_app = WebAppInfo(url='https://store.envelope-app.ru/schema=1/store_id=1/')
 
@@ -71,43 +39,70 @@ router = APIRouter(
     tags=["Mail (admin)"])
 
 
-bot = Bot(token=BOT_TOKEN)
+bot = Bot(token=settings.BOT_TOKEN)
 dp: Dispatcher = Dispatcher()
 
 
-# photo_url = 'https://storage.yandexcloud.net/envelope-app/13/2/california-rolls.jpeg'
-
-
 @router.post("/send_message/")
-async def send_message(data: TextMail, store_id: int, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
+async def send_message(
+    data: TextMail,
+    store_id: int,
+    current_user: User = Depends(get_current_user_from_token),
+    session: AsyncSession = Depends(get_async_session)
+):
     try:
-        customers = await get_all_customer(store_id=store_id, current_user=current_user, session=session)
+        customers = await get_all_customer(
+            store_id=store_id,
+            current_user=current_user,
+            session=session
+        )
         for customer in customers:
             tg_user_id = customer.tg_user_id
             try:
                 if data.photo_url:
-                    await bot.send_photo(chat_id=tg_user_id, photo=data.photo_url, caption=f"{data.mail_text}", parse_mode=ParseMode.MARKDOWN_V2)
+                    await bot.send_photo(
+                        chat_id=tg_user_id,
+                        photo=data.photo_url,
+                        caption=f"{data.mail_text}",
+                        parse_mode=ParseMode.MARKDOWN_V2
+                    )
                 else:
-                    await bot.send_message(chat_id=tg_user_id, text=f"{data.mail_text}", parse_mode=ParseMode.MARKDOWN_V2)
+                    await bot.send_message(
+                        chat_id=tg_user_id,
+                        text=f"{data.mail_text}",
+                        parse_mode=ParseMode.MARKDOWN_V2
+                    )
             except tg_exceptions.TelegramBadRequest as e:
                 print(
-                    f"Ошибка при отправке сообщения пользователю {tg_user_id}: {e}")
-                # customer.is_active = True
-                # session.commit()
+                    "Ошибка при отправке сообщения пользователю "
+                    f"{tg_user_id}: {e}")
         return {"status": "success", "message": "Сообщение успешно отправлено"}
     except Exception as e:
         raise HTTPException(
             status_code=500, detail=f"Ошибка при отправке сообщения: {str(e)}")
 
 
-@router.post("/send_message_me/")
-async def send_message(data: TextMail, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
+@router.post("/send_message_self/")
+async def send_message_self(
+    data: TextMail,
+    current_user: User = Depends(get_current_user_from_token),
+    session: AsyncSession = Depends(get_async_session)
+):
     try:
         tg_id = await get_one_user(current_user=current_user, session=session)
         if data.photo_url:
-            await bot.send_photo(chat_id=tg_id.user_tg_id, photo=data.photo_url, caption=f"{data.mail_text}", parse_mode=ParseMode.MARKDOWN_V2)
+            await bot.send_photo(
+                chat_id=tg_id.user_tg_id,
+                photo=data.photo_url,
+                caption=f"{data.mail_text}",
+                parse_mode=ParseMode.MARKDOWN_V2
+            )
         else:
-            await bot.send_message(chat_id=tg_id.user_tg_id, text=f"{data.mail_text}", parse_mode=ParseMode.MARKDOWN_V2)
+            await bot.send_message(
+                chat_id=tg_id.user_tg_id,
+                text=f"{data.mail_text}",
+                parse_mode=ParseMode.MARKDOWN_V2
+            )
         return {"status": "success", "message": "Сообщение успешно отправлено"}
     except tg_exceptions.TelegramBadRequest as e:
         print(
@@ -118,13 +113,31 @@ async def send_message(data: TextMail, current_user: User = Depends(get_current_
 
 
 @router.post("/send_message_group/")
-async def send_message(data: TextMail, store_id: int, current_user: User = Depends(get_current_user_from_token), session: AsyncSession = Depends(get_async_session)):
+async def send_message_group(
+    data: TextMail,
+    store_id: int,
+    current_user: User = Depends(get_current_user_from_token),
+    session: AsyncSession = Depends(get_async_session)
+):
     try:
-        tg_group = await get_one_store(store_id=store_id, current_user=current_user, session=session)
+        tg_group = await get_one_store(
+            store_id=store_id,
+            current_user=current_user,
+            session=session
+        )
         if data.photo_url:
-            await bot.send_photo(chat_id=tg_group.tg_id_group, photo=data.photo_url, caption=f"{data.mail_text}", parse_mode=ParseMode.MARKDOWN_V2)
+            await bot.send_photo(
+                chat_id=tg_group.tg_id_group,
+                photo=data.photo_url,
+                caption=f"{data.mail_text}",
+                parse_mode=ParseMode.MARKDOWN_V2
+            )
         else:
-            await bot.send_message(chat_id=tg_group.tg_id_group, text=f"{data.mail_text}", parse_mode=ParseMode.MARKDOWN_V2)
+            await bot.send_message(
+                chat_id=tg_group.tg_id_group,
+                text=f"{data.mail_text}",
+                parse_mode=ParseMode.MARKDOWN_V2
+            )
         return {"status": "success", "message": "Сообщение успешно отправлено"}
     except tg_exceptions.TelegramBadRequest as e:
         print(
@@ -135,7 +148,11 @@ async def send_message(data: TextMail, store_id: int, current_user: User = Depen
 
 
 @router.post("/upload_photo/")
-async def process_and_upload_photo(file: UploadFile, store_id: int, current_user: User = Depends(get_current_user_from_token)):
+async def process_and_upload_photo(
+    file: UploadFile,
+    store_id: int,
+    current_user: User = Depends(get_current_user_from_token)
+):
     try:
         image = Image.open(io.BytesIO(await file.read()))
 
@@ -149,14 +166,19 @@ async def process_and_upload_photo(file: UploadFile, store_id: int, current_user
         current_datetime = datetime.now()
         current_date_str = current_datetime.strftime("%Y-%m-%d_%H-%M-%S")
 
-        object_key = f"{current_user.id}/{store_id}/mail/{current_date_str}_{file.filename}"
-
+        object_key = (
+            f"{current_user.id}/{store_id}/"
+            f"mail/{current_date_str}_{file.filename}"
+        )
         with io.BytesIO() as webp_output_buffer:
             webp_image.save(webp_output_buffer, format="WebP")
             webp_output_buffer.seek(0)
-            s3.upload_fileobj(webp_output_buffer, BUCKET_NAME, object_key)
+            s3.upload_fileobj(webp_output_buffer,
+                              settings.BUCKET_NAME, object_key)
 
-        object_url = f'{ENDPOINT_URL}/{BUCKET_NAME}/{object_key}'
+        object_url = (
+            f'{settings.ENDPOINT_URL}/{settings.BUCKET_NAME}/{object_key}'
+        )
 
         return object_url
     except Exception as e:

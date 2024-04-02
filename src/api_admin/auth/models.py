@@ -1,6 +1,6 @@
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from src.database import *
+from src.database import Base, intpk, str_64
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -15,5 +15,4 @@ class Token(Base):
     user_id: Mapped[int | None] = mapped_column(
         ForeignKey("public.users.id", ondelete="CASCADE"))
 
-    user: Mapped['User'] = relationship(back_populates="token")  # One-to-One
-
+    user: Mapped['User'] = relationship(back_populates="token")

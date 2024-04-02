@@ -1,17 +1,9 @@
-from sqlalchemy import Column, func, DateTime, Integer, BIGINT, String, Boolean, ForeignKey
-from sqlalchemy.orm import relationship
-
-from src.database import Base
 from sqlalchemy.orm import Mapped, mapped_column
-from src.database import *
-from typing import List
-
-from typing import List, TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from ..category import Category
-    from ..user import User
-    from ..product import Product
+from src.database import (
+    Base, intpk, str_64, is_active,
+    created_at, deleted_flag, deleted_at,
+    updated_at
+)
 
 
 class Employee(Base):
@@ -28,16 +20,3 @@ class Employee(Base):
     updated_at: Mapped[updated_at]
     deleted_flag: Mapped[deleted_flag]
     deleted_at: Mapped[deleted_at]
-
-    # user_employee: Mapped[List['User']] = relationship(
-    #     back_populates="employee")
-
-    # def __init__(self, schema):
-    #     super().__init__()
-    #     self.__table_args__ = {'schema': schema}
-
-    # user_employee = relationship(
-    #     "users", back_populates="employee")
-
-    # user_employee: Mapped[List['User']] = relationship(
-    #     back_populates="employee")

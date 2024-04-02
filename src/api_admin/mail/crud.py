@@ -11,17 +11,17 @@ from .schemas import *
 
 async def crud_get_all_categories(schema: str, store_id: int, session: AsyncSession = Depends(get_async_session)):
     query = select(Category).where(
-        Category.deleted_flag != True).where(Category.store_id == store_id).order_by(Category.id.desc()).execution_options(schema_translate_map={None: schema})
+        not Category.deleted_flag).where(Category.store_id == store_id).order_by(Category.id.desc()).execution_options(schema_translate_map={None: schema})
     result = await session.execute(query)
     categories = result.scalars().all()
     return categories
 
 
 async def crud_create_new_category(schema: str, store_id: int, data: CategoryCreate, user_id: int, session: AsyncSession = Depends(get_async_session)) -> List[CategoryCreate]:
-    category_data = data.dict()
+    category_data = data.model_dump()
     # Устанавливаем created_by из текущего пользователя
     category_data["created_by"] = user_id
-    stmt = insert(Category).values(**data.dict(), store_id=store_id, created_by=user_id
+    stmt = insert(Category).values(**data.model_dump(), store_id=store_id, created_by=user_id
                                    ).execution_options(schema_translate_map={None: schema})
     await session.execute(stmt)
     await session.commit()
@@ -30,7 +30,7 @@ async def crud_create_new_category(schema: str, store_id: int, data: CategoryCre
 
 async def crud_update_category(schema: str, user_id: int, category_id: int, data: CategoryUpdate, session: AsyncSession = Depends(get_async_session)) -> List[CategoryUpdate]:
     stmt = update(Category).where(
-        Category.id == category_id).values(**data.dict(), updated_by=user_id).execution_options(schema_translate_map={None: schema})
+        Category.id == category_id).values(**data.model_dump(), updated_by=user_id).execution_options(schema_translate_map={None: schema})
     await session.execute(stmt)
     await session.commit()
     return {"status": "success", 'date': data}

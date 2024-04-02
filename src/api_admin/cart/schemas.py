@@ -1,4 +1,3 @@
-from datetime import datetime
 from pydantic import BaseModel, ConfigDict
 from typing import Optional, List
 
@@ -7,7 +6,6 @@ class CartBase(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     product_id: int
-    # quantity: int
 
 
 class CartCreate(CartBase):
@@ -45,7 +43,6 @@ class CartResponse(BaseModel):
 class CartItemTotal(CartItem):
     model_config = ConfigDict(from_attributes=True)
 
-    # tg_user_id: int
     total_price: int
 
 
@@ -63,7 +60,6 @@ class CreateOrder(BaseModel):
     tg_user_id: int
     store_id: int
     order_type_id: int
-    # cart_items: List[CartItemsOrder]
 
 
 class CreateCustomerInfo(BaseModel):

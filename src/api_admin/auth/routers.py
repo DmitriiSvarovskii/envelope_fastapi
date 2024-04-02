@@ -9,10 +9,10 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.secure import pwd_context, oauth2_scheme
-from src.config import SECRET_KEY_JWT, ALGORITHM
+from src.config import settings
 from src.database import get_async_session
 from ..models import User
-from .schemas import *
+from .schemas import TokenCreate, UserAuth
 
 
 router = APIRouter(
@@ -20,20 +20,25 @@ router = APIRouter(
     tags=["Login (admin)"])
 
 
-SECRET_KEY = SECRET_KEY_JWT
-ALGORITHM = ALGORITHM
-
-
 def create_jwt_token(data: dict):
     to_encode = data.copy()
     expiration = datetime.utcnow() + timedelta(hours=24)
     to_encode.update({"exp": expiration})
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    return jwt.encode(to_encode,
+                      settings.SECRET_KEY_JWT,
+                      algorithm=settings.ALGORITHM)
 
 
 @router.post("/login/", response_model=TokenCreate)
-async def create_token(response: Response, user_data: OAuth2PasswordRequestForm = Depends(), session: AsyncSession = Depends(get_async_session)):
-    user: User = await session.scalar(select(User).where(User.username == user_data.username))
+async def create_token(
+    response: Response,
+    user_data: OAuth2PasswordRequestForm = Depends(),
+    session: AsyncSession = Depends(get_async_session)
+):
+    user: User = await session.scalar(
+        select(User).
+        where(User.username == user_data.username)
+    )
     if not user:
         raise HTTPException(
             status_code=404,
@@ -45,10 +50,16 @@ async def create_token(response: Response, user_data: OAuth2PasswordRequestForm 
     token_data = {"sub": user_data.username}
     jwt_token = create_jwt_token(token_data)
     response.set_cookie(key="access_token", value=jwt_token, expires=3600)
-    return {"access_token": jwt_token, "data": {'username': user.username, 'user_id': user.id}}
+    return {
+        "access_token": jwt_token,
+        "data": {'username': user.username, 'user_id': user.id}
+    }
 
 
-async def get_user(username: str, session: AsyncSession = Depends(get_async_session)) -> List[UserAuth]:
+async def get_user(
+    username: str,
+    session: AsyncSession = Depends(get_async_session)
+) -> List[UserAuth]:
     query = select(User).where(
         User.username == username)
     result = await session.execute(query)
@@ -56,13 +67,87 @@ async def get_user(username: str, session: AsyncSession = Depends(get_async_sess
     return user
 
 
-# async def get_current_user_from_token(token: str = Depends(oauth2_scheme), session: AsyncSession = Depends(get_async_session)):
+async def get_current_user_from_token(
+    token: str = Depends(oauth2_scheme),
+    session: AsyncSession = Depends(get_async_session)
+):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Не удается проверить учетные данные",
+    )
+    try:
+        payload = jwt.decode(token, settings.SECRET_KEY_JWT, algorithms=[
+                             settings.ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+
+        expiration = payload.get("exp")
+        if (expiration is not None and
+                datetime.utcnow() > datetime.utcfromtimestamp(expiration)):
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Срок действия токена истек",
+            )
+
+    except ExpiredSignatureError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Срок действия токена истек",
+        )
+
+    except JWTError:
+        raise credentials_exception
+
+    if not token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Требуется вход",
+        )
+
+    user = await get_user(username=username, session=session)
+    if user is None:
+        raise credentials_exception
+
+    user_response = UserAuth(
+        id=user[0].id,
+        store_id=str(user[0].id),
+        username=user[0].username,
+        name=user[0].name,
+        number_phone=user[0].number_phone,
+        role_id=user[0].role_id
+    )
+
+    return user_response
+
+
+@router.get("/logit/test/",)
+async def read_items(
+    current_user: User = Depends(get_current_user_from_token)
+):
+    return {"token": current_user}
+
+
+@router.post("/logout")
+async def logout(
+    response: Response,
+    current_user: User = Depends(get_current_user_from_token)
+):
+    response.delete_cookie(key="access_token")
+    return {"message": "Вы успешно вышли"}
+
+
+# async def get_current_user_from_token(
+    # token: str = Depends(oauth2_scheme),
+    # session: AsyncSession = Depends(get_async_session)
+    # ):
     # credentials_exception = HTTPException(
     #     status_code=status.HTTP_401_UNAUTHORIZED,
     #     detail="Could not validate credentials",
     # )
     # try:
-    #     payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    #     payload = jwt.decode(token, settings.SECRET_KEY_JWT,
+    # algorithms=[settings.ALGORITHM])
     #     username: str = payload.get("sub")
     #     if username is None:
     #         raise credentials_exception
@@ -84,7 +169,8 @@ async def get_user(username: str, session: AsyncSession = Depends(get_async_sess
     #     detail="Не удается проверить учетные данные",
     # )
     # try:
-    #     payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+    #     payload = jwt.decode(token, settings.SECRET_KEY_JWT,
+    # algorithms=[settings.ALGORITHM])
     #     username: str = payload.get("sub")
     #     if username is None:
     #         raise credentials_exception
@@ -112,65 +198,3 @@ async def get_user(username: str, session: AsyncSession = Depends(get_async_sess
     # )
 
     # return user_response
-async def get_current_user_from_token(token: str = Depends(oauth2_scheme), session: AsyncSession = Depends(get_async_session)):
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Не удается проверить учетные данные",
-    )
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get("sub")
-        if username is None:
-            raise credentials_exception
-
-        # Проверка истечения срока действия токена
-        expiration = payload.get("exp")
-        if expiration is not None and datetime.utcnow() > datetime.utcfromtimestamp(expiration):
-            # Токен истек, вы можете выполнить выход или вызвать свое исключение
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Срок действия токена истек",
-            )
-
-    except ExpiredSignatureError:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Срок действия токена истек",
-        )
-
-    except JWTError:
-        raise credentials_exception
-
-    # Если токен отсутствует, это может означать, что пользователь вышел
-    if not token:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Требуется вход",
-        )
-
-    user = await get_user(username=username, session=session)
-    if user is None:
-        raise credentials_exception
-
-    user_response = UserAuth(
-        id=user[0].id,
-        store_id=str(user[0].id),
-        username=user[0].username,
-        name=user[0].name,
-        number_phone=user[0].number_phone,
-        role_id=user[0].role_id
-    )
-
-    return user_response
-
-
-@router.get("/logit/test/",)
-async def read_items(current_user: User = Depends(get_current_user_from_token)):
-    return {"token": current_user}
-
-
-@router.post("/logout")
-async def logout(response: Response, current_user: User = Depends(get_current_user_from_token)):
-    # Удаление куки с токеном
-    response.delete_cookie(key="access_token")
-    return {"message": "Вы успешно вышли"}

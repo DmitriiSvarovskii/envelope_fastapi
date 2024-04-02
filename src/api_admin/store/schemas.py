@@ -437,8 +437,11 @@ class OneStore(BaseModel):
 
     id: int
     info: Optional[OneStoreInfo]
-    delivery_info: Optional[Union[GetDeliveryFix,
-                                  List[GetDeliveryDistrict], GetDeliveryDistance]] = None
+    delivery_info: Optional[Union[
+        GetDeliveryFix,
+        List[GetDeliveryDistrict],
+        GetDeliveryDistance]
+    ] = None
     subscriptions: Optional[InfoStoreSubscription]
     association: List[StoreOrderType]
     working_days: List[StoreWorkingDay]

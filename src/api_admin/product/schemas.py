@@ -1,6 +1,5 @@
-from datetime import datetime
-from pydantic import BaseModel, ConfigDict, Field
-from typing import Optional, List
+from pydantic import BaseModel, ConfigDict
+from typing import Optional
 
 
 class UnitBase(BaseModel):
@@ -16,8 +15,6 @@ class ProductList(BaseModel):
     id: int
     category_name: str
     category_id: int
-    # subcategory_id: Optional[int] = None
-    # store_id: int
     name: str
     description: Optional[str] = None
     image: Optional[str] = None
@@ -39,33 +36,20 @@ class ProductListStore(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
-    # category_name: str
     category_id: int
-    # subcategory_id: Optional[int] = None
-    # store_id: int
     name: str
-    # description: Optional[str] = None
     image: Optional[str] = None
     price: float
-    # wt: Optional[int] = None
-    # unit_id: int
-    # kilocalories: Optional[int] = None
-    # proteins: Optional[int] = None
-    # fats: Optional[int] = None
-    # carbohydrates: Optional[int] = None
-    # availability: bool
     popular: bool
     delivery: bool
     takeaway: bool
     dinein: bool
-    # position
 
 
 class ProductOne(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     id: int
-    # category_id: int
     name: str
     description: str
     price: float
@@ -73,14 +57,8 @@ class ProductOne(BaseModel):
     wt: int
     kilocalories: int
     proteins: int
-    # fats: int
     carbohydrates: int
     unit: Optional[UnitBase]
-    # availability: bool
-    # popular: bool
-    # delivery: bool
-    # takeaway: bool
-    # dinein: bool
 
 
 class ProductCreate(BaseModel):
@@ -100,8 +78,6 @@ class ProductCreate(BaseModel):
     delivery: bool
     takeaway: bool
     dinein: bool
-    # created_by: int
-    # updated_by: int
 
 
 class ProductUpdate(BaseModel):
@@ -116,7 +92,6 @@ class ProductUpdate(BaseModel):
     fats: int | None
     carbohydrates: int | None
     unit_id: int
-    # popular: bool
     delivery: bool
     takeaway: bool
     dinein: bool

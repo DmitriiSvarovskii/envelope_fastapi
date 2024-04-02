@@ -10,13 +10,13 @@ from src.secure import pwd_context
 
 
 async def crud_create_new_role(role: RolesCreate, order_status: CreateOrderStatus, unit: CreateUnit, day_of_week: CreateDayOfWeek, order_type: CreateOrderType, delivery_type: DeliveryTypeCreate, session: AsyncSession = Depends(get_async_session)):
-    stmt = insert(Role).values(role.dict())
+    stmt = insert(Role).values(role.model_dump())
     await session.execute(stmt)
-    unit_list_data = unit.dict().get('data_unit', [])
-    order_type_list_data = order_type.dict().get('data_order_type', [])
-    day_of_week_list_data = day_of_week.dict().get('data_day_of_week', [])
-    order_status_list_data = order_status.dict().get('data_order_status', [])
-    delivery_type_list_data = delivery_type.dict().get('data_delivery_type', [])
+    unit_list_data = unit.model_dump().get('data_unit', [])
+    order_type_list_data = order_type.model_dump().get('data_order_type', [])
+    day_of_week_list_data = day_of_week.model_dump().get('data_day_of_week', [])
+    order_status_list_data = order_status.model_dump().get('data_order_status', [])
+    delivery_type_list_data = delivery_type.model_dump().get('data_delivery_type', [])
     for item in day_of_week_list_data:
         stmt = insert(DayOfWeek).values(item)
         await session.execute(stmt)
@@ -49,9 +49,9 @@ async def crud_create_new_store_and_bot(schema: str, data: CreateStore, token_bo
     store_result = await crud_create_new_store(schema=schema, user_id=user_id, session=session)
     store_id = store_result.get("id")
     stmt_token = insert(BotToken).values(
-        **token_bot.dict(), user_id=user_id, store_id=store_id)
+        **token_bot.model_dump(), user_id=user_id, store_id=store_id)
     await session.execute(stmt_token)
-    stmt = insert(StoreInfo).values(**data.dict(), store_id=store_id
+    stmt = insert(StoreInfo).values(**data.model_dump(), store_id=store_id
                                     ).execution_options(schema_translate_map={None: schema})
     await session.execute(stmt)
     await session.commit()
@@ -59,10 +59,10 @@ async def crud_create_new_store_and_bot(schema: str, data: CreateStore, token_bo
 
 
 async def crud_create_new_unit(unit: CreateUnit, day_of_week: CreateDayOfWeek, order_type: CreateOrderType, session: AsyncSession = Depends(get_async_session)):
-    unit_list_data = unit.dict().get('data_unit', [])
+    unit_list_data = unit.model_dump().get('data_unit', [])
 
-    order_type_list_data = order_type.dict().get('data_order_type', [])
-    day_of_week_list_data = day_of_week.dict().get('data_day_of_week', [])
+    order_type_list_data = order_type.model_dump().get('data_order_type', [])
+    day_of_week_list_data = day_of_week.model_dump().get('data_day_of_week', [])
     for item in day_of_week_list_data:
         stmt = insert(DayOfWeek).values(item)
         await session.execute(stmt)
@@ -78,10 +78,10 @@ async def crud_create_new_unit(unit: CreateUnit, day_of_week: CreateDayOfWeek, o
 
 
 async def crud_create_new_category(schema: str, store_id: int, data: CategoryCreate, user_id: int, session: AsyncSession = Depends(get_async_session)):
-    category_data = data.dict()
+    category_data = data.model_dump()
     # Устанавливаем created_by из текущего пользователя
     category_data["created_by"] = user_id
-    stmt = insert(Category).values(**data.dict(), store_id=store_id, created_by=user_id
+    stmt = insert(Category).values(**data.model_dump(), store_id=store_id, created_by=user_id
                                    ).execution_options(schema_translate_map={None: schema})
     await session.execute(stmt)
     await session.commit()
@@ -90,7 +90,7 @@ async def crud_create_new_category(schema: str, store_id: int, data: CategoryCre
 
 async def crud_create_new_product(store_id: int, schema: str, user_id: int,  data: ProductCreate,  session: AsyncSession = Depends(get_async_session)):
     try:
-        stmt = insert(Product).values(**data.dict(), store_id=store_id, created_by=user_id).execution_options(
+        stmt = insert(Product).values(**data.model_dump(), store_id=store_id, created_by=user_id).execution_options(
             schema_translate_map={None: schema})
         await session.execute(stmt)
         await session.commit()

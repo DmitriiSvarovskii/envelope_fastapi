@@ -4,14 +4,17 @@ from sqlalchemy import insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.database import get_async_session
-from src.bot.bot_get_info import get_info_store_token
+from src.bot.services import get_info_store_token
 from src.api_admin.customer.schemas import CustomerCreate
-from src.api_admin.models import *
+from src.api_admin.models import Customer
 
 
-async def start(message: types.Message, bot: Bot):
+async def process_start_command(message: types.Message, bot: Bot):
     async for session in get_async_session():
-        bot_token_obj = await get_info_store_token(bot_token=message.bot.token, session=session)
+        bot_token_obj = await get_info_store_token(
+            bot_token=message.bot.token,
+            session=session
+        )
         welcome_message_text = 'У магазина не заполнен текст'
         if bot_token_obj:
             user_id = bot_token_obj.user_id
@@ -20,13 +23,19 @@ async def start(message: types.Message, bot: Bot):
                 resourse = None
             else:
                 resourse = message.text.replace("/start", "").strip()
-            # query = select(ServiceTextAndChat.welcome_message_bot).where(
-            #     ServiceTextAndChat.store_id == store_id).execution_options(schema_translate_map={None: str(store_id)})
+            # query = (
+                # select(ServiceTextAndChat.welcome_message_bot).
+                # where(ServiceTextAndChat.store_id == store_id).
+                # execution_options(schema_translate_map={None: str(store_id)})
+            # )
             # result = await session.execute(query)
             # if result:
             #     welcome_message_text = result.scalar()
-            # query = select(StoreInfo).where(
-            #     StoreInfo.store_id == store_id).execution_options(schema_translate_map={None: str(store_id)})
+            # query = (
+                # select(StoreInfo).
+                # where(StoreInfo.store_id == store_id).
+                # execution_options(schema_translate_map={None: str(store_id)})
+            # )
             # result = await session.execute(query)
             # locations = result.scalar()
             # latitude = locations.latitude
@@ -42,18 +51,33 @@ async def start(message: types.Message, bot: Bot):
                     is_premium=message.from_user.is_premium,
                 )
             )
-            await add_tg_user(schema=str(user_id), data=new_customer_data, session=session)
-            url = f"https://store.envelope-app.ru/schema={user_id}/store_id={store_id}/"
+            await add_tg_user(
+                schema=str(user_id),
+                data=new_customer_data,
+                session=session
+            )
+            url = (
+                f"https://store.envelope-app.ru/"
+                f"schema={user_id}/store_id={store_id}/"
+            )
             await bot.set_chat_menu_button(
                 chat_id=message.chat.id,
-                menu_button=types.MenuButtonWebApp(text="Store", web_app=types.WebAppInfo(
-                    url=url)),
+                menu_button=types.MenuButtonWebApp(
+                    text="Store",
+                    web_app=types.WebAppInfo(
+                        url=url
+                    )
+                ),
             )
         break
 
     await bot.send_message(chat_id=message.chat.id, text=welcome_message_text)
     # if latitude and longitude:
-    #     await bot.send_location(chat_id=message.chat.id, latitude=latitude, longitude=longitude)
+    #     await bot.send_location(
+    # chat_id=message.chat.id,
+    # latitude=latitude,
+    # longitude=longitude
+    # )
 
 
 def compare_customer_data(customer: Customer, data: CustomerCreate) -> bool:
@@ -72,7 +96,11 @@ def compare_customer_data(customer: Customer, data: CustomerCreate) -> bool:
     return True
 
 
-async def add_tg_user(schema: str, data: CustomerCreate, session: AsyncSession = Depends(get_async_session)):
+async def add_tg_user(
+    schema: str,
+    data: CustomerCreate,
+    session: AsyncSession = Depends(get_async_session)
+):
     if data.is_premium is None:
         data.is_premium = False
     query = select(Customer).filter(
@@ -85,16 +113,23 @@ async def add_tg_user(schema: str, data: CustomerCreate, session: AsyncSession =
         if not compare_customer_data(customer, data):
             update_data = data.dict(exclude_unset=True)
             await session.execute(
-                update(Customer).where(
+                update(Customer).
+                where(
                     Customer.tg_user_id == data.tg_user_id,
                     Customer.store_id == data.store_id
-                ).values(**update_data).execution_options(schema_translate_map={None: schema})
+                ).
+                values(**update_data).
+                execution_options(schema_translate_map={None: schema})
             )
             await session.commit()
-            return {"status": 200, "message": "User updated", "data": update_data}
+            return (
+                {"status": 200, "message": "User updated", "data": update_data}
+            )
     else:
-        stmt = insert(Customer).values(
-            **data.dict()).execution_options(schema_translate_map={None: schema})
+        stmt = (
+            insert(Customer).
+            values(**data.model_dump()).
+            execution_options(schema_translate_map={None: schema}))
         await session.execute(stmt)
         await session.commit()
         return {"status": 201, "message": "User created", "data": data}

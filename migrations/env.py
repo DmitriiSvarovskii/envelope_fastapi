@@ -6,7 +6,7 @@ from logging.config import fileConfig
 
 from alembic import context
 from sqlalchemy import engine_from_config, pool
-from src.api_admin.models import *
+from src.api_admin.models import *  # noqa: F401, F403
 
 sys.path.append(os.path.join(sys.path[0], 'src'))
 

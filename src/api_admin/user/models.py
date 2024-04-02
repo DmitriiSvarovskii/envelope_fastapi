@@ -1,16 +1,17 @@
-from typing import List
-from datetime import datetime
-from sqlalchemy import create_engine, Column, func, DateTime, Integer, BIGINT, TIMESTAMP, String, Boolean, Float, ForeignKey, UniqueConstraint
+from typing import TYPE_CHECKING
+from sqlalchemy import BIGINT, ForeignKey, text
 from sqlalchemy.orm import relationship
-
-from src.database import *
+from src.database import (
+    Base, intpk, str_64,
+    is_active, created_at, updated_at,
+    deleted_flag, deleted_at
+)
 from sqlalchemy.orm import Mapped, mapped_column
 
-import sqlalchemy
-from typing import List, TYPE_CHECKING
-
 if TYPE_CHECKING:
-    from ..models import *
+    from ..models import (
+        Role, Token, BotToken
+    )
 
 
 class User(Base):
@@ -26,7 +27,12 @@ class User(Base):
     employee_id: Mapped[int | None] = mapped_column(
         ForeignKey("public.employees.id", ondelete="CASCADE"))
     role_id: Mapped[int] = mapped_column(
-        ForeignKey("public.roles.id", ondelete="CASCADE"), server_default=text("1"))
+        ForeignKey(
+            "public.roles.id",
+            ondelete="CASCADE"
+        ),
+        server_default=text("1")
+    )
     is_active: Mapped[is_active]
     created_at: Mapped[created_at]
     updated_at: Mapped[updated_at]
@@ -37,10 +43,3 @@ class User(Base):
     token: Mapped['Token'] = relationship(back_populates="user")
     bot_token: Mapped['BotToken'] = relationship(
         back_populates="user")
-    # store: Mapped['Store'] = relationship(
-    #     back_populates="user")
-    # back_populates="user_product")
-
-    # def __init__(self, schema):
-    #     super().__init__()
-    #     self.__table_args__ = {'schema': schema}

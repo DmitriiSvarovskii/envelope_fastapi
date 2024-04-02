@@ -1,16 +1,14 @@
 import datetime
-from sqlalchemy import BIGINT, ForeignKey
+from sqlalchemy import BIGINT, ForeignKey, text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import UniqueConstraint
+from typing import TYPE_CHECKING
 
-from src.database import *
+from src.database import (
+    Base, intpk, created_at
+)
 
-
-from sqlalchemy import ForeignKey, UniqueConstraint
-from sqlalchemy.orm import relationship
-from typing import List, TYPE_CHECKING
 if TYPE_CHECKING:
-    from ..models import *
+    from ..models import Store
 
 
 class Customer(Base):
@@ -31,11 +29,6 @@ class Customer(Base):
     is_active: Mapped[bool] = mapped_column(server_default=text("true"))
 
     store: Mapped['Store'] = relationship(back_populates="customers")
-    # orders: Mapped['Order'] = relationship(back_populates="customer")
-    # store: Mapped['Store'] = relationship(
-    #     back_populates="customers", viewonly=True)
-    # orders: Mapped['Order'] = relationship(
-    #     back_populates="customer", viewonly=True)
 
     def __init__(self, schema):
         super().__init__()

@@ -1,19 +1,14 @@
-import os
-
-from datetime import datetime
-from sqlalchemy import create_engine, Column, Integer, TIMESTAMP, String, Boolean, Float, ForeignKey
+from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship, Mapped, mapped_column
-from PIL import Image as PILImage
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, func
-from sqlalchemy.orm import relationship
-from src.database import *
-
-from typing import List, TYPE_CHECKING
+from src.database import (
+    Base, intpk, str_64,
+    created_at, updated_at,
+    deleted_flag, deleted_at
+)
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from ..category import Category
-    from ..subcategory import Subcategory
-    from ..user import User
     from ..product import Product
     from ..store import Store
 

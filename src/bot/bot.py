@@ -1,14 +1,17 @@
 import logging
 from fastapi import HTTPException, Request, APIRouter
-from aiogram import Bot, Dispatcher
 from aiogram.types import Update
-from typing import List, Dict, Tuple
 
 from src.database import get_async_session
 from src.config import WEBHOOK_PATH, WEBHOOK_HOST
 
-from src.bot.bot_management import dispatchers_by_webhook_url, create_bot, setup_webhook_for_bot, bots
-from src.bot.bot_get_info import get_info_store_token_all
+from src.bot.services import (  # noqa: F401
+    dispatchers_by_webhook_url,
+    bots,
+    create_bot,
+    setup_webhook_for_bot
+)
+from src.bot.services import get_info_store_token_all
 
 
 router = APIRouter(
@@ -47,14 +50,17 @@ async def bot_webhook(request: Request, token: str):
 async def on_startup_bot():
     logger.info("Starting up bots")
     global bots
+    tokens = []
+
     async for session in get_async_session():
         try:
             store = await get_info_store_token_all(session)
-            tokens = [{"token_bot": bot.token_bot} for bot in store]
+            tokens.extend([{"token_bot": bot.token_bot} for bot in store])
             logger.info(f"Found {len(tokens)} bots in the database")
         except Exception as e:
             logger.error(f"Error in getting tokens from database: {e}")
             continue
+
     for token_info in tokens:
         token = token_info["token_bot"]
         try:
@@ -72,4 +78,8 @@ async def on_startup_bot():
 async def on_shutdown_bot():
     global bots
     for bot in bots:
-        await bot.session.close()
+        if bot.session:
+            try:
+                await bot.session.close()
+            except Exception as e:
+                print(f"Ошибка при закрытии сессии бота: {e}")

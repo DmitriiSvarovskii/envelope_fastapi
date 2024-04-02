@@ -1,4 +1,3 @@
-from typing import List
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict
 from typing import Optional
@@ -18,14 +17,6 @@ class OrderBase(BaseModel):
 
 class OrderCreate(OrderBase):
     pass
-
-
-# class Order(OrderBase):
-#     model_config = ConfigDict(from_attributes=True)
-
-#     id: int
-#     order_date: datetime
-#     # customer: "Customer"
 
 
 class OrderDetailBase(BaseModel):

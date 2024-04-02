@@ -1,4 +1,10 @@
-from .models import *
+from .models import (
+    User,
+    Employee,
+    Category,
+    Subcategory,
+    Product,
+)
 __all__ = [
     # 'Role',
     'User',

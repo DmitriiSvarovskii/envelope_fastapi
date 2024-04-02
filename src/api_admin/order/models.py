@@ -1,12 +1,13 @@
-from enum import Enum
-from datetime import datetime
-from sqlalchemy import BIGINT, ForeignKey, ForeignKeyConstraint
+from sqlalchemy import BIGINT, ForeignKey, ForeignKeyConstraint, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from src.database import *
+from src.database import (
+    Base, intpk,
+    str_64, created_at
+)
 from typing import TYPE_CHECKING, List
 if TYPE_CHECKING:
-    from ..models import *
+    from ..models import Store, OrderType, Product
 
 
 class Order(Base):
@@ -20,9 +21,10 @@ class Order(Base):
     order_type_id: Mapped[int] = mapped_column(
         ForeignKey("public.order_types.id", ondelete="CASCADE"))
     order_status_id: Mapped[int] = mapped_column(
-        ForeignKey("public.order_status.id", ondelete="CASCADE"), server_default=text("1"))
+        ForeignKey(
+            "public.order_status.id", ondelete="CASCADE"
+        ), server_default=text("1"))
     created_at: Mapped[created_at]
-
     store: Mapped['Store'] = relationship(back_populates="orders")
     order_customer_info: Mapped[List['OrderCustomerInfo']] = relationship(
         back_populates="orders")
@@ -37,8 +39,10 @@ class Order(Base):
         self.__table_args__ = {'schema': schema}
 
     __table_args__ = (
-        ForeignKeyConstraint(['store_id', 'tg_user_id'], [
-                             'customers.store_id', 'customers.tg_user_id'], ondelete="CASCADE"),
+        ForeignKeyConstraint(
+            ['store_id', 'tg_user_id'],
+            ['customers.store_id', 'customers.tg_user_id'],
+            ondelete="CASCADE"),
     )
 
 
@@ -102,6 +106,8 @@ class OrderCustomerInfo(Base):
         self.__table_args__ = {'schema': schema}
 
     __table_args__ = (
-        ForeignKeyConstraint(['store_id', 'tg_user_id'], [
-                             'customers.store_id', 'customers.tg_user_id'], ondelete="CASCADE"),
+        ForeignKeyConstraint(
+            ['store_id', 'tg_user_id'],
+            ['customers.store_id', 'customers.tg_user_id'],
+            ondelete="CASCADE"),
     )

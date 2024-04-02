@@ -1,6 +1,4 @@
-from datetime import datetime
 from pydantic import BaseModel, ConfigDict
-from typing import List, Optional
 
 
 class CategoryBase(BaseModel):
@@ -15,14 +13,12 @@ class CategoryBaseStore(BaseModel):
 
     id: int
     name: str
-    # position: int
 
 
 class CategoryList(CategoryBase):
     id: int
     name: str
     availability: bool
-    # position: int
 
 
 class CategoryCreate(CategoryBase):
@@ -36,7 +32,6 @@ class CategoryDeleted(BaseModel):
 
 class CategoryUpdate(BaseModel):
     name: str
-    # availability: bool
 
 
 class CategoryModel(CategoryBase):
@@ -50,15 +45,12 @@ class SubcategoryBase(BaseModel):
     availability: bool
     parent_category_id: int
 
-    # position: int
-
 
 class SubcategoryList(SubcategoryBase):
     id: int
     name: str
     availability: bool
     parent_category_id: int
-    # position: int
 
 
 class SubcategoryCreate(SubcategoryBase):

@@ -1,15 +1,13 @@
 from typing import List, TYPE_CHECKING
 from sqlalchemy.orm import relationship, Mapped, mapped_column
 from sqlalchemy import ForeignKey
-from sqlalchemy.orm import relationship
-from src.database import *
-
+from src.database import (
+    Base, intpk, created_at,
+    str_256, str_4048, deleted_flag,
+    deleted_at,
+)
 
 if TYPE_CHECKING:
-    from ..category import Category
-    from ..subcategory import Subcategory
-    from ..user import User
-    from ..product import Product
     from ..store import Store
 
 
@@ -36,8 +34,6 @@ class Mail(Base):
     image: Mapped['MailImage'] = relationship(back_populates="mail")
 
     store: Mapped[List['Store']] = relationship(back_populates="mails")
-    # mail_images: Mapped[List['MailImage']] = relationship(
-    #     back_populates="image_mail")
 
     def __init__(self, schema):
         super().__init__()
@@ -59,8 +55,6 @@ class MailImage(Base):
         ForeignKey("public.users.id", ondelete="CASCADE"))
 
     mail: Mapped['Mail'] = relationship(back_populates="image")
-    # image_mail: Mapped['Mail'] = relationship(back_populates="mail_images")
-    # mail_store: Mapped['Store'] = relationship(back_populates="mail")
 
     def __init__(self, schema):
         super().__init__()

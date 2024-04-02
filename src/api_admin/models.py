@@ -6,7 +6,7 @@ from .product import Unit, Product
 from .employee import Employee
 from .auth import Token
 from .cart import Cart
-from .order import Order, OrderDetail, OrderCustomerInfo, OrderStatus
+from .order import Order, OrderDetail, OrderCustomerInfo
 from .mail import Mail, MailImage
 from .customer import Customer
 from .payment import PaymentYookassa

@@ -1,13 +1,28 @@
 import datetime
 
 from sqlalchemy.orm import relationship, Mapped, mapped_column
-from sqlalchemy import ForeignKey, BIGINT, Time
-
-from src.database import *
-
+from sqlalchemy import ForeignKey, BIGINT, text
 from typing import List, TYPE_CHECKING
+
+from src.database import (
+    Base, intpk, str_64,
+    str_256, str_4048,
+    created_at, updated_at,
+    deleted_flag, deleted_at
+)
 if TYPE_CHECKING:
-    from ..models import *
+    from ..models import (
+        Subcategory,
+        Cart,
+        Category,
+        Customer,
+        Mail,
+        Order,
+        OrderCustomerInfo,
+        OrderDetail,
+        Product,
+        User
+    )
 
 
 class Store(Base):
@@ -70,16 +85,6 @@ class Store(Base):
         back_populates="store")
     delivery_district: Mapped[List['DeliveryDistrict']] = relationship(
         back_populates="store")
-
-    # order_typed: Mapped[List['OrderType']] = relationship(
-    #     back_populates='store_order_types',
-    #     secondary='store_order_types_association'
-    # )
-
-    # user: Mapped['User'] = relationship(
-    #     back_populates="store",
-    #     foreign_keys=['user_id', 'created_by', 'updated_by', 'deleted_by']
-    # )
 
     def __init__(self, schema):
         super().__init__()
@@ -230,7 +235,9 @@ class WorkingDay(Base):
     store_id: Mapped[int] = mapped_column(
         ForeignKey("stores.id", ondelete="CASCADE"), primary_key=True)
     day_of_week_id: Mapped[int] = mapped_column(
-        ForeignKey("public.days_of_week.id", ondelete="CASCADE"), primary_key=True)
+        ForeignKey(
+            "public.days_of_week.id", ondelete="CASCADE"
+        ), primary_key=True)
     opening_time: Mapped[datetime.time | None]
     closing_time: Mapped[datetime.time | None]
     is_working: Mapped[bool] = mapped_column(server_default=text("false"))
@@ -367,7 +374,3 @@ class TypeDelivery(Base):
     delivery_name: Mapped[str_64]
     store_info: Mapped['StoreInfo'] = relationship(
         back_populates="types_delivery")
-
-    # def __init__(self, schema):
-    #     super().__init__()
-    #     self.__table_args__ = {'schema': schema}

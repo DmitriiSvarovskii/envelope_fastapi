@@ -1,11 +1,7 @@
-from sqlalchemy.orm import relationship, Mapped, mapped_column
-from sqlalchemy import ForeignKey, Time, BIGINT
+from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import ForeignKey, BIGINT
 
-from src.database import *
-
-from typing import List, TYPE_CHECKING
-if TYPE_CHECKING:
-    from ..models import *
+from src.database import Base, intpk
 
 
 class PaymentYookassa(Base):

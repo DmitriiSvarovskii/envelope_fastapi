@@ -1,8 +1,11 @@
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship, Mapped, mapped_column
-from src.database import *
-
-from typing import List, TYPE_CHECKING
+from src.database import (
+    Base, intpk, str_64,
+    created_at, updated_at,
+    deleted_at, deleted_flag
+)
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from ..subcategory import Subcategory
@@ -19,7 +22,6 @@ class Category(Base):
     availability: Mapped[bool]
     store_id: Mapped[int] = mapped_column(
         ForeignKey("stores.id", ondelete="CASCADE"))
-    # position: Mapped[int] = mapped_column(Integer, nullable=True)
     created_by: Mapped[int] = mapped_column(
         ForeignKey("public.users.id", ondelete="CASCADE"))
     created_at: Mapped[created_at]

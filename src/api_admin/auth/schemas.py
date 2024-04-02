@@ -17,5 +17,3 @@ class TokenCreate(BaseModel):
 
     access_token: str
     data: dict
-    # username: int
-    # id: int
